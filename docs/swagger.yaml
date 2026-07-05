@@ -282,8 +282,10 @@ paths:
                 email:
                   type: string
                   format: email
+                  example: kader@cipicung.com
                 password:
                   type: string
+                  example: kader123
       responses:
         '200':
           description: Login successful
