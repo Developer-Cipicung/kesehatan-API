@@ -152,3 +152,10 @@
 - [x] Scope all APIs to the user's Posyandu automatically
 - [x] Update seed.ts
 - [x] Revise Documentation (API, DB, Architecture)
+
+## Phase 13 — API Experience Enhancements
+
+- [x] Implement Posyandu CRUD (Controller, Route, Service, Repository)
+- [x] Configure Auto-Auth script for Swagger UI
+- [x] Embed Valid Example Payloads to Swagger Schemas
+- [x] Upgrade Zod Dates to auto-transform strings to ISO-8601 for Prisma compatibility

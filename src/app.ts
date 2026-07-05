@@ -36,15 +36,21 @@ import pascaPersalinanRoutes from './routes/pasca-persalinan.routes';
 import lansiaRoutes from './routes/lansia.routes';
 import pendataanRoutes from './routes/pendataan.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import posyanduRoutes from './routes/posyandu.routes';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
+
+// Serve static files from public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Load Swagger document
 const swaggerDocument = YAML.load(path.join(__dirname, '../docs/swagger.yaml'));
 
 // Swagger UI Route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+  customJs: '/swagger-custom.js'
+}));
 
 // Routes
 app.get('/health', (req: Request, res: Response) => {
@@ -64,6 +70,7 @@ app.use('/api/v1/pasca-persalinan', pascaPersalinanRoutes);
 app.use('/api/v1/lansia', lansiaRoutes);
 app.use('/api/v1/pendataan', pendataanRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/posyandu', posyanduRoutes);
 
 // 404 Handler
 app.use(notFoundMiddleware);

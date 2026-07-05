@@ -37,6 +37,36 @@ components:
           type: array
           items:
             type: object
+    Posyandu:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        kode:
+          type: string
+          example: "POS-001"
+        nama:
+          type: string
+          example: "Posyandu Cipicung"
+        alamat:
+          type: string
+          example: "Jl. Cipicung No. 123"
+        kelurahan:
+          type: string
+          example: "Cipicung"
+        kecamatan:
+          type: string
+          example: "Coblong"
+        kabupaten:
+          type: string
+          example: "Bandung"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     Warga:
       type: object
       properties:
@@ -358,6 +388,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+  /posyandu:
+    get:
+      tags:
+        - Posyandu
+      summary: Get list of Posyandu
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    post:
+      tags:
+        - Posyandu
+      summary: Add new Posyandu
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Posyandu'
+      responses:
+        '201':
+          description: Created
+  /posyandu/{id}:
+    get:
+      tags:
+        - Posyandu
+      summary: Get Posyandu details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Posyandu
+      summary: Edit Posyandu
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Posyandu'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags:
+        - Posyandu
+      summary: Delete Posyandu
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
   /warga:
     get:
       tags:

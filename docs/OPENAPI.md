@@ -255,6 +255,8 @@ type: string
 format: date-time
 ```
 
+**Implementation Note:** All `date` string inputs (`YYYY-MM-DD`) must be validated using Zod with an ISO-8601 transformation (`.date().transform(val => new Date(val).toISOString())`) at the middleware layer to ensure strict compatibility with Prisma's `DateTime` requirements.
+
 ---
 
 # UUID Format
@@ -470,3 +472,11 @@ When generating or modifying swagger.yaml:
 14. Validate the generated YAML before completion.
 ## Multi-Tenancy
 All APIs dynamically inject `posyandu_id` from the Bearer Token user context. Client payloads must omit `posyandu_id`.
+
+---
+
+# Swagger UI Enhancements
+
+- The Swagger UI contains a custom JavaScript injection (`src/public/swagger-custom.js`).
+- This script intercepts the `POST /auth/login` response and automatically sets the Bearer token for the entire UI session via `window.ui.authActions.authorize`.
+- It also injects a "Copy Bearer Token" button natively into the endpoint's response panel for easy Postman testing.
