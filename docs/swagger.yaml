@@ -1,0 +1,1054 @@
+openapi: 3.1.0
+info:
+  title: Posyandu Digital API
+  version: 1.0.0
+  description: REST API for Sistem Digitalisasi Posyandu
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation successful.
+        data:
+          type: object
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Validation failed.
+        errors:
+          type: array
+          items:
+            type: object
+    Warga:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        posyandu_id:
+          type: string
+          format: uuid
+        nomor:
+          type: string
+        nik:
+          type: string
+        nama:
+          type: string
+        jenis_kelamin:
+          type: string
+          enum: [L, P]
+        tanggal_lahir:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    PemeriksaanBalita:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        warga_id:
+          type: string
+          format: uuid
+        bb:
+          type: number
+        tb:
+          type: number
+        lingkar_kepala:
+          type: number
+        lingkar_lengan_atas:
+          type: number
+        nama_ortu:
+          type: string
+        tanggal_kunjungan:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    PemeriksaanBumil:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        warga_id:
+          type: string
+          format: uuid
+        bb:
+          type: number
+        tb:
+          type: number
+        lingkar_perut:
+          type: number
+        lingkar_lengan_atas:
+          type: number
+        usia_kehamilan_minggu:
+          type: integer
+        hpht:
+          type: string
+          format: date
+        htp:
+          type: string
+          format: date
+        tekanan_darah_sistolik:
+          type: integer
+        tekanan_darah_diastolik:
+          type: integer
+        tinggi_fundus:
+          type: number
+        denyut_jantung_janin:
+          type: integer
+        hemoglobin:
+          type: number
+        keluhan:
+          type: string
+        tanggal_kunjungan:
+          type: string
+          format: date
+    PemeriksaanPascaPersalinan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        warga_id:
+          type: string
+          format: uuid
+        tanggal_persalinan:
+          type: string
+          format: date
+        bb:
+          type: number
+        tekanan_darah_sistolik:
+          type: integer
+        tekanan_darah_diastolik:
+          type: integer
+        suhu_tubuh:
+          type: number
+        kondisi_ibu:
+          type: string
+        keluhan:
+          type: string
+        tanggal_kunjungan:
+          type: string
+          format: date
+    PemeriksaanLansia:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        warga_id:
+          type: string
+          format: uuid
+        bb:
+          type: number
+        tb:
+          type: number
+        tekanan_darah_sistolik:
+          type: integer
+        tekanan_darah_diastolik:
+          type: integer
+        gula_darah_sewaktu:
+          type: integer
+        keluhan:
+          type: string
+        tanggal_kunjungan:
+          type: string
+          format: date
+    RiwayatImunisasi:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        warga_id:
+          type: string
+          format: uuid
+        jenis_vaksin:
+          type: string
+        tanggal_pemberian:
+          type: string
+          format: date
+    PendataanBulanan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        posyandu_id:
+          type: string
+          format: uuid
+        kategori:
+          type: string
+          enum: [balita, imunisasi, bumil, pasca_persalinan, lansia]
+        bulan:
+          type: integer
+        tahun:
+          type: integer
+        status:
+          type: string
+          enum: [draft, selesai]
+        submitted_at:
+          type: string
+          format: date-time
+        submitted_by:
+          type: string
+          format: uuid
+    DashboardResponse:
+      type: object
+      properties:
+        total_warga:
+          type: integer
+          example: 512
+        total_balita:
+          type: integer
+          example: 84
+        total_bumil:
+          type: integer
+          example: 17
+        total_lansia:
+          type: integer
+          example: 63
+        pendataan:
+          type: object
+          properties:
+            balita:
+              type: string
+              example: selesai
+            imunisasi:
+              type: string
+              example: draft
+            bumil:
+              type: string
+              example: selesai
+            pasca_persalinan:
+              type: string
+              example: draft
+            lansia:
+              type: string
+              example: selesai
+tags:
+  - name: Authentication
+  - name: Posyandu
+  - name: Warga
+  - name: Balita
+  - name: Imunisasi
+  - name: Bumil
+  - name: Pasca Persalinan
+  - name: Lansia
+  - name: Pendataan Bulanan
+  - name: Dashboard
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login using Supabase Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /warga:
+    get:
+      tags:
+        - Warga
+      summary: Get list of Warga
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: jenis_kelamin
+          in: query
+          schema:
+            type: string
+            enum: [L, P]
+        - name: posyandu_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    post:
+      tags:
+        - Warga
+      summary: Add new Warga
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Warga'
+      responses:
+        '201':
+          description: Warga created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /warga/{id}:
+    get:
+      tags:
+        - Warga
+      summary: Get Warga details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Not found
+    put:
+      tags:
+        - Warga
+      summary: Edit Warga
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Warga'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags:
+        - Warga
+      summary: Delete Warga
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
+  /balita:
+    get:
+      tags:
+        - Balita
+      summary: List balita checkups
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bulan
+          in: query
+          schema:
+            type: integer
+        - name: tahun
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - Balita
+      summary: Add balita checkup
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanBalita'
+      responses:
+        '201':
+          description: Created
+        '409':
+          description: Pendataan is locked
+  /balita/{id}:
+    get:
+      tags:
+        - Balita
+      summary: Checkup details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Balita
+      summary: Edit checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanBalita'
+      responses:
+        '200':
+          description: Updated
+        '409':
+          description: Locked
+    delete:
+      tags:
+        - Balita
+      summary: Delete checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
+        '409':
+          description: Locked
+  /balita/{wargaId}/history:
+    get:
+      tags:
+        - Balita
+      summary: Get checkup history for a citizen
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wargaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+  /imunisasi:
+    get:
+      tags:
+        - Imunisasi
+      summary: List immunizations
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - Imunisasi
+      summary: Add immunization record
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiwayatImunisasi'
+      responses:
+        '201':
+          description: Created
+        '409':
+          description: Locked
+  /imunisasi/{id}:
+    get:
+      tags:
+        - Imunisasi
+      summary: Immunization details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Imunisasi
+      summary: Edit immunization
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiwayatImunisasi'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags:
+        - Imunisasi
+      summary: Delete immunization
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
+  /imunisasi/{wargaId}/history:
+    get:
+      tags:
+        - Imunisasi
+      summary: Get immunization history
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wargaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+  /bumil:
+    get:
+      tags:
+        - Bumil
+      summary: List bumil checkups
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - Bumil
+      summary: Add bumil checkup
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanBumil'
+      responses:
+        '201':
+          description: Created
+        '409':
+          description: Locked
+  /bumil/{id}:
+    get:
+      tags:
+        - Bumil
+      summary: Checkup details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Bumil
+      summary: Edit checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanBumil'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags:
+        - Bumil
+      summary: Delete checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
+  /bumil/{wargaId}/history:
+    get:
+      tags:
+        - Bumil
+      summary: Get checkup history
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wargaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+  /pasca-persalinan:
+    get:
+      tags:
+        - Pasca Persalinan
+      summary: List pasca persalinan checkups
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - Pasca Persalinan
+      summary: Add checkup
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanPascaPersalinan'
+      responses:
+        '201':
+          description: Created
+  /pasca-persalinan/{id}:
+    get:
+      tags:
+        - Pasca Persalinan
+      summary: Checkup details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Pasca Persalinan
+      summary: Edit checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanPascaPersalinan'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags:
+        - Pasca Persalinan
+      summary: Delete checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
+  /pasca-persalinan/{wargaId}/history:
+    get:
+      tags:
+        - Pasca Persalinan
+      summary: Get checkup history
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wargaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+  /lansia:
+    get:
+      tags:
+        - Lansia
+      summary: List lansia checkups
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - Lansia
+      summary: Add checkup
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanLansia'
+      responses:
+        '201':
+          description: Created
+  /lansia/{id}:
+    get:
+      tags:
+        - Lansia
+      summary: Checkup details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Lansia
+      summary: Edit checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PemeriksaanLansia'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags:
+        - Lansia
+      summary: Delete checkup
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
+  /lansia/{wargaId}/history:
+    get:
+      tags:
+        - Lansia
+      summary: Get checkup history
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wargaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+  /pendataan:
+    get:
+      tags:
+        - Pendataan Bulanan
+      summary: Get status of a specific category
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: kategori
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [balita, imunisasi, bumil, pasca_persalinan, lansia]
+        - name: bulan
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: tahun
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /pendataan/status:
+    get:
+      tags:
+        - Pendataan Bulanan
+      summary: Get status of all categories
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bulan
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: tahun
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /pendataan/selesai:
+    post:
+      tags:
+        - Pendataan Bulanan
+      summary: Mark data entry as complete
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kategori:
+                  type: string
+                  enum: [balita, imunisasi, bumil, pasca_persalinan, lansia]
+                bulan:
+                  type: integer
+                tahun:
+                  type: integer
+      responses:
+        '200':
+          description: Completed successfully
+        '409':
+          description: Already completed
+  /dashboard:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard statistics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'

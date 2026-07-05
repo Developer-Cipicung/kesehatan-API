@@ -127,10 +127,10 @@
 
 ## Phase 10 — OpenAPI & Documentation
 
-- [ ] Generate swagger.yaml
-- [ ] Verify OpenAPI specification
-- [ ] Configure Swagger UI
-- [ ] Verify every endpoint is documented
+- [x] Generate swagger.yaml
+- [x] Verify OpenAPI specification
+- [x] Configure Swagger UI
+- [x] Verify every endpoint is documented
 
 ---
 
@@ -144,3 +144,4 @@
 - [ ] Verify Swagger documentation
 - [ ] Remove unused code
 - [ ] Final project review
+- [ ] EDIT README.md
