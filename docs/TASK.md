@@ -60,13 +60,13 @@
 
 ## Phase 5 — Repository Layer
 
-- [ ] Warga Repository
-- [ ] Balita Repository
-- [ ] Imunisasi Repository
-- [ ] Bumil Repository
-- [ ] Pasca Persalinan Repository
-- [ ] Lansia Repository
-- [ ] Pendataan Bulanan Repository
+- [x] Warga Repository
+- [x] Balita Repository
+- [x] Imunisasi Repository
+- [x] Bumil Repository
+- [x] Pasca Persalinan Repository
+- [x] Lansia Repository
+- [x] Pendataan Bulanan Repository
 
 ---
 
