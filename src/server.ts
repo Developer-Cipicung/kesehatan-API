@@ -9,7 +9,7 @@ const startServer = () => {
       logger.info(`🚀 Server running on port ${port} in ${env.NODE_ENV} mode`);
     });
   } catch (error) {
-    logger.error('Error starting server:', error);
+    logger.error(error, 'Error starting server:');
     process.exit(1);
   }
 };
