@@ -1,9 +1,180 @@
 generator client {
-  provider = "prisma-client"
-  output   = "./generated-schema"
+  provider = "prisma-client-js"
+  output   = "../prisma/generated-schema"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JenisKelamin {
+  L
+  P
+}
+
+enum KategoriPendataan {
+  balita
+  imunisasi
+  bumil
+  pasca_persalinan
+  lansia
+}
+
+enum StatusPendataan {
+  draft
+  selesai
+}
+
+model Posyandu {
+  id         String   @id @default(uuid()) @db.Uuid
+  nama       String
+  alamat     String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  wargas            Warga[]
+  pendataan_bulanan PendataanBulanan[]
+
+  @@map("posyandu")
+}
+
+model Warga {
+  id            String       @id @default(uuid()) @db.Uuid
+  posyandu_id   String       @db.Uuid
+  nomor         String
+  nik           String       @unique
+  nama          String
+  jenis_kelamin JenisKelamin
+  tanggal_lahir DateTime     @db.Date
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+
+  posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
+
+  pemeriksaan_balita_baduta    PemeriksaanBalitaBaduta[]
+  riwayat_imunisasi            RiwayatImunisasi[]
+  pemeriksaan_bumil            PemeriksaanBumil[]
+  pemeriksaan_pasca_persalinan PemeriksaanPascaPersalinan[]
+  pemeriksaan_lansia           PemeriksaanLansia[]
+
+  @@index([posyandu_id])
+  @@index([nik])
+  @@map("warga")
+}
+
+model PemeriksaanBalitaBaduta {
+  id                  String   @id @default(uuid()) @db.Uuid
+  warga_id            String   @db.Uuid
+  tanggal_kunjungan   DateTime @db.Date
+  bb                  Decimal  @db.Decimal(5, 2)
+  tb                  Decimal  @db.Decimal(5, 2)
+  lingkar_kepala      Decimal  @db.Decimal(5, 2)
+  lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
+  nama_ortu           String
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  warga Warga @relation(fields: [warga_id], references: [id])
+
+  @@index([warga_id])
+  @@map("pemeriksaan_balita_baduta")
+}
+
+model RiwayatImunisasi {
+  id                String   @id @default(uuid()) @db.Uuid
+  warga_id          String   @db.Uuid
+  jenis_vaksin      String
+  tanggal_pemberian DateTime @db.Date
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  warga Warga @relation(fields: [warga_id], references: [id])
+
+  @@index([warga_id])
+  @@map("riwayat_imunisasi")
+}
+
+model PemeriksaanBumil {
+  id                      String   @id @default(uuid()) @db.Uuid
+  warga_id                String   @db.Uuid
+  tanggal_kunjungan       DateTime @db.Date
+  bb                      Decimal  @db.Decimal(5, 2)
+  tb                      Decimal  @db.Decimal(5, 2)
+  lingkar_perut           Decimal  @db.Decimal(5, 2)
+  lingkar_lengan_atas     Decimal  @db.Decimal(5, 2)
+  usia_kehamilan_minggu   Int
+  hpht                    DateTime @db.Date
+  htp                     DateTime @db.Date
+  tekanan_darah_sistolik  Int
+  tekanan_darah_diastolik Int
+  tinggi_fundus           Decimal  @db.Decimal(5, 2)
+  denyut_jantung_janin    Int
+  hemoglobin              Decimal  @db.Decimal(5, 2)
+  keluhan                 String?  @db.Text
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  warga Warga @relation(fields: [warga_id], references: [id])
+
+  @@index([warga_id])
+  @@map("pemeriksaan_bumil")
+}
+
+model PemeriksaanPascaPersalinan {
+  id                      String   @id @default(uuid()) @db.Uuid
+  warga_id                String   @db.Uuid
+  tanggal_kunjungan       DateTime @db.Date
+  tanggal_persalinan      DateTime @db.Date
+  bb                      Decimal  @db.Decimal(5, 2)
+  tekanan_darah_sistolik  Int
+  tekanan_darah_diastolik Int
+  suhu_tubuh              Decimal  @db.Decimal(4, 2)
+  kondisi_ibu             String?  @db.Text
+  keluhan                 String?  @db.Text
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  warga Warga @relation(fields: [warga_id], references: [id])
+
+  @@index([warga_id])
+  @@map("pemeriksaan_pasca_persalinan")
+}
+
+model PemeriksaanLansia {
+  id                      String   @id @default(uuid()) @db.Uuid
+  warga_id                String   @db.Uuid
+  tanggal_kunjungan       DateTime @db.Date
+  bb                      Decimal  @db.Decimal(5, 2)
+  tb                      Decimal  @db.Decimal(5, 2)
+  tekanan_darah_sistolik  Int
+  tekanan_darah_diastolik Int
+  gula_darah_sewaktu      Int
+  keluhan                 String?  @db.Text
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  warga Warga @relation(fields: [warga_id], references: [id])
+
+  @@index([warga_id])
+  @@map("pemeriksaan_lansia")
+}
+
+model PendataanBulanan {
+  id           String            @id @default(uuid()) @db.Uuid
+  posyandu_id  String            @db.Uuid
+  kategori     KategoriPendataan
+  bulan        Int
+  tahun        Int
+  status       StatusPendataan   @default(draft)
+  submitted_at DateTime?
+  submitted_by String?           @db.Uuid
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+
+  posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
+
+  @@unique([posyandu_id, kategori, bulan, tahun])
+  @@index([posyandu_id])
+  @@map("pendataan_bulanan")
 }

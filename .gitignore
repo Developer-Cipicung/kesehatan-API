@@ -24,4 +24,4 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Primsa generated client
-/prisma/generated-schema
+prisma/generated-schema
