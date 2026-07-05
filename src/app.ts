@@ -35,6 +35,7 @@ import bumilRoutes from './routes/bumil.routes';
 import pascaPersalinanRoutes from './routes/pasca-persalinan.routes';
 import lansiaRoutes from './routes/lansia.routes';
 import pendataanRoutes from './routes/pendataan.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 
 // Routes
 app.get('/health', (req: Request, res: Response) => {
@@ -53,6 +54,7 @@ app.use('/api/v1/bumil', bumilRoutes);
 app.use('/api/v1/pasca-persalinan', pascaPersalinanRoutes);
 app.use('/api/v1/lansia', lansiaRoutes);
 app.use('/api/v1/pendataan', pendataanRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
 
 // 404 Handler
 app.use(notFoundMiddleware);

@@ -3,6 +3,7 @@ import { WargaRepository } from '../repositories/warga.repository';
 import { LockValidationService } from './lock-validation.service';
 import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
+import { calculateAgeInYears } from '../utils/age';
 
 const lansiaRepo = new LansiaRepository();
 const wargaRepo = new WargaRepository();
@@ -26,6 +27,10 @@ export class LansiaService {
   async create(data: Prisma.PemeriksaanLansiaUncheckedCreateInput) {
     const warga = await wargaRepo.findById(data.warga_id);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
+
+    if (calculateAgeInYears(warga.tanggal_lahir) < 60) {
+      throw new AppError(422, 'Warga tidak valid untuk kategori lansia (umur < 60 tahun).');
+    }
 
     const date = new Date(data.tanggal_kunjungan);
     await lockService.ensureNotLocked(warga.posyandu_id, 'lansia', date.getMonth() + 1, date.getFullYear());

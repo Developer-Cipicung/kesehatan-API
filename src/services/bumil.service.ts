@@ -27,6 +27,10 @@ export class BumilService {
     const warga = await wargaRepo.findById(data.warga_id);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
+    if (warga.jenis_kelamin !== 'P') {
+      throw new AppError(422, 'Hanya warga perempuan yang dapat didata sebagai ibu hamil.');
+    }
+
     const date = new Date(data.tanggal_kunjungan);
     await lockService.ensureNotLocked(warga.posyandu_id, 'bumil', date.getMonth() + 1, date.getFullYear());
 

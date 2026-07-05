@@ -112,16 +112,16 @@
 
 ## Phase 9 — Business Rules
 
-- [ ] Monthly lock verification
-- [ ] Prevent update after submission
-- [ ] Prevent delete after submission
-- [ ] Prevent insert after submission
-- [ ] Pendataan selesai workflow
-- [ ] Dashboard statistics
-- [ ] Search warga
-- [ ] Age calculation logic
-- [ ] Category validation
-- [ ] Error handling verification
+- [x] Monthly lock verification
+- [x] Prevent update after submission
+- [x] Prevent delete after submission
+- [x] Prevent insert after submission
+- [x] Pendataan selesai workflow
+- [x] Dashboard statistics
+- [x] Search warga
+- [x] Age calculation logic
+- [x] Category validation
+- [x] Error handling verification
 
 ---
 
