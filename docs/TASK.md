@@ -98,15 +98,15 @@
 
 ## Phase 8 — Routes
 
-- [ ] Authentication routes
-- [ ] Warga routes
-- [ ] Balita routes
-- [ ] Imunisasi routes
-- [ ] Bumil routes
-- [ ] Pasca Persalinan routes
-- [ ] Lansia routes
-- [ ] Pendataan Bulanan routes
-- [ ] Register routes
+- [x] Authentication routes
+- [x] Warga routes
+- [x] Balita routes
+- [x] Imunisasi routes
+- [x] Bumil routes
+- [x] Pasca Persalinan routes
+- [x] Lansia routes
+- [x] Pendataan Bulanan routes
+- [x] Register routes
 
 ---
 

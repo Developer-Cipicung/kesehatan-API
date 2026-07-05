@@ -28,6 +28,13 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 import authRoutes from './routes/auth.routes';
+import wargaRoutes from './routes/warga.routes';
+import balitaRoutes from './routes/balita.routes';
+import imunisasiRoutes from './routes/imunisasi.routes';
+import bumilRoutes from './routes/bumil.routes';
+import pascaPersalinanRoutes from './routes/pasca-persalinan.routes';
+import lansiaRoutes from './routes/lansia.routes';
+import pendataanRoutes from './routes/pendataan.routes';
 
 // Routes
 app.get('/health', (req: Request, res: Response) => {
@@ -39,6 +46,13 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 app.use('/api/v1/auth', authLimiter, authRoutes);
+app.use('/api/v1/warga', wargaRoutes);
+app.use('/api/v1/balita', balitaRoutes);
+app.use('/api/v1/imunisasi', imunisasiRoutes);
+app.use('/api/v1/bumil', bumilRoutes);
+app.use('/api/v1/pasca-persalinan', pascaPersalinanRoutes);
+app.use('/api/v1/lansia', lansiaRoutes);
+app.use('/api/v1/pendataan', pendataanRoutes);
 
 // 404 Handler
 app.use(notFoundMiddleware);
