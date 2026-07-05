@@ -4,7 +4,7 @@ export const successResponse = <T>(
   res: Response,
   statusCode: number,
   message: string,
-  data: T = {} as T
+  data: T = {} as T,
 ) => {
   return res.status(statusCode).json({
     success: true,
@@ -17,7 +17,7 @@ export const errorResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  errors: any[] = []
+  errors: any[] = [],
 ) => {
   return res.status(statusCode).json({
     success: false,

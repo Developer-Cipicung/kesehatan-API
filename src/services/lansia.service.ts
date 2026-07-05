@@ -33,7 +33,12 @@ export class LansiaService {
     }
 
     const date = new Date(data.tanggal_kunjungan);
-    await lockService.ensureNotLocked(warga.posyandu_id, 'lansia', date.getMonth() + 1, date.getFullYear());
+    await lockService.ensureNotLocked(
+      warga.posyandu_id,
+      'lansia',
+      date.getMonth() + 1,
+      date.getFullYear(),
+    );
 
     return lansiaRepo.create(data);
   }
@@ -46,12 +51,25 @@ export class LansiaService {
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const oldDate = new Date(record.tanggal_kunjungan);
-    await lockService.ensureNotLocked(warga.posyandu_id, 'lansia', oldDate.getMonth() + 1, oldDate.getFullYear());
+    await lockService.ensureNotLocked(
+      warga.posyandu_id,
+      'lansia',
+      oldDate.getMonth() + 1,
+      oldDate.getFullYear(),
+    );
 
     if (data.tanggal_kunjungan) {
       const newDate = new Date(data.tanggal_kunjungan as Date | string);
-      if (oldDate.getMonth() !== newDate.getMonth() || oldDate.getFullYear() !== newDate.getFullYear()) {
-        await lockService.ensureNotLocked(warga.posyandu_id, 'lansia', newDate.getMonth() + 1, newDate.getFullYear());
+      if (
+        oldDate.getMonth() !== newDate.getMonth() ||
+        oldDate.getFullYear() !== newDate.getFullYear()
+      ) {
+        await lockService.ensureNotLocked(
+          warga.posyandu_id,
+          'lansia',
+          newDate.getMonth() + 1,
+          newDate.getFullYear(),
+        );
       }
     }
 
@@ -65,7 +83,12 @@ export class LansiaService {
     const warga = await wargaRepo.findById(record.warga_id);
     if (warga) {
       const date = new Date(record.tanggal_kunjungan);
-      await lockService.ensureNotLocked(warga.posyandu_id, 'lansia', date.getMonth() + 1, date.getFullYear());
+      await lockService.ensureNotLocked(
+        warga.posyandu_id,
+        'lansia',
+        date.getMonth() + 1,
+        date.getFullYear(),
+      );
     }
 
     return lansiaRepo.delete(id);

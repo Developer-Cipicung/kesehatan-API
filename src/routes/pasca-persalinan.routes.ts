@@ -9,7 +9,10 @@ import {
 } from '../controllers/pasca-persalinan.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validation.middleware';
-import { createPascaPersalinanSchema, updatePascaPersalinanSchema } from '../validations/pasca-persalinan.validation';
+import {
+  createPascaPersalinanSchema,
+  updatePascaPersalinanSchema,
+} from '../validations/pasca-persalinan.validation';
 
 const router = Router();
 

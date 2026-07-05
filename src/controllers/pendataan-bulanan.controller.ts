@@ -20,10 +20,10 @@ export const getPendataan = asyncHandler(async (req: Request, res: Response) => 
   const { kategori, bulan, tahun } = req.query;
 
   const result = await pendataanService.getStatus(
-    posyanduId, 
-    kategori as KategoriPendataan, 
-    parseInt(bulan as string), 
-    parseInt(tahun as string)
+    posyanduId,
+    kategori as KategoriPendataan,
+    parseInt(bulan as string),
+    parseInt(tahun as string),
   );
 
   return successResponse(res, 200, 'Status pendataan berhasil diambil.', result);
@@ -34,9 +34,9 @@ export const getPendataanStatusAll = asyncHandler(async (req: Request, res: Resp
   const { bulan, tahun } = req.query;
 
   const result = await pendataanService.getAllStatus(
-    posyanduId, 
-    parseInt(bulan as string), 
-    parseInt(tahun as string)
+    posyanduId,
+    parseInt(bulan as string),
+    parseInt(tahun as string),
   );
 
   return successResponse(res, 200, 'Status seluruh kategori berhasil diambil.', result);
@@ -48,11 +48,11 @@ export const selesaikanPendataan = asyncHandler(async (req: Request, res: Respon
   const userId = req.user?.id || 'system';
 
   await pendataanService.selesaikanPendataan(
-    posyanduId, 
-    kategori as KategoriPendataan, 
-    parseInt(bulan as string), 
+    posyanduId,
+    kategori as KategoriPendataan,
+    parseInt(bulan as string),
     parseInt(tahun as string),
-    userId
+    userId,
   );
 
   return successResponse(res, 200, 'Pendataan berhasil diselesaikan.', {});

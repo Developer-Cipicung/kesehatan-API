@@ -39,7 +39,10 @@ export class PascaPersalinanRepository {
   }
 
   async findById(id: string) {
-    return prisma.pemeriksaanPascaPersalinan.findUnique({ where: { id }, include: { warga: true } });
+    return prisma.pemeriksaanPascaPersalinan.findUnique({
+      where: { id },
+      include: { warga: true },
+    });
   }
 
   async findByWargaId(wargaId: string) {

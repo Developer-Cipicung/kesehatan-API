@@ -8,11 +8,16 @@ export class PendataanBulananRepository {
         bulan,
         tahun,
       },
-      include: { posyandu: true }
+      include: { posyandu: true },
     });
   }
 
-  async findByKategoriPeriode(posyanduId: string, kategori: KategoriPendataan, bulan: number, tahun: number) {
+  async findByKategoriPeriode(
+    posyanduId: string,
+    kategori: KategoriPendataan,
+    bulan: number,
+    tahun: number,
+  ) {
     return prisma.pendataanBulanan.findUnique({
       where: {
         posyandu_id_kategori_bulan_tahun: {
@@ -20,12 +25,21 @@ export class PendataanBulananRepository {
           kategori,
           bulan,
           tahun,
-        }
-      }
+        },
+      },
     });
   }
 
-  async upsert(posyanduId: string, kategori: KategoriPendataan, bulan: number, tahun: number, data: Omit<Prisma.PendataanBulananUncheckedCreateInput, 'posyandu_id' | 'kategori' | 'bulan' | 'tahun'>) {
+  async upsert(
+    posyanduId: string,
+    kategori: KategoriPendataan,
+    bulan: number,
+    tahun: number,
+    data: Omit<
+      Prisma.PendataanBulananUncheckedCreateInput,
+      'posyandu_id' | 'kategori' | 'bulan' | 'tahun'
+    >,
+  ) {
     return prisma.pendataanBulanan.upsert({
       where: {
         posyandu_id_kategori_bulan_tahun: {
@@ -33,7 +47,7 @@ export class PendataanBulananRepository {
           kategori,
           bulan,
           tahun,
-        }
+        },
       },
       update: data,
       create: {

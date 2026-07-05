@@ -6,7 +6,10 @@ import {
 } from '../controllers/pendataan-bulanan.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { validateRequest, validateQuery } from '../middleware/validation.middleware';
-import { getPendataanStatusSchema, selesaikanPendataanSchema } from '../validations/pendataan.validation';
+import {
+  getPendataanStatusSchema,
+  selesaikanPendataanSchema,
+} from '../validations/pendataan.validation';
 
 const router = Router();
 

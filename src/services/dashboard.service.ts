@@ -6,7 +6,7 @@ const pendataanService = new PendataanBulananService();
 export class DashboardService {
   async getSummary(posyanduId: string) {
     const now = new Date();
-    
+
     const fiveYearsAgo = new Date();
     fiveYearsAgo.setFullYear(now.getFullYear() - 5);
 
@@ -18,25 +18,25 @@ export class DashboardService {
 
     const [totalWarga, totalBalita, totalLansia, bumilGroups] = await Promise.all([
       prisma.warga.count({ where: { posyandu_id: posyanduId } }),
-      prisma.warga.count({ 
-        where: { 
+      prisma.warga.count({
+        where: {
           posyandu_id: posyanduId,
-          tanggal_lahir: { gte: fiveYearsAgo }
-        } 
+          tanggal_lahir: { gte: fiveYearsAgo },
+        },
       }),
-      prisma.warga.count({ 
-        where: { 
+      prisma.warga.count({
+        where: {
           posyandu_id: posyanduId,
-          tanggal_lahir: { lte: sixtyYearsAgo }
-        } 
+          tanggal_lahir: { lte: sixtyYearsAgo },
+        },
       }),
       prisma.pemeriksaanBumil.groupBy({
         by: ['warga_id'],
         where: {
           tanggal_kunjungan: { gte: nineMonthsAgo },
-          warga: { posyandu_id: posyanduId }
-        }
-      })
+          warga: { posyandu_id: posyanduId },
+        },
+      }),
     ]);
 
     const totalBumil = bumilGroups.length;
@@ -44,10 +44,14 @@ export class DashboardService {
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
-    const pendataanStatuses = await pendataanService.getAllStatus(posyanduId, currentMonth, currentYear);
-    
+    const pendataanStatuses = await pendataanService.getAllStatus(
+      posyanduId,
+      currentMonth,
+      currentYear,
+    );
+
     const pendataanMap: Record<string, string> = {};
-    pendataanStatuses.forEach(p => {
+    pendataanStatuses.forEach((p) => {
       pendataanMap[p.kategori] = p.status;
     });
 
@@ -56,7 +60,7 @@ export class DashboardService {
       total_balita: totalBalita,
       total_bumil: totalBumil,
       total_lansia: totalLansia,
-      pendataan: pendataanMap
+      pendataan: pendataanMap,
     };
   }
 }

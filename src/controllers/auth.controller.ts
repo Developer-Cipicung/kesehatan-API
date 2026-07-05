@@ -7,7 +7,7 @@ import { AppError } from '../utils/AppError';
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  
+
   if (error) {
     throw new AppError(401, 'Invalid login credentials');
   }

@@ -28,7 +28,12 @@ export class ImunisasiService {
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const date = new Date(data.tanggal_pemberian);
-    await lockService.ensureNotLocked(warga.posyandu_id, 'imunisasi', date.getMonth() + 1, date.getFullYear());
+    await lockService.ensureNotLocked(
+      warga.posyandu_id,
+      'imunisasi',
+      date.getMonth() + 1,
+      date.getFullYear(),
+    );
 
     return imunisasiRepo.create(data);
   }
@@ -41,12 +46,25 @@ export class ImunisasiService {
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const oldDate = new Date(record.tanggal_pemberian);
-    await lockService.ensureNotLocked(warga.posyandu_id, 'imunisasi', oldDate.getMonth() + 1, oldDate.getFullYear());
+    await lockService.ensureNotLocked(
+      warga.posyandu_id,
+      'imunisasi',
+      oldDate.getMonth() + 1,
+      oldDate.getFullYear(),
+    );
 
     if (data.tanggal_pemberian) {
       const newDate = new Date(data.tanggal_pemberian as Date | string);
-      if (oldDate.getMonth() !== newDate.getMonth() || oldDate.getFullYear() !== newDate.getFullYear()) {
-        await lockService.ensureNotLocked(warga.posyandu_id, 'imunisasi', newDate.getMonth() + 1, newDate.getFullYear());
+      if (
+        oldDate.getMonth() !== newDate.getMonth() ||
+        oldDate.getFullYear() !== newDate.getFullYear()
+      ) {
+        await lockService.ensureNotLocked(
+          warga.posyandu_id,
+          'imunisasi',
+          newDate.getMonth() + 1,
+          newDate.getFullYear(),
+        );
       }
     }
 
@@ -60,7 +78,12 @@ export class ImunisasiService {
     const warga = await wargaRepo.findById(record.warga_id);
     if (warga) {
       const date = new Date(record.tanggal_pemberian);
-      await lockService.ensureNotLocked(warga.posyandu_id, 'imunisasi', date.getMonth() + 1, date.getFullYear());
+      await lockService.ensureNotLocked(
+        warga.posyandu_id,
+        'imunisasi',
+        date.getMonth() + 1,
+        date.getFullYear(),
+      );
     }
 
     return imunisasiRepo.delete(id);
