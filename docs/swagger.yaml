@@ -338,11 +338,6 @@ paths:
           schema:
             type: string
             enum: [L, P]
-        - name: posyandu_id
-          in: query
-          schema:
-            type: string
-            format: uuid
       responses:
         '200':
           description: Success

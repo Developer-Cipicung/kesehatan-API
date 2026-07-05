@@ -1,7 +1,20 @@
-import { PrismaClient } from './generated-schema';
-import { logger } from '../src/utils/logger';
+import { KategoriPendataan, StatusPendataan, PrismaClient, JenisKelamin, UserRole } from './generated-schema';
+import pino from 'pino';
+import { createClient } from '@supabase/supabase-js';
+
+const logger = pino({
+  transport: {
+    target: 'pino-pretty',
+    options: { colorize: true },
+  },
+});
 
 const prisma = new PrismaClient();
+const supabase = createClient(
+  process.env.SUPABASE_URL || '',
+  process.env.SUPABASE_ANON_KEY || ''
+);
+
 async function main() {
   logger.info('Starting seed...');
 
@@ -31,18 +44,42 @@ async function main() {
   });
   logger.info(`Created Posyandu: ${posyandu.nama}`);
 
-  // 1.5. Create User (Mock Auth_ID)
-  // Generating a random UUID for auth_id to simulate Supabase user
+  logger.info(`Created Posyandu: ${posyandu.nama}`);
+
+  // 1.5. Create User (Real Auth_ID from Supabase)
+  const email = 'kader@cipicung.com';
+  const password = 'kader123';
+  let authId = '00000000-0000-0000-0000-000000000001';
+
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (signInData?.user) {
+    authId = signInData.user.id;
+  } else {
+    const { data: signUpData } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (signUpData?.user) {
+      authId = signUpData.user.id;
+    } else {
+      logger.warn('Failed to sign in or sign up mock user. Using dummy auth_id.');
+    }
+  }
+
   const adminUser = await prisma.user.create({
     data: {
-      auth_id: '00000000-0000-0000-0000-000000000001',
+      auth_id: authId,
       posyandu_id: posyandu.id,
       nama: 'Kader Cipicung',
-      email: 'kader@cipicung.com',
-      role: 'admin',
+      email: email,
+      role: UserRole.kader,
     },
   });
-  logger.info(`Created User: ${adminUser.nama}`);
+  logger.info(`Created User: ${adminUser.nama} with auth_id: ${authId}`);
 
   // 2. Create Warga
   const wargaBalita = await prisma.warga.create({

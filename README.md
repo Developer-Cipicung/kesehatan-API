@@ -88,14 +88,17 @@ Untuk mencoba API secara langsung dengan data dummy lengkap (termasuk pemeriksaa
 
 2. **Dapatkan Token JWT (Supabase)**
    Seluruh API dilindungi oleh Supabase JWT (kecuali `/api/v1/auth/login` dan `/health`).
-   - Buat user baru secara manual di dashboard Supabase Anda, atau gunakan endpoint `/auth/login` untuk masuk jika user sudah terdaftar.
-   - Ambil token `access_token` yang diberikan.
+   - Gunakan endpoint `POST /api/v1/auth/login` melalui Swagger atau Postman.
+   - Gunakan kredensial berikut untuk login uji coba (akun ini dihubungkan dengan data seed):
+     - **Email**: `kader@cipicung.com`
+     - **Password**: `kader123`
+   - Ambil token `access_token` yang diberikan di response body.
 
 3. **Gunakan Swagger UI / Postman**
    - Buka Swagger UI di `http://localhost:3000/api-docs`
    - Klik tombol **"Authorize"** di pojok kanan atas.
    - Masukkan token Anda dengan format: `<TOKEN>` (tanpa embel-embel Bearer, karena Swagger sudah menyediakannya di background).
-   - Sekarang Anda dapat mencoba endpoint `GET /api/v1/balita`, `GET /api/v1/dashboard`, dll. Semua data dari proses seeding tadi akan muncul di hasil response.
+   - Sekarang Anda dapat mencoba endpoint `GET /api/v1/balita`, `GET /api/v1/dashboard`, dll. Semua data dari proses seeding tadi akan muncul di hasil response secara otomatis difilter sesuai Posyandu dari akun Kader tersebut.
 
 ## 📄 Struktur Proyek
 
