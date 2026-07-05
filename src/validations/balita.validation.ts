@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createBalitaSchema = z.object({
   warga_id: z.string().uuid(),
-  tanggal_kunjungan: z.string().date(),
+  tanggal_kunjungan: z.string().date().transform(val => new Date(val).toISOString()),
   bb: z.number().positive(),
   tb: z.number().positive(),
   lingkar_kepala: z.number().positive(),

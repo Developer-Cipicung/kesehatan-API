@@ -48,10 +48,13 @@ components:
           format: uuid
         nomor:
           type: string
+          example: "NO-001"
         nik:
           type: string
+          example: "3201010101010001"
         nama:
           type: string
+          example: "Budi Santoso"
         jenis_kelamin:
           type: string
           enum: [L, P]
@@ -73,19 +76,26 @@ components:
         warga_id:
           type: string
           format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
         bb:
           type: number
+          example: 12.5
         tb:
           type: number
+          example: 85.2
         lingkar_kepala:
           type: number
+          example: 45.1
         lingkar_lengan_atas:
           type: number
+          example: 15.3
         nama_ortu:
           type: string
+          example: "Siti Aminah"
         tanggal_kunjungan:
           type: string
           format: date
+          example: "2026-07-05"
         created_at:
           type: string
           format: date-time
@@ -101,37 +111,52 @@ components:
         warga_id:
           type: string
           format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
         bb:
           type: number
+          example: 12.5
         tb:
           type: number
+          example: 85.2
         lingkar_perut:
           type: number
+          example: 95.0
         lingkar_lengan_atas:
           type: number
+          example: 15.3
         usia_kehamilan_minggu:
           type: integer
+          example: 24
         hpht:
           type: string
           format: date
+          example: "2026-01-15"
         htp:
           type: string
           format: date
+          example: "2026-10-22"
         tekanan_darah_sistolik:
           type: integer
+          example: 120
         tekanan_darah_diastolik:
           type: integer
+          example: 80
         tinggi_fundus:
           type: number
+          example: 24.5
         denyut_jantung_janin:
           type: integer
+          example: 140
         hemoglobin:
           type: number
+          example: 11.5
         keluhan:
           type: string
+          example: "Mual di pagi hari"
         tanggal_kunjungan:
           type: string
           format: date
+          example: "2026-07-05"
     PemeriksaanPascaPersalinan:
       type: object
       properties:
@@ -141,24 +166,33 @@ components:
         warga_id:
           type: string
           format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
         tanggal_persalinan:
           type: string
           format: date
+          example: "2026-06-30"
         bb:
           type: number
+          example: 12.5
         tekanan_darah_sistolik:
           type: integer
+          example: 120
         tekanan_darah_diastolik:
           type: integer
+          example: 80
         suhu_tubuh:
           type: number
+          example: 36.5
         kondisi_ibu:
           type: string
+          example: "Sehat"
         keluhan:
           type: string
+          example: "Mual di pagi hari"
         tanggal_kunjungan:
           type: string
           format: date
+          example: "2026-07-05"
     PemeriksaanLansia:
       type: object
       properties:
@@ -168,21 +202,29 @@ components:
         warga_id:
           type: string
           format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
         bb:
           type: number
+          example: 12.5
         tb:
           type: number
+          example: 85.2
         tekanan_darah_sistolik:
           type: integer
+          example: 120
         tekanan_darah_diastolik:
           type: integer
+          example: 80
         gula_darah_sewaktu:
           type: integer
+          example: 110
         keluhan:
           type: string
+          example: "Mual di pagi hari"
         tanggal_kunjungan:
           type: string
           format: date
+          example: "2026-07-05"
     RiwayatImunisasi:
       type: object
       properties:
@@ -192,11 +234,14 @@ components:
         warga_id:
           type: string
           format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
         jenis_vaksin:
           type: string
+          example: "BCG"
         tanggal_pemberian:
           type: string
           format: date
+          example: "2026-07-05"
     PendataanBulanan:
       type: object
       properties:
