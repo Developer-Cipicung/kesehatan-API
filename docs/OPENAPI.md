@@ -468,3 +468,5 @@ When generating or modifying swagger.yaml:
 12. Keep swagger.yaml synchronized with API.md.
 13. Never invent endpoints that are not defined in API.md.
 14. Validate the generated YAML before completion.
+## Multi-Tenancy
+All APIs dynamically inject `posyandu_id` from the Bearer Token user context. Client payloads must omit `posyandu_id`.

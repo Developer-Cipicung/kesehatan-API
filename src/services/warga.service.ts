@@ -9,9 +9,9 @@ export class WargaService {
     return wargaRepo.findAll(params);
   }
 
-  async findById(id: string) {
+  async findById(id: string, posyanduId: string) {
     const warga = await wargaRepo.findById(id);
-    if (!warga) throw new AppError(404, 'Warga not found');
+    if (!warga || warga.posyandu_id !== posyanduId) throw new AppError(404, 'Warga not found');
     return warga;
   }
 
@@ -22,9 +22,9 @@ export class WargaService {
     return wargaRepo.create(data);
   }
 
-  async update(id: string, data: Prisma.WargaUncheckedUpdateInput) {
+  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId: string) {
     const warga = await wargaRepo.findById(id);
-    if (!warga) throw new AppError(404, 'Warga not found');
+    if (!warga || warga.posyandu_id !== posyanduId) throw new AppError(404, 'Warga not found');
 
     if (data.nik && data.nik !== warga.nik) {
       const existing = await wargaRepo.findByNik(data.nik as string);
@@ -34,9 +34,9 @@ export class WargaService {
     return wargaRepo.update(id, data);
   }
 
-  async delete(id: string) {
+  async delete(id: string, posyanduId: string) {
     const warga = await wargaRepo.findById(id);
-    if (!warga) throw new AppError(404, 'Warga not found');
+    if (!warga || warga.posyandu_id !== posyanduId) throw new AppError(404, 'Warga not found');
 
     return wargaRepo.delete(id);
   }

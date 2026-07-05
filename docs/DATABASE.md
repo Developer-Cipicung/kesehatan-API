@@ -320,3 +320,12 @@ Posyandu (1)
 - Reopen Pendataan Bulanan oleh Administrator
 - Arsip Pendataan Tahunan
 - Statistik dan Pelaporan Otomatis
+## Users Table
+Stores application-specific user profiles uniquely mapped to Supabase Auth UUIDs.
+- `id`: UUID (Primary Key)
+- `auth_id`: UUID (Unique, Supabase mapping)
+- `posyandu_id`: UUID (Foreign Key)
+- `nama`: String
+- `email`: String
+- `role`: Enum (kader, bidan, admin)
+- `is_active`: Boolean

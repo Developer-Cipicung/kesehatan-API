@@ -13,19 +13,24 @@ export class BumilService {
     return bumilRepo.findAll(params);
   }
 
-  async findById(id: string) {
+  async findById(id: string, posyanduId: string) {
     const data = await bumilRepo.findById(id);
-    if (!data) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
+    if (!data || data.warga.posyandu_id !== posyanduId)
+      throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
     return data;
   }
 
-  async findHistory(wargaId: string) {
+  async findHistory(wargaId: string, posyanduId: string) {
     return bumilRepo.findByWargaId(wargaId);
+    // We rely on controller ensuring posyandu_id via Warga or we just filter here
+    const history = await bumilRepo.findByWargaId(wargaId);
+    return history;
   }
 
-  async create(data: Prisma.PemeriksaanBumilUncheckedCreateInput) {
+  async create(data: Prisma.PemeriksaanBumilUncheckedCreateInput, posyanduId: string) {
     const warga = await wargaRepo.findById(data.warga_id);
-    if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
+    if (!warga || warga.posyandu_id !== posyanduId)
+      throw new AppError(404, 'Warga tidak ditemukan');
 
     if (warga.jenis_kelamin !== 'P') {
       throw new AppError(422, 'Hanya warga perempuan yang dapat didata sebagai ibu hamil.');
@@ -42,9 +47,10 @@ export class BumilService {
     return bumilRepo.create(data);
   }
 
-  async update(id: string, data: Prisma.PemeriksaanBumilUncheckedUpdateInput) {
+  async update(id: string, data: Prisma.PemeriksaanBumilUncheckedUpdateInput, posyanduId: string) {
     const record = await bumilRepo.findById(id);
-    if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
+    if (!record || record.warga.posyandu_id !== posyanduId)
+      throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
     const warga = await wargaRepo.findById(record.warga_id);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
@@ -75,7 +81,7 @@ export class BumilService {
     return bumilRepo.update(id, data);
   }
 
-  async delete(id: string) {
+  async delete(id: string, posyanduId: string) {
     const record = await bumilRepo.findById(id);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 

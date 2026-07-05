@@ -8,11 +8,7 @@ import { AppError } from '../utils/AppError';
 const pendataanService = new PendataanBulananService();
 
 const getPosyanduId = (req: Request): string => {
-  const posyanduId = req.user?.user_metadata?.posyandu_id;
-  if (!posyanduId) {
-    throw new AppError(403, 'User tidak memiliki akses ke posyandu manapun.');
-  }
-  return posyanduId;
+  return req.appUser!.posyandu_id;
 };
 
 export const getPendataan = asyncHandler(async (req: Request, res: Response) => {
@@ -45,7 +41,7 @@ export const getPendataanStatusAll = asyncHandler(async (req: Request, res: Resp
 export const selesaikanPendataan = asyncHandler(async (req: Request, res: Response) => {
   const posyanduId = getPosyanduId(req);
   const { kategori, bulan, tahun } = req.body;
-  const userId = req.user?.id || 'system';
+  const userId = req.appUser!.id;
 
   await pendataanService.selesaikanPendataan(
     posyanduId,

@@ -5,6 +5,7 @@ export interface FindAllLansiaParams {
   page?: number;
   limit?: number;
   search?: string;
+  posyanduId?: string;
 }
 
 export class LansiaRepository {
@@ -15,9 +16,10 @@ export class LansiaRepository {
 
     const where: Prisma.PemeriksaanLansiaWhereInput = {};
 
-    if (params.search) {
+    if (params.posyanduId || params.search) {
       where.warga = {
-        nama: { contains: params.search, mode: 'insensitive' },
+        ...(params.posyanduId && { posyandu_id: params.posyanduId }),
+        ...(params.search && { nama: { contains: params.search, mode: 'insensitive' } }),
       };
     }
 

@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma';
 export interface FindAllImunisasiParams {
   page?: number;
   limit?: number;
+  posyanduId?: string;
 }
 
 export class ImunisasiRepository {
@@ -12,14 +13,20 @@ export class ImunisasiRepository {
     const limit = params.limit || 10;
     const skip = (page - 1) * limit;
 
+    const where: Prisma.RiwayatImunisasiWhereInput = {};
+    if (params.posyanduId) {
+      where.warga = { posyandu_id: params.posyanduId };
+    }
+
     const [data, total] = await Promise.all([
       prisma.riwayatImunisasi.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { tanggal_pemberian: 'desc' },
         include: { warga: true },
       }),
-      prisma.riwayatImunisasi.count(),
+      prisma.riwayatImunisasi.count({ where }),
     ]);
 
     return {

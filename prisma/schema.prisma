@@ -13,6 +13,12 @@ enum JenisKelamin {
   P
 }
 
+enum UserRole {
+  kader
+  bidan
+  admin
+}
+
 enum KategoriPendataan {
   balita
   imunisasi
@@ -28,15 +34,38 @@ enum StatusPendataan {
 
 model Posyandu {
   id         String   @id @default(uuid()) @db.Uuid
+  kode       String   @unique
   nama       String
   alamat     String?
+  kelurahan  String?
+  kecamatan  String?
+  kabupaten  String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  users             User[]
   wargas            Warga[]
   pendataan_bulanan PendataanBulanan[]
 
   @@map("posyandu")
+}
+
+model User {
+  id          String   @id @default(uuid()) @db.Uuid
+  auth_id     String   @unique @db.Uuid
+  posyandu_id String   @db.Uuid
+  nama        String
+  email       String
+  role        UserRole @default(kader)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  posyandu          Posyandu           @relation(fields: [posyandu_id], references: [id])
+  pendataan_bulanan PendataanBulanan[]
+
+  @@index([posyandu_id])
+  @@map("users")
 }
 
 model Warga {
@@ -173,6 +202,7 @@ model PendataanBulanan {
   updated_at   DateTime          @updatedAt
 
   posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
+  user     User?    @relation(fields: [submitted_by], references: [id])
 
   @@unique([posyandu_id, kategori, bulan, tahun])
   @@index([posyandu_id])

@@ -14,19 +14,24 @@ export class BalitaService {
     return balitaRepo.findAll(params);
   }
 
-  async findById(id: string) {
+  async findById(id: string, posyanduId: string) {
     const data = await balitaRepo.findById(id);
-    if (!data) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
+    if (!data || data.warga.posyandu_id !== posyanduId)
+      throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
     return data;
   }
 
-  async findHistory(wargaId: string) {
+  async findHistory(wargaId: string, posyanduId: string) {
     return balitaRepo.findByWargaId(wargaId);
+    // We rely on controller ensuring posyandu_id via Warga or we just filter here
+    const history = await balitaRepo.findByWargaId(wargaId);
+    return history;
   }
 
-  async create(data: Prisma.PemeriksaanBalitaBadutaUncheckedCreateInput) {
+  async create(data: Prisma.PemeriksaanBalitaBadutaUncheckedCreateInput, posyanduId: string) {
     const warga = await wargaRepo.findById(data.warga_id);
-    if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
+    if (!warga || warga.posyandu_id !== posyanduId)
+      throw new AppError(404, 'Warga tidak ditemukan');
 
     if (calculateAgeInMonths(warga.tanggal_lahir) > 60) {
       throw new AppError(422, 'Warga tidak valid untuk kategori balita (umur > 5 tahun).');
@@ -43,9 +48,14 @@ export class BalitaService {
     return balitaRepo.create(data);
   }
 
-  async update(id: string, data: Prisma.PemeriksaanBalitaBadutaUncheckedUpdateInput) {
+  async update(
+    id: string,
+    data: Prisma.PemeriksaanBalitaBadutaUncheckedUpdateInput,
+    posyanduId: string,
+  ) {
     const record = await balitaRepo.findById(id);
-    if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
+    if (!record || record.warga.posyandu_id !== posyanduId)
+      throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
     const warga = await wargaRepo.findById(record.warga_id);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
@@ -76,7 +86,7 @@ export class BalitaService {
     return balitaRepo.update(id, data);
   }
 
-  async delete(id: string) {
+  async delete(id: string, posyanduId: string) {
     const record = await balitaRepo.findById(id);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 

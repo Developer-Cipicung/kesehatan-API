@@ -5,6 +5,7 @@ export interface FindAllPascaPersalinanParams {
   page?: number;
   limit?: number;
   search?: string;
+  posyanduId?: string;
 }
 
 export class PascaPersalinanRepository {
@@ -15,9 +16,10 @@ export class PascaPersalinanRepository {
 
     const where: Prisma.PemeriksaanPascaPersalinanWhereInput = {};
 
-    if (params.search) {
+    if (params.posyanduId || params.search) {
       where.warga = {
-        nama: { contains: params.search, mode: 'insensitive' },
+        ...(params.posyanduId && { posyandu_id: params.posyanduId }),
+        ...(params.search && { nama: { contains: params.search, mode: 'insensitive' } }),
       };
     }
 

@@ -14,26 +14,33 @@ export const getImunisasi = asyncHandler(async (req: Request, res: Response) => 
 });
 
 export const getImunisasiById = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.findById(req.params.id as string);
+  const data = await imunisasiService.findById(req.params.id as string, req.appUser!.posyandu_id);
   return successResponse(res, 200, 'Data imunisasi berhasil diambil.', data);
 });
 
 export const getImunisasiHistory = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.findHistory(req.params.wargaId as string);
+  const data = await imunisasiService.findHistory(
+    req.params.wargaId as string,
+    req.appUser!.posyandu_id,
+  );
   return successResponse(res, 200, 'Riwayat imunisasi berhasil diambil.', data);
 });
 
 export const createImunisasi = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.create(req.body);
+  const data = await imunisasiService.create(req.body, req.appUser!.posyandu_id);
   return successResponse(res, 201, 'Riwayat imunisasi berhasil ditambahkan.', data);
 });
 
 export const updateImunisasi = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.update(req.params.id as string, req.body);
+  const data = await imunisasiService.update(
+    req.params.id as string,
+    req.body,
+    req.appUser!.posyandu_id,
+  );
   return successResponse(res, 200, 'Riwayat imunisasi berhasil diubah.', data);
 });
 
 export const deleteImunisasi = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.delete(req.params.id as string);
+  const data = await imunisasiService.delete(req.params.id as string, req.appUser!.posyandu_id);
   return successResponse(res, 200, 'Riwayat imunisasi berhasil dihapus.', data);
 });
