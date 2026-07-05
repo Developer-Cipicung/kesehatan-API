@@ -1,0 +1,12 @@
+import { z } from 'zod';
+
+export const createWargaSchema = z.object({
+  posyandu_id: z.string().uuid(),
+  nomor: z.string().min(1),
+  nik: z.string().length(16),
+  nama: z.string().min(1),
+  jenis_kelamin: z.enum(['L', 'P']),
+  tanggal_lahir: z.string().date(),
+});
+
+export const updateWargaSchema = createWargaSchema.partial();

@@ -47,14 +47,14 @@
 
 ## Phase 4 — Validation Layer
 
-- [ ] Create Zod schemas for Warga
-- [ ] Create Zod schemas for Balita
-- [ ] Create Zod schemas for Imunisasi
-- [ ] Create Zod schemas for Bumil
-- [ ] Create Zod schemas for Pasca Persalinan
-- [ ] Create Zod schemas for Lansia
-- [ ] Create Zod schemas for Pendataan Bulanan
-- [ ] Validation middleware
+- [x] Create Zod schemas for Warga
+- [x] Create Zod schemas for Balita
+- [x] Create Zod schemas for Imunisasi
+- [x] Create Zod schemas for Bumil
+- [x] Create Zod schemas for Pasca Persalinan
+- [x] Create Zod schemas for Lansia
+- [x] Create Zod schemas for Pendataan Bulanan
+- [x] Validation middleware
 
 ---
 
