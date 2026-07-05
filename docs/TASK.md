@@ -72,14 +72,14 @@
 
 ## Phase 6 — Service Layer
 
-- [ ] Warga Service
-- [ ] Balita Service
-- [ ] Imunisasi Service
-- [ ] Bumil Service
-- [ ] Pasca Persalinan Service
-- [ ] Lansia Service
-- [ ] Pendataan Bulanan Service
-- [ ] Monthly Lock Validation Service
+- [x] Warga Service
+- [x] Balita Service
+- [x] Imunisasi Service
+- [x] Bumil Service
+- [x] Pasca Persalinan Service
+- [x] Lansia Service
+- [x] Pendataan Bulanan Service
+- [x] Monthly Lock Validation Service
 
 ---
 
