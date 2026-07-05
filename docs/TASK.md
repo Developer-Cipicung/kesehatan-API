@@ -85,14 +85,14 @@
 
 ## Phase 7 — Controller Layer
 
-- [ ] Auth Controller
-- [ ] Warga Controller
-- [ ] Balita Controller
-- [ ] Imunisasi Controller
-- [ ] Bumil Controller
-- [ ] Pasca Persalinan Controller
-- [ ] Lansia Controller
-- [ ] Pendataan Bulanan Controller
+- [x] Auth Controller
+- [x] Warga Controller
+- [x] Balita Controller
+- [x] Imunisasi Controller
+- [x] Bumil Controller
+- [x] Pasca Persalinan Controller
+- [x] Lansia Controller
+- [x] Pendataan Bulanan Controller
 
 ---
 
