@@ -53,13 +53,16 @@ export class BalitaRepository {
     };
   }
 
-  async findById(id: string) {
-    return prisma.pemeriksaanBalitaBaduta.findUnique({ where: { id }, include: { warga: true } });
+  async findById(id: string, posyanduId: string) {
+    return prisma.pemeriksaanBalitaBaduta.findFirst({ 
+      where: { id, warga: { posyandu_id: posyanduId } }, 
+      include: { warga: true } 
+    });
   }
 
-  async findByWargaId(wargaId: string) {
+  async findByWargaId(wargaId: string, posyanduId: string) {
     return prisma.pemeriksaanBalitaBaduta.findMany({
-      where: { warga_id: wargaId },
+      where: { warga_id: wargaId, warga: { posyandu_id: posyanduId } },
       orderBy: { tanggal_kunjungan: 'desc' },
     });
   }
@@ -68,11 +71,20 @@ export class BalitaRepository {
     return prisma.pemeriksaanBalitaBaduta.create({ data });
   }
 
-  async update(id: string, data: Prisma.PemeriksaanBalitaBadutaUncheckedUpdateInput) {
-    return prisma.pemeriksaanBalitaBaduta.update({ where: { id }, data });
+  async update(id: string, data: Prisma.PemeriksaanBalitaBadutaUncheckedUpdateInput, posyanduId: string) {
+    return prisma.pemeriksaanBalitaBaduta.updateMany({ 
+      where: { id, warga: { posyandu_id: posyanduId } }, 
+      data 
+    }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string) {
-    return prisma.pemeriksaanBalitaBaduta.delete({ where: { id } });
+  async delete(id: string, posyanduId: string) {
+    const record = await this.findById(id, posyanduId);
+    if (record) {
+      await prisma.pemeriksaanBalitaBaduta.deleteMany({ 
+        where: { id, warga: { posyandu_id: posyanduId } } 
+      });
+    }
+    return record;
   }
 }

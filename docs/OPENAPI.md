@@ -328,11 +328,17 @@ Reuse these schemas across the specification.
 
 Document the following endpoints:
 
-GET /pendataan
+### `GET /pendataan-bulanan`
 
-POST /pendataan/selesai
+Mengambil status pendataan suatu kategori.
 
-GET /pendataan/status
+### `POST /pendataan-bulanan/:id/submit`
+
+Menandai pendataan kategori sebagai selesai.
+
+### `GET /pendataan-bulanan/status`
+
+Mengambil status seluruh kategori pada bulan tertentu.
 
 Include business descriptions explaining that:
 

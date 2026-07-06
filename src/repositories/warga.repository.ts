@@ -53,15 +53,15 @@ export class WargaRepository {
     };
   }
 
-  async findById(id: string) {
-    return prisma.warga.findUnique({
-      where: { id },
+  async findById(id: string, posyanduId: string) {
+    return prisma.warga.findFirst({
+      where: { id, posyandu_id: posyanduId },
     });
   }
 
-  async findByNik(nik: string) {
-    return prisma.warga.findUnique({
-      where: { nik },
+  async findByNik(nik: string, posyanduId: string) {
+    return prisma.warga.findFirst({
+      where: { nik, posyandu_id: posyanduId },
     });
   }
 
@@ -71,16 +71,20 @@ export class WargaRepository {
     });
   }
 
-  async update(id: string, data: Prisma.WargaUncheckedUpdateInput) {
-    return prisma.warga.update({
-      where: { id },
+  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId: string) {
+    return prisma.warga.updateMany({
+      where: { id, posyandu_id: posyanduId },
       data,
-    });
+    }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string) {
-    return prisma.warga.delete({
-      where: { id },
-    });
+  async delete(id: string, posyanduId: string) {
+    const record = await this.findById(id, posyanduId);
+    if (record) {
+      await prisma.warga.deleteMany({
+        where: { id, posyandu_id: posyanduId },
+      });
+    }
+    return record;
   }
 }

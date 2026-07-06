@@ -31,7 +31,7 @@ export const getBumilHistory = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const createBumil = asyncHandler(async (req: Request, res: Response) => {
-  const data = await bumilService.create(req.body, req.appUser!.posyandu_id);
+  const data = await bumilService.create(req.body, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan bumil berhasil ditambahkan.', data);
 });
 
@@ -40,11 +40,12 @@ export const updateBumil = asyncHandler(async (req: Request, res: Response) => {
     req.params.id as string,
     req.body,
     req.appUser!.posyandu_id,
+    req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan bumil berhasil diubah.', data);
 });
 
 export const deleteBumil = asyncHandler(async (req: Request, res: Response) => {
-  const data = await bumilService.delete(req.params.id as string, req.appUser!.posyandu_id);
+  const data = await bumilService.delete(req.params.id as string, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan bumil berhasil dihapus.', data);
 });

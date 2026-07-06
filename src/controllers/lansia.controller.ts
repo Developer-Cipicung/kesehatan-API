@@ -29,7 +29,7 @@ export const getLansiaHistory = asyncHandler(async (req: Request, res: Response)
 });
 
 export const createLansia = asyncHandler(async (req: Request, res: Response) => {
-  const data = await lansiaService.create(req.body, req.appUser!.posyandu_id);
+  const data = await lansiaService.create(req.body, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan lansia berhasil ditambahkan.', data);
 });
 
@@ -38,11 +38,12 @@ export const updateLansia = asyncHandler(async (req: Request, res: Response) => 
     req.params.id as string,
     req.body,
     req.appUser!.posyandu_id,
+    req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan lansia berhasil diubah.', data);
 });
 
 export const deleteLansia = asyncHandler(async (req: Request, res: Response) => {
-  const data = await lansiaService.delete(req.params.id as string, req.appUser!.posyandu_id);
+  const data = await lansiaService.delete(req.params.id as string, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan lansia berhasil dihapus.', data);
 });

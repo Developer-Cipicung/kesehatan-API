@@ -31,7 +31,7 @@ export const getBalitaHistory = asyncHandler(async (req: Request, res: Response)
 });
 
 export const createBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.create(req.body, req.appUser!.posyandu_id);
+  const data = await balitaService.create(req.body, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan balita berhasil ditambahkan.', data);
 });
 
@@ -40,11 +40,12 @@ export const updateBalita = asyncHandler(async (req: Request, res: Response) => 
     req.params.id as string,
     req.body,
     req.appUser!.posyandu_id,
+    req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan balita berhasil diubah.', data);
 });
 
 export const deleteBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.delete(req.params.id as string, req.appUser!.posyandu_id);
+  const data = await balitaService.delete(req.params.id as string, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan balita berhasil dihapus.', data);
 });

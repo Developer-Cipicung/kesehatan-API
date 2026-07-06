@@ -9,6 +9,7 @@ export const getImunisasi = asyncHandler(async (req: Request, res: Response) => 
   const result = await imunisasiService.findAll({
     page: req.query.page ? parseInt(req.query.page as string) : undefined,
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+    posyanduId: req.appUser!.posyandu_id,
   });
   return successResponse(res, 200, 'Data riwayat imunisasi berhasil diambil.', result);
 });
@@ -27,7 +28,7 @@ export const getImunisasiHistory = asyncHandler(async (req: Request, res: Respon
 });
 
 export const createImunisasi = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.create(req.body, req.appUser!.posyandu_id);
+  const data = await imunisasiService.create(req.body, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 201, 'Riwayat imunisasi berhasil ditambahkan.', data);
 });
 
@@ -36,11 +37,12 @@ export const updateImunisasi = asyncHandler(async (req: Request, res: Response) 
     req.params.id as string,
     req.body,
     req.appUser!.posyandu_id,
+    req.appUser!.id,
   );
   return successResponse(res, 200, 'Riwayat imunisasi berhasil diubah.', data);
 });
 
 export const deleteImunisasi = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.delete(req.params.id as string, req.appUser!.posyandu_id);
+  const data = await imunisasiService.delete(req.params.id as string, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 200, 'Riwayat imunisasi berhasil dihapus.', data);
 });

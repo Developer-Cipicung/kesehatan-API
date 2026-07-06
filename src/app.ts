@@ -68,7 +68,7 @@ app.use('/api/v1/imunisasi', imunisasiRoutes);
 app.use('/api/v1/bumil', bumilRoutes);
 app.use('/api/v1/pasca-persalinan', pascaPersalinanRoutes);
 app.use('/api/v1/lansia', lansiaRoutes);
-app.use('/api/v1/pendataan', pendataanRoutes);
+app.use('/api/v1/pendataan-bulanan', pendataanRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/posyandu', posyanduRoutes);
 

@@ -12,6 +12,19 @@ export class PendataanBulananRepository {
     });
   }
 
+  async findById(id: string, posyanduId: string) {
+    return prisma.pendataanBulanan.findFirst({
+      where: { id, posyandu_id: posyanduId },
+    });
+  }
+
+  async update(id: string, data: Prisma.PendataanBulananUpdateInput) {
+    return prisma.pendataanBulanan.update({
+      where: { id },
+      data,
+    });
+  }
+
   async findByKategoriPeriode(
     posyanduId: string,
     kategori: KategoriPendataan,

@@ -342,7 +342,7 @@ Status pendataan **tidak menyimpan data pemeriksaan**, tetapi menandakan bahwa s
 
 ---
 
-## GET /pendataan
+## GET /pendataan-bulanan
 
 Mengambil status pendataan suatu kategori.
 
@@ -360,6 +360,7 @@ Response
 {
     "success": true,
     "data": {
+        "id": "uuid-here",
         "kategori": "bumil",
         "bulan": 7,
         "tahun": 2026,
@@ -371,18 +372,13 @@ Response
 
 ---
 
-## POST /pendataan/selesai
+## POST /pendataan-bulanan/:id/submit
 
-Menandai pendataan kategori sebagai selesai.
+Menandai pendataan kategori sebagai selesai. (Idempotent: Jika sudah selesai, maka akan mengembalikan 200 OK)
 
-Request
-
+Request (Empty Body)
 ```json
-{
-    "kategori": "bumil",
-    "bulan": 7,
-    "tahun": 2026
-}
+{}
 ```
 
 Response
@@ -403,7 +399,7 @@ Business Rules
 
 ---
 
-## GET /pendataan/status
+## GET /pendataan-bulanan/status
 
 Mengambil status seluruh kategori pada bulan tertentu.
 
@@ -421,10 +417,12 @@ Response
     "success": true,
     "data": [
         {
+            "id": "uuid-here",
             "kategori": "balita",
             "status": "selesai"
         },
         {
+            "id": "uuid-here",
             "kategori": "imunisasi",
             "status": "draft"
         },

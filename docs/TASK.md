@@ -159,3 +159,12 @@
 - [x] Configure Auto-Auth script for Swagger UI
 - [x] Embed Valid Example Payloads to Swagger Schemas
 - [x] Upgrade Zod Dates to auto-transform strings to ISO-8601 for Prisma compatibility
+
+## Phase 14 — Backend Improvements & Security Hardening
+
+- [x] Implement AuditLog table in schema and AuditLogService
+- [x] Enforce Posyandu ownership dynamically across all APIs
+- [x] Centralize and enforce Lock Submitted Monthly Data logic
+- [x] Implemented placeholder centralized medical status logic
+- [x] Refactor Pendataan Bulanan routes to idempotent `/:id/submit`
+- [x] Update documentation (API.md, DATABASE.md, OPENAPI.md, swagger.yaml)

@@ -40,14 +40,12 @@ export const getPendataanStatusAll = asyncHandler(async (req: Request, res: Resp
 
 export const selesaikanPendataan = asyncHandler(async (req: Request, res: Response) => {
   const posyanduId = getPosyanduId(req);
-  const { kategori, bulan, tahun } = req.body;
+  const id = req.params.id as string;
   const userId = req.appUser!.id;
 
   await pendataanService.selesaikanPendataan(
+    id,
     posyanduId,
-    kategori as KategoriPendataan,
-    parseInt(bulan as string),
-    parseInt(tahun as string),
     userId,
   );
 

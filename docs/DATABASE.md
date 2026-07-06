@@ -235,6 +235,26 @@ Artinya, setiap Posyandu hanya boleh memiliki **satu status pendataan** untuk se
 
 ---
 
+# System Tables
+
+## audit_log
+
+Tabel ini menyimpan riwayat perubahan data (Create, Update, Delete) pada tabel-tabel utama (seperti warga, pemeriksaan, dll).
+
+| Field | Type | Notes |
+|--------|------|------|
+| id | UUID | Primary Key |
+| user_id | UUID | User yang melakukan aksi |
+| posyandu_id | UUID | Posyandu terkait |
+| action | String | CREATE, UPDATE, DELETE, SUBMIT |
+| entity | String | Nama tabel / entitas (Warga, PemeriksaanBalitaBaduta, dsb) |
+| entity_id | UUID | ID baris yang berubah |
+| old_value | JSON | Data sebelum diubah |
+| new_value | JSON | Data setelah diubah |
+| created_at | Timestamp | Waktu log dibuat |
+
+---
+
 # Monthly Workflow
 
 ```text
@@ -312,10 +332,6 @@ Posyandu (1)
 
 ---
 
-# Future Improvements
-
-- Soft Delete
-- Audit Log
 - Multi-Puskesmas
 - Reopen Pendataan Bulanan oleh Administrator
 - Arsip Pendataan Tahunan

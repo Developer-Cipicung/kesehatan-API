@@ -40,13 +40,16 @@ export class LansiaRepository {
     };
   }
 
-  async findById(id: string) {
-    return prisma.pemeriksaanLansia.findUnique({ where: { id }, include: { warga: true } });
+  async findById(id: string, posyanduId: string) {
+    return prisma.pemeriksaanLansia.findFirst({ 
+      where: { id, warga: { posyandu_id: posyanduId } }, 
+      include: { warga: true } 
+    });
   }
 
-  async findByWargaId(wargaId: string) {
+  async findByWargaId(wargaId: string, posyanduId: string) {
     return prisma.pemeriksaanLansia.findMany({
-      where: { warga_id: wargaId },
+      where: { warga_id: wargaId, warga: { posyandu_id: posyanduId } },
       orderBy: { tanggal_kunjungan: 'desc' },
     });
   }
@@ -55,11 +58,20 @@ export class LansiaRepository {
     return prisma.pemeriksaanLansia.create({ data });
   }
 
-  async update(id: string, data: Prisma.PemeriksaanLansiaUncheckedUpdateInput) {
-    return prisma.pemeriksaanLansia.update({ where: { id }, data });
+  async update(id: string, data: Prisma.PemeriksaanLansiaUncheckedUpdateInput, posyanduId: string) {
+    return prisma.pemeriksaanLansia.updateMany({ 
+      where: { id, warga: { posyandu_id: posyanduId } }, 
+      data 
+    }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string) {
-    return prisma.pemeriksaanLansia.delete({ where: { id } });
+  async delete(id: string, posyanduId: string) {
+    const record = await this.findById(id, posyanduId);
+    if (record) {
+      await prisma.pemeriksaanLansia.deleteMany({ 
+        where: { id, warga: { posyandu_id: posyanduId } } 
+      });
+    }
+    return record;
   }
 }

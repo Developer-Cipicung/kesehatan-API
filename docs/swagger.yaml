@@ -1112,7 +1112,7 @@ paths:
       responses:
         '200':
           description: Success
-  /pendataan:
+  /pendataan-bulanan:
     get:
       tags:
         - Pendataan Bulanan
@@ -1143,7 +1143,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
-  /pendataan/status:
+  /pendataan-bulanan/status:
     get:
       tags:
         - Pendataan Bulanan
@@ -1168,27 +1168,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
-  /pendataan/selesai:
+  /pendataan-bulanan/{id}/submit:
     post:
       tags:
         - Pendataan Bulanan
-      summary: Mark data entry as complete
+      summary: Selesaikan Pendataan
+      description: Menandai pendataan kategori sebagai selesai
       security:
         - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              properties:
-                kategori:
-                  type: string
-                  enum: [balita, imunisasi, bumil, pasca_persalinan, lansia]
-                bulan:
-                  type: integer
-                tahun:
-                  type: integer
       responses:
         '200':
           description: Completed successfully

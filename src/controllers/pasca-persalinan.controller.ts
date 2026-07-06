@@ -32,7 +32,7 @@ export const getPascaPersalinanHistory = asyncHandler(async (req: Request, res: 
 });
 
 export const createPascaPersalinan = asyncHandler(async (req: Request, res: Response) => {
-  const data = await pascaPersalinanService.create(req.body, req.appUser!.posyandu_id);
+  const data = await pascaPersalinanService.create(req.body, req.appUser!.posyandu_id, req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan pasca persalinan berhasil ditambahkan.', data);
 });
 
@@ -41,6 +41,7 @@ export const updatePascaPersalinan = asyncHandler(async (req: Request, res: Resp
     req.params.id as string,
     req.body,
     req.appUser!.posyandu_id,
+    req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan pasca persalinan berhasil diubah.', data);
 });
@@ -49,6 +50,7 @@ export const deletePascaPersalinan = asyncHandler(async (req: Request, res: Resp
   const data = await pascaPersalinanService.delete(
     req.params.id as string,
     req.appUser!.posyandu_id,
+    req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan pasca persalinan berhasil dihapus.', data);
 });

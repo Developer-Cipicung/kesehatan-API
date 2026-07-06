@@ -17,6 +17,6 @@ router.use(authMiddleware);
 
 router.get('/', validateQuery(getPendataanStatusSchema), getPendataan);
 router.get('/status', validateQuery(getPendataanStatusSchema), getPendataanStatusAll);
-router.post('/selesai', validateRequest(selesaikanPendataanSchema), selesaikanPendataan);
+router.post('/:id/submit', selesaikanPendataan);
 
 export default router;

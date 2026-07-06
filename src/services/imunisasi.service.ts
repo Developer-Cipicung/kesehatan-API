@@ -3,6 +3,7 @@ import { WargaRepository } from '../repositories/warga.repository';
 import { LockValidationService } from './lock-validation.service';
 import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
+import { auditLogService } from './audit-log.service';
 
 const imunisasiRepo = new ImunisasiRepository();
 const wargaRepo = new WargaRepository();
@@ -14,22 +15,19 @@ export class ImunisasiService {
   }
 
   async findById(id: string, posyanduId: string) {
-    const data = await imunisasiRepo.findById(id);
+    const data = await imunisasiRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data imunisasi tidak ditemukan');
     return data;
   }
 
   async findHistory(wargaId: string, posyanduId: string) {
-    return imunisasiRepo.findByWargaId(wargaId);
-    // We rely on controller ensuring posyandu_id via Warga or we just filter here
-    const history = await imunisasiRepo.findByWargaId(wargaId);
+    const history = await imunisasiRepo.findByWargaId(wargaId, posyanduId);
     return history;
   }
 
-  async create(data: Prisma.RiwayatImunisasiUncheckedCreateInput, posyanduId: string) {
-    const warga = await wargaRepo.findById(data.warga_id);
-    if (!warga || warga.posyandu_id !== posyanduId)
-      throw new AppError(404, 'Warga tidak ditemukan');
+  async create(data: Prisma.RiwayatImunisasiUncheckedCreateInput, posyanduId: string, userId: string) {
+    const warga = await wargaRepo.findById(data.warga_id, posyanduId);
+    if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const date = new Date(data.tanggal_pemberian);
     await lockService.ensureNotLocked(
@@ -39,14 +37,16 @@ export class ImunisasiService {
       date.getFullYear(),
     );
 
-    return imunisasiRepo.create(data);
+    const created = await imunisasiRepo.create(data);
+    auditLogService.logAction(userId, posyanduId, 'CREATE', 'RiwayatImunisasi', created.id, null, created);
+    return created;
   }
 
-  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId: string) {
-    const record = await imunisasiRepo.findById(id);
+  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId: string, userId: string) {
+    const record = await imunisasiRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data imunisasi tidak ditemukan');
 
-    const warga = await wargaRepo.findById(record.warga_id);
+    const warga = await wargaRepo.findById(record.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const oldDate = new Date(record.tanggal_pemberian);
@@ -72,14 +72,16 @@ export class ImunisasiService {
       }
     }
 
-    return imunisasiRepo.update(id, data);
+    const updated = await imunisasiRepo.update(id, data, posyanduId);
+    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'RiwayatImunisasi', id, record, updated);
+    return updated;
   }
 
-  async delete(id: string, posyanduId: string) {
-    const record = await imunisasiRepo.findById(id);
+  async delete(id: string, posyanduId: string, userId: string) {
+    const record = await imunisasiRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data imunisasi tidak ditemukan');
 
-    const warga = await wargaRepo.findById(record.warga_id);
+    const warga = await wargaRepo.findById(record.warga_id, posyanduId);
     if (warga) {
       const date = new Date(record.tanggal_pemberian);
       await lockService.ensureNotLocked(
@@ -90,6 +92,8 @@ export class ImunisasiService {
       );
     }
 
-    return imunisasiRepo.delete(id);
+    const deleted = await imunisasiRepo.delete(id, posyanduId);
+    auditLogService.logAction(userId, posyanduId, 'DELETE', 'RiwayatImunisasi', id, record, null);
+    return deleted;
   }
 }

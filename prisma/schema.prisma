@@ -46,6 +46,7 @@ model Posyandu {
   users             User[]
   wargas            Warga[]
   pendataan_bulanan PendataanBulanan[]
+  audit_logs        AuditLog[]
 
   @@map("posyandu")
 }
@@ -63,6 +64,7 @@ model User {
 
   posyandu          Posyandu           @relation(fields: [posyandu_id], references: [id])
   pendataan_bulanan PendataanBulanan[]
+  audit_logs        AuditLog[]
 
   @@index([posyandu_id])
   @@map("users")
@@ -207,4 +209,22 @@ model PendataanBulanan {
   @@unique([posyandu_id, kategori, bulan, tahun])
   @@index([posyandu_id])
   @@map("pendataan_bulanan")
+}
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  posyandu_id String   @db.Uuid
+  action      String   // "CREATE", "UPDATE", "DELETE", "SUBMIT"
+  entity      String
+  entity_id   String   @db.Uuid
+  old_value   Json?
+  new_value   Json?
+  created_at  DateTime @default(now())
+
+  user     User     @relation(fields: [user_id], references: [id])
+  posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
+
+  @@index([posyandu_id])
+  @@index([entity, entity_id])
+  @@map("audit_log")
 }
