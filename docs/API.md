@@ -531,3 +531,26 @@ Perubahan besar (breaking changes) akan dirilis melalui versi baru, misalnya:
 ```
 /api/v2
 ```
+---
+
+# Users (Super Admin)
+
+## GET /users
+
+Daftar seluruh users. (Hanya admin)
+
+## GET /users/:id
+
+Detail user.
+
+## POST /users
+
+Membuat user baru.
+
+## PUT /users/:id
+
+Update data user (assign posyandu dll).
+
+## DELETE /users/:id
+
+Hapus user.

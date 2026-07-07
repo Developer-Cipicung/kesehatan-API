@@ -21,5 +21,5 @@ export const errorMiddleware = (err: Error, req: Request, res: Response, next: N
 
   // Handle other known domain errors here (e.g. 400, 401, 403, 409)
   // For now, default to 500
-  return errorResponse(res, 500, 'Internal server error.');
+  return errorResponse(res, 500, 'Internal server error.', err.message);
 };

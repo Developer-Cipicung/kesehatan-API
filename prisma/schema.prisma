@@ -13,6 +13,12 @@ enum JenisKelamin {
   P
 }
 
+enum StatusKehamilan {
+  TIDAK_HAMIL
+  HAMIL
+  PASCA_PERSALINAN
+}
+
 enum UserRole {
   kader
   bidan
@@ -54,7 +60,7 @@ model Posyandu {
 model User {
   id          String   @id @default(uuid()) @db.Uuid
   auth_id     String   @unique @db.Uuid
-  posyandu_id String   @db.Uuid
+  posyandu_id String?  @db.Uuid
   nama        String
   email       String
   role        UserRole @default(kader)
@@ -62,7 +68,7 @@ model User {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  posyandu          Posyandu           @relation(fields: [posyandu_id], references: [id])
+  posyandu          Posyandu?          @relation(fields: [posyandu_id], references: [id])
   pendataan_bulanan PendataanBulanan[]
   audit_logs        AuditLog[]
 
@@ -71,15 +77,16 @@ model User {
 }
 
 model Warga {
-  id            String       @id @default(uuid()) @db.Uuid
-  posyandu_id   String       @db.Uuid
-  nomor         String
-  nik           String       @unique
-  nama          String
-  jenis_kelamin JenisKelamin
-  tanggal_lahir DateTime     @db.Date
-  created_at    DateTime     @default(now())
-  updated_at    DateTime     @updatedAt
+  id               String          @id @default(uuid()) @db.Uuid
+  posyandu_id      String          @db.Uuid
+  nomor            String
+  nik              String          @unique
+  nama             String
+  jenis_kelamin    JenisKelamin
+  status_kehamilan StatusKehamilan @default(TIDAK_HAMIL)
+  tanggal_lahir    DateTime        @db.Date
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
 
   posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
 
@@ -102,7 +109,9 @@ model PemeriksaanBalitaBaduta {
   tb                  Decimal  @db.Decimal(5, 2)
   lingkar_kepala      Decimal  @db.Decimal(5, 2)
   lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
-  nama_ortu           String
+  nama_ayah           String?
+  nama_ibu            String?
+  keluhan             String?  @db.Text
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
 
@@ -137,11 +146,6 @@ model PemeriksaanBumil {
   usia_kehamilan_minggu   Int
   hpht                    DateTime @db.Date
   htp                     DateTime @db.Date
-  tekanan_darah_sistolik  Int
-  tekanan_darah_diastolik Int
-  tinggi_fundus           Decimal  @db.Decimal(5, 2)
-  denyut_jantung_janin    Int
-  hemoglobin              Decimal  @db.Decimal(5, 2)
   keluhan                 String?  @db.Text
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
@@ -194,7 +198,6 @@ model PemeriksaanLansia {
 model PendataanBulanan {
   id           String            @id @default(uuid()) @db.Uuid
   posyandu_id  String            @db.Uuid
-  kategori     KategoriPendataan
   bulan        Int
   tahun        Int
   status       StatusPendataan   @default(draft)
@@ -206,7 +209,7 @@ model PendataanBulanan {
   posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
   user     User?    @relation(fields: [submitted_by], references: [id])
 
-  @@unique([posyandu_id, kategori, bulan, tahun])
+  @@unique([posyandu_id, bulan, tahun])
   @@index([posyandu_id])
   @@map("pendataan_bulanan")
 }

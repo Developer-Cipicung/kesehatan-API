@@ -37,6 +37,7 @@ import lansiaRoutes from './routes/lansia.routes';
 import pendataanRoutes from './routes/pendataan.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import posyanduRoutes from './routes/posyandu.routes';
+import userRoutes from './routes/user.routes';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
@@ -71,6 +72,7 @@ app.use('/api/v1/lansia', lansiaRoutes);
 app.use('/api/v1/pendataan-bulanan', pendataanRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/posyandu', posyanduRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // 404 Handler
 app.use(notFoundMiddleware);

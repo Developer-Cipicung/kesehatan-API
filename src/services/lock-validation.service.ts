@@ -11,7 +11,7 @@ export class LockValidationService {
     bulan: number,
     tahun: number,
   ) {
-    const pendataan = await pendataanRepo.findByKategoriPeriode(posyanduId, kategori, bulan, tahun);
+    const pendataan = await pendataanRepo.findByPeriode(posyanduId, bulan, tahun);
 
     if (pendataan && pendataan.status === 'selesai') {
       throw new AppError(

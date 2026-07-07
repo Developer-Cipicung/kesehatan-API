@@ -12,20 +12,22 @@ export const getBalita = asyncHandler(async (req: Request, res: Response) => {
     page: req.query.page ? parseInt(req.query.page as string) : undefined,
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
     search: req.query.search as string,
-    posyanduId: req.appUser!.posyandu_id,
+    posyanduId: (req.query.posyanduId as string) || req.appUser!.posyandu_id,
   });
   return successResponse(res, 200, 'Data pemeriksaan balita berhasil diambil.', result);
 });
 
 export const getBalitaById = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.findById(req.params.id as string, req.appUser!.posyandu_id);
+  const posyanduId = (req.query.posyanduId as string) || req.appUser!.posyandu_id;
+  const data = await balitaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data pemeriksaan balita berhasil diambil.', data);
 });
 
 export const getBalitaHistory = asyncHandler(async (req: Request, res: Response) => {
+  const posyanduId = (req.query.posyanduId as string) || req.appUser!.posyandu_id;
   const data = await balitaService.findHistory(
     req.params.wargaId as string,
-    req.appUser!.posyandu_id,
+    posyanduId,
   );
   return successResponse(res, 200, 'Riwayat pemeriksaan balita berhasil diambil.', data);
 });

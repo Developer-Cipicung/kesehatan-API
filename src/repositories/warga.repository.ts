@@ -7,6 +7,7 @@ export interface FindAllWargaParams {
   search?: string;
   jenisKelamin?: 'L' | 'P';
   posyanduId?: string;
+  kategori?: string;
 }
 
 export class WargaRepository {
@@ -32,12 +33,62 @@ export class WargaRepository {
       where.posyandu_id = params.posyanduId;
     }
 
+    if (params.kategori) {
+      const now = new Date();
+      if (params.kategori === 'baduta') {
+        // Under 2 years old
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(now.getFullYear() - 2);
+        where.tanggal_lahir = { gt: twoYearsAgo };
+      } else if (params.kategori === 'balita') {
+        // 2–5 years old (not baduta)
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(now.getFullYear() - 2);
+        const fiveYearsAgo = new Date();
+        fiveYearsAgo.setFullYear(now.getFullYear() - 5);
+        where.tanggal_lahir = { lte: twoYearsAgo, gt: fiveYearsAgo };
+      } else if (params.kategori === 'anak_sekolah') {
+        const fiveYearsAgo = new Date();
+        fiveYearsAgo.setFullYear(now.getFullYear() - 5);
+        const eighteenYearsAgo = new Date();
+        eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
+        where.tanggal_lahir = { lte: fiveYearsAgo, gt: eighteenYearsAgo };
+      } else if (params.kategori === 'lansia') {
+        const sixtyYearsAgo = new Date();
+        sixtyYearsAgo.setFullYear(now.getFullYear() - 60);
+        where.tanggal_lahir = { lte: sixtyYearsAgo };
+      } else if (params.kategori === 'bumil') {
+        where.jenis_kelamin = 'P';
+        where.status_kehamilan = 'HAMIL';
+        // Optional age filter just to be safe
+        const fifteenYearsAgo = new Date();
+        fifteenYearsAgo.setFullYear(now.getFullYear() - 15);
+        const fiftyYearsAgo = new Date();
+        fiftyYearsAgo.setFullYear(now.getFullYear() - 50);
+        where.tanggal_lahir = { lte: fifteenYearsAgo, gt: fiftyYearsAgo };
+      } else if (params.kategori === 'pasca_persalinan') {
+        where.jenis_kelamin = 'P';
+        where.status_kehamilan = 'PASCA_PERSALINAN';
+        const fifteenYearsAgo = new Date();
+        fifteenYearsAgo.setFullYear(now.getFullYear() - 15);
+        const fiftyYearsAgo = new Date();
+        fiftyYearsAgo.setFullYear(now.getFullYear() - 50);
+        where.tanggal_lahir = { lte: fifteenYearsAgo, gt: fiftyYearsAgo };
+      }
+    }
+
     const [data, total] = await Promise.all([
       prisma.warga.findMany({
         where,
         skip,
         take: limit,
         orderBy: { created_at: 'desc' },
+        include: {
+          pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 1 },
+          pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 1 },
+          pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 1 },
+          pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 1 },
+        }
       }),
       prisma.warga.count({ where }),
     ]);

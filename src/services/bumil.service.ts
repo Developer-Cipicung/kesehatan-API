@@ -5,18 +5,11 @@ import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
 
-function calculateBumilStatus(tekananDarahSistolik: number): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
-  // Placeholder medical rule logic
-  if (tekananDarahSistolik > 160) return 'Dirujuk';
-  if (tekananDarahSistolik > 140) return 'Perlu Perhatian';
-  return 'Normal';
-}
-
 function mapWithStatus(record: any) {
   if (!record) return record;
   return {
     ...record,
-    status_medis: calculateBumilStatus(Number(record.tekanan_darah_sistolik)),
+    status_medis: 'Normal',
   };
 }
 

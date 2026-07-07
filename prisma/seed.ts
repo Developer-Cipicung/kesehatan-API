@@ -97,10 +97,23 @@ async function main() {
     data: {
       posyandu_id: posyandu.id,
       nomor: '002',
-      nik: '3201000000000002',
-      nama: 'Ibu Hamil & Pasca Persalinan',
+      nik: '3201020000000002',
+      nama: 'Siti Aminah',
       jenis_kelamin: 'P',
-      tanggal_lahir: new Date('1995-05-15'), // 31 tahun
+      status_kehamilan: 'HAMIL',
+      tanggal_lahir: new Date('1995-03-15'),
+    },
+  });
+
+  const wargaPasca = await prisma.warga.create({
+    data: {
+      posyandu_id: posyandu.id,
+      nomor: '004',
+      nik: '3201020000000004',
+      nama: 'Ibu Pasca',
+      jenis_kelamin: 'P',
+      status_kehamilan: 'PASCA_PERSALINAN',
+      tanggal_lahir: new Date('1995-05-15'),
     },
   });
 
@@ -124,7 +137,8 @@ async function main() {
       tb: 85.0,
       lingkar_kepala: 48.0,
       lingkar_lengan_atas: 16.0,
-      nama_ortu: 'Budi (Ayah)',
+      nama_ayah: 'Budi',
+      nama_ibu: 'Siti',
       tanggal_kunjungan: new Date(),
     },
   });
@@ -148,14 +162,9 @@ async function main() {
       lingkar_perut: 90.0,
       lingkar_lengan_atas: 25.0,
       usia_kehamilan_minggu: 24,
-      hpht: new Date('2025-10-01'),
-      htp: new Date('2026-07-08'),
-      tekanan_darah_sistolik: 120,
-      tekanan_darah_diastolik: 80,
-      tinggi_fundus: 20.0,
-      denyut_jantung_janin: 140,
-      hemoglobin: 12.5,
-      keluhan: 'Mual ringan',
+      hpht: new Date(),
+      htp: new Date(),
+      keluhan: 'Mual pagi hari',
       tanggal_kunjungan: new Date(),
     },
   });

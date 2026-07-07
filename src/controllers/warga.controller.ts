@@ -8,12 +8,20 @@ import { JenisKelamin } from '../../prisma/generated-schema';
 const wargaService = new WargaService();
 
 export const getWarga = asyncHandler(async (req: Request, res: Response) => {
+  let posyanduId: string | undefined = req.appUser!.posyandu_id;
+  if (req.query.posyanduId === 'all') {
+    posyanduId = undefined;
+  } else if (req.query.posyanduId) {
+    posyanduId = req.query.posyanduId as string;
+  }
+
   const params: FindAllWargaParams = {
     page: req.query.page ? parseInt(req.query.page as string) : undefined,
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
     search: req.query.search as string,
     jenisKelamin: req.query.jenis_kelamin as JenisKelamin,
-    posyanduId: req.appUser!.posyandu_id,
+    posyanduId: posyanduId,
+    kategori: req.query.kategori as string,
   };
 
   const result = await wargaService.findAll(params);
@@ -21,7 +29,8 @@ export const getWarga = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getWargaById = asyncHandler(async (req: Request, res: Response) => {
-  const data = await wargaService.findById(req.params.id as string, req.appUser!.posyandu_id);
+  const posyanduId = (req.query.posyanduId as string) || req.appUser!.posyandu_id;
+  const data = await wargaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data warga berhasil diambil.', data);
 });
 
