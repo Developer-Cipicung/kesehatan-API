@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { supabase } from '../lib/supabase';
 import { AppError } from '../utils/AppError';
 import { prisma } from '../lib/prisma';
+import { getOptionalPosyanduId } from '../utils/posyandu';
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -19,7 +20,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 export const getMe = asyncHandler(async (req: Request, res: Response) => {
   const appUser = req.appUser!;
   const posyandu = await prisma.posyandu.findUnique({
-    where: { id: appUser.posyandu_id },
+    where: { id: getOptionalPosyanduId(req) },
     select: { id: true, nama: true, kelurahan: true, kecamatan: true },
   });
   return successResponse(res, 200, 'Operation successful.', {

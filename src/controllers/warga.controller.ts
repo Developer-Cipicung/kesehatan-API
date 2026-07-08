@@ -4,16 +4,12 @@ import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
 import { FindAllWargaParams } from '../repositories/warga.repository';
 import { JenisKelamin } from '../../prisma/generated-schema';
+import { getOptionalPosyanduId, getRequiredPosyanduId } from '../utils/posyandu';
 
 const wargaService = new WargaService();
 
 export const getWarga = asyncHandler(async (req: Request, res: Response) => {
-  let posyanduId: string | undefined = req.appUser!.posyandu_id;
-  if (req.query.posyanduId === 'all') {
-    posyanduId = undefined;
-  } else if (req.query.posyanduId) {
-    posyanduId = req.query.posyanduId as string;
-  }
+  const posyanduId = getOptionalPosyanduId(req);
 
   const params: FindAllWargaParams = {
     page: req.query.page ? parseInt(req.query.page as string) : undefined,
@@ -29,14 +25,14 @@ export const getWarga = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getWargaById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = (req.query.posyanduId as string) || req.appUser!.posyandu_id;
+  const posyanduId = getRequiredPosyanduId(req);
   const data = await wargaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data warga berhasil diambil.', data);
 });
 
 export const createWarga = asyncHandler(async (req: Request, res: Response) => {
   const data = await wargaService.create(
-    { ...req.body, posyandu_id: req.appUser!.posyandu_id },
+    { ...req.body, posyandu_id: getRequiredPosyanduId(req) },
     req.appUser!.id,
   );
   return successResponse(res, 201, 'Warga berhasil ditambahkan.', data);
@@ -46,13 +42,13 @@ export const updateWarga = asyncHandler(async (req: Request, res: Response) => {
   const data = await wargaService.update(
     req.params.id as string,
     req.body,
-    req.appUser!.posyandu_id,
+    getRequiredPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Warga berhasil diubah.', data);
 });
 
 export const deleteWarga = asyncHandler(async (req: Request, res: Response) => {
-  const data = await wargaService.delete(req.params.id as string, req.appUser!.posyandu_id, req.appUser!.id);
+  const data = await wargaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Warga berhasil dihapus.', data);
 });

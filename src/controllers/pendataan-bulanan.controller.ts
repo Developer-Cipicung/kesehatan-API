@@ -4,6 +4,7 @@ import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
 import { KategoriPendataan } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
+import { getRequiredPosyanduId } from '../utils/posyandu';
 
 const pendataanService = new PendataanBulananService();
 
@@ -11,7 +12,8 @@ const getPosyanduId = (req: Request): string => {
   if (req.method === 'GET' && req.query.posyanduId) {
     return req.query.posyanduId as string;
   }
-  return req.appUser!.posyandu_id;
+
+  return getRequiredPosyanduId(req);
 };
 
 export const getPendataan = asyncHandler(async (req: Request, res: Response) => {

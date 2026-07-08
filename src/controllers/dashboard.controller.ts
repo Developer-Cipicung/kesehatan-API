@@ -2,20 +2,12 @@ import { Request, Response } from 'express';
 import { DashboardService } from '../services/dashboard.service';
 import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
-import { AppError } from '../utils/AppError';
+import { getOptionalPosyanduId } from '../utils/posyandu';
 
 const dashboardService = new DashboardService();
 
 export const getDashboardSummary = asyncHandler(async (req: Request, res: Response) => {
-  let posyanduId: string | undefined = req.appUser!.posyandu_id;
-  
-  if (req.query.posyanduId === 'all') {
-    posyanduId = undefined;
-  } else if (req.query.posyanduId) {
-    posyanduId = req.query.posyanduId as string;
-  }
-
-  const result = await dashboardService.getSummary(posyanduId);
+  const result = await dashboardService.getSummary(getOptionalPosyanduId(req));
 
   return successResponse(res, 200, 'Ringkasan dashboard berhasil diambil.', result);
 });

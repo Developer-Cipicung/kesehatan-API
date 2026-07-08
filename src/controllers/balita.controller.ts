@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { BalitaService } from '../services/balita.service';
 import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
+import { getOptionalPosyanduId, getRequiredPosyanduId } from '../utils/posyandu';
 
 const balitaService = new BalitaService();
 
@@ -12,19 +13,19 @@ export const getBalita = asyncHandler(async (req: Request, res: Response) => {
     page: req.query.page ? parseInt(req.query.page as string) : undefined,
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
     search: req.query.search as string,
-    posyanduId: (req.query.posyanduId as string) || req.appUser!.posyandu_id,
+    posyanduId: getOptionalPosyanduId(req),
   });
   return successResponse(res, 200, 'Data pemeriksaan balita berhasil diambil.', result);
 });
 
 export const getBalitaById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = (req.query.posyanduId as string) || req.appUser!.posyandu_id;
+  const posyanduId = getRequiredPosyanduId(req);
   const data = await balitaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data pemeriksaan balita berhasil diambil.', data);
 });
 
 export const getBalitaHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = (req.query.posyanduId as string) || req.appUser!.posyandu_id;
+  const posyanduId = getRequiredPosyanduId(req);
   const data = await balitaService.findHistory(
     req.params.wargaId as string,
     posyanduId,
@@ -33,7 +34,7 @@ export const getBalitaHistory = asyncHandler(async (req: Request, res: Response)
 });
 
 export const createBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.create(req.body, req.appUser!.posyandu_id, req.appUser!.id);
+  const data = await balitaService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan balita berhasil ditambahkan.', data);
 });
 
@@ -41,13 +42,13 @@ export const updateBalita = asyncHandler(async (req: Request, res: Response) => 
   const data = await balitaService.update(
     req.params.id as string,
     req.body,
-    req.appUser!.posyandu_id,
+    getRequiredPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan balita berhasil diubah.', data);
 });
 
 export const deleteBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.delete(req.params.id as string, req.appUser!.posyandu_id, req.appUser!.id);
+  const data = await balitaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan balita berhasil dihapus.', data);
 });
