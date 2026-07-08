@@ -2,6 +2,8 @@ import { Prisma } from '../../prisma/generated-schema';
 import { prisma } from '../lib/prisma';
 
 export interface FindAllLansiaParams {
+  bulan?: number;
+  tahun?: number;
   page?: number;
   limit?: number;
   search?: string;
@@ -15,6 +17,16 @@ export class LansiaRepository {
     const skip = (page - 1) * limit;
 
     const where: Prisma.PemeriksaanLansiaWhereInput = {};
+
+    if (params.bulan && params.tahun) {
+      const startDate = new Date(params.tahun, params.bulan - 1, 1);
+      const endDate = new Date(params.tahun, params.bulan, 1);
+
+      where.tanggal_kunjungan = {
+        gte: startDate,
+        lt: endDate,
+      };
+    }
 
     if (params.posyanduId || params.search) {
       where.warga = {

@@ -66,6 +66,28 @@ npm run build
 npm start
 ```
 
+### Deploy ke Vercel
+Kalau backend ini dipasang ke Vercel, pakai konfigurasi ini:
+
+```bash
+npm install
+npm run build
+```
+
+File `vercel.json` sudah disiapkan untuk route semua request ke handler serverless di folder `api`.
+
+### Checklist Vercel
+Sebelum klik deploy, pastikan ini sudah diisi di Project Settings Vercel:
+
+- `DATABASE_URL`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` jika memang dipakai backend
+
+`JWT_SECRET` tidak dipakai oleh flow auth yang ada sekarang. Token login dan validasi user saat ini semuanya lewat Supabase Auth, jadi secret itu baru perlu kalau nanti kamu menambah JWT custom sendiri.
+
+Kalau pakai domain produksi, pastikan CORS di backend mengizinkan origin frontend yang benar. Untuk backend ini, Swagger UI tetap tersedia di `/api-docs` selama file docs ikut terbaca saat build serverless.
+
 ## 📚 Dokumentasi API
 
 Sistem menyediakan interaktif Swagger UI untuk mengeksplorasi API secara langsung.

@@ -4,7 +4,7 @@ import { PendataanBulananService } from './pendataan-bulanan.service';
 const pendataanService = new PendataanBulananService();
 
 export class DashboardService {
-  async getSummary(posyanduId: string) {
+  async getSummary(posyanduId?: string) {
     const now = new Date();
 
     const twoYearsAgo = new Date();

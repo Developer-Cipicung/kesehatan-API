@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from 'express';
+import fs from 'fs';
 import { loggerMiddleware } from './middleware/logger.middleware';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.middleware';
 
@@ -43,15 +44,24 @@ import YAML from 'yamljs';
 import path from 'path';
 
 // Serve static files from public
-app.use(express.static(path.join(__dirname, 'public')));
+const publicDir = path.join(__dirname, 'public');
+
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+}
 
 // Load Swagger document
-const swaggerDocument = YAML.load(path.join(__dirname, '../docs/swagger.yaml'));
+const swaggerPath = path.join(__dirname, '../docs/swagger.yaml');
 
 // Swagger UI Route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
-  customJs: '/swagger-custom.js'
-}));
+if (fs.existsSync(swaggerPath)) {
+  const swaggerDocument = YAML.load(swaggerPath);
+  const swaggerOptions = fs.existsSync(path.join(publicDir, 'swagger-custom.js'))
+    ? { customJs: '/swagger-custom.js' }
+    : undefined;
+
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
+}
 
 // Routes
 app.get('/health', (req: Request, res: Response) => {
