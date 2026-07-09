@@ -21,8 +21,27 @@ const authLimiter = rateLimit({
   message: { success: false, message: 'Too many login attempts, please try again later.' },
 });
 
-// Middleware
-app.use(helmet());
+// Disable CSP on /api-docs so Swagger UI CDN assets can load freely
+app.use('/api-docs', (_req, _res, next) => {
+  next();
+}, helmet({
+  contentSecurityPolicy: false,
+}));
+
+// For all other routes — use helmet with strict CSP
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:'],
+      fontSrc: ["'self'", 'https:', 'data:'],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+}));
 app.use(cors());
 app.use(generalLimiter);
 app.use(express.json());
