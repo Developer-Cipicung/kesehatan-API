@@ -42,6 +42,8 @@ import userRoutes from './routes/user.routes';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
+import { success } from 'zod';
+import { timeStamp } from 'console';
 
 // Serve static files from public
 const publicDir = path.join(__dirname, 'public');
@@ -63,14 +65,17 @@ if (fs.existsSync(swaggerPath)) {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
 }
 
+
 // Routes
-app.get('/health', (req: Request, res: Response) => {
+app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'Server is healthy.',
-    data: {},
+    name: "API Kesehatan Cipicung",
+    status: "Server is up!",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
   });
-});
+})
 
 app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/warga', wargaRoutes);
