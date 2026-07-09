@@ -11,13 +11,17 @@ const app: Express = express();
 
 const generalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 1 minute)
+  max: 100, // Limit each IP to 100 requests per `window` (here, per 1 minute),
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { success: false, message: 'Too many requests, please try again later.' },
 });
 
 const authLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 5, // Limit each IP to 5 requests per `window` (here, per 1 minute)
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { success: false, message: 'Too many login attempts, please try again later.' },
 });
 
@@ -26,7 +30,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://unpkg.com', "'unsafe-inline'"],
+      scriptSrc: ["'self'", 'https://unpkg.com'],
       styleSrc: ["'self'", 'https://unpkg.com', "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:'],
       fontSrc: ["'self'", 'https:', 'data:'],
@@ -72,9 +76,23 @@ app.get('/api-docs/swagger.json', (_req: Request, res: Response) => {
   res.json(swaggerDocument);
 });
 
+// Serve Swagger UI init script to avoid inline script CSP issues
+app.get('/api-docs/swagger-init.js', (_req: Request, res: Response) => {
+  const js = `window.onload = function () {
+    SwaggerUIBundle({
+      url: "/api-docs/swagger.json",
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+      layout: 'StandaloneLayout',
+      deepLinking: true,
+    });
+  };`;
+  res.setHeader('Content-Type', 'application/javascript');
+  res.send(js);
+});
+
 // Swagger UI — serve raw HTML loading all assets from CDN (works on Vercel serverless)
 app.get('/api-docs', (_req: Request, res: Response) => {
-  const specUrl = '/api-docs/swagger.json';
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,17 +105,7 @@ app.get('/api-docs', (_req: Request, res: Response) => {
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
-  <script>
-    window.onload = function () {
-      SwaggerUIBundle({
-        url: "${specUrl}",
-        dom_id: '#swagger-ui',
-        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-        layout: 'StandaloneLayout',
-        deepLinking: true,
-      });
-    };
-  </script>
+  <script src="/api-docs/swagger-init.js"></script>
 </body>
 </html>`;
   res.setHeader('Content-Type', 'text/html');
