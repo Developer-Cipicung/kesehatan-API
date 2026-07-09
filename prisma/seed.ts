@@ -34,20 +34,16 @@ async function main() {
   // 1. Create Posyandu
   const posyandu = await prisma.posyandu.create({
     data: {
-      kode: 'POS-001',
       nama: 'Posyandu Cipicung',
-      alamat: 'Jl. Cipicung No. 123, Bandung',
-      kelurahan: 'Cipicung',
-      kecamatan: 'Coblong',
-      kabupaten: 'Bandung',
+      rw: '01',
     },
   });
   logger.info(`Created Posyandu: ${posyandu.nama}`);
 
   logger.info(`Created Posyandu: ${posyandu.nama}`);
 
-  // 1.5. Create User (Real Auth_ID from Supabase)
-  const email = 'kader@cipicung.com';
+  const username = 'kader';
+  const email = `${username}@cipicung.com`;
   const password = 'kader123';
   let authId = '00000000-0000-0000-0000-000000000001';
 
@@ -59,7 +55,7 @@ async function main() {
   if (signInData?.user) {
     authId = signInData.user.id;
   } else {
-    const { data: signUpData } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -75,8 +71,8 @@ async function main() {
       auth_id: authId,
       posyandu_id: posyandu.id,
       nama: 'Kader Cipicung',
-      email: email,
-      role: UserRole.kader,
+      username: username,
+      role: UserRole.admin,
     },
   });
   logger.info(`Created User: ${adminUser.nama} with auth_id: ${authId}`);

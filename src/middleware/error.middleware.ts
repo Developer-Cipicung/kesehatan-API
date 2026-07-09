@@ -19,6 +19,13 @@ export const errorMiddleware = (err: Error, req: Request, res: Response, next: N
     return errorResponse(res, err.statusCode, err.message);
   }
 
+  if (err.name === 'PrismaClientKnownRequestError') {
+    const prismaErr = err as any;
+    if (prismaErr.code === 'P2003') {
+      return errorResponse(res, 400, 'Data tidak bisa dihapus karena masih digunakan (terhubung dengan data lain).');
+    }
+  }
+
   // Handle other known domain errors here (e.g. 400, 401, 403, 409)
   // For now, default to 500
   return errorResponse(res, 500, 'Internal server error.', [{ message: err.message }]);

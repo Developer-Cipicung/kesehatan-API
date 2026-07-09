@@ -45,7 +45,6 @@ export class PendataanBulananService {
       return {
         id: posyandu.id,
         nama: posyandu.nama,
-        kode: posyandu.kode,
         status: statusPerMonth
       };
     });

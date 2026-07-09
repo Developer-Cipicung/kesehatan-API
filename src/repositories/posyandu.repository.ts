@@ -4,7 +4,10 @@ import { Prisma } from '../../prisma/generated-schema';
 export class PosyanduRepository {
   async findAll() {
     return prisma.posyandu.findMany({
-      orderBy: { nama: 'asc' },
+      orderBy: [
+        { rw: 'asc' },
+        { nama: 'asc' }
+      ],
     });
   }
 

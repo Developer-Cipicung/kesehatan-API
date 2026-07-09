@@ -40,12 +40,9 @@ enum StatusPendataan {
 
 model Posyandu {
   id         String   @id @default(uuid()) @db.Uuid
-  kode       String   @unique
+
   nama       String
-  alamat     String?
-  kelurahan  String?
-  kecamatan  String?
-  kabupaten  String?
+  rw         String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -62,7 +59,7 @@ model User {
   auth_id     String   @unique @db.Uuid
   posyandu_id String?  @db.Uuid
   nama        String
-  email       String
+  username    String   @unique
   role        UserRole @default(kader)
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())

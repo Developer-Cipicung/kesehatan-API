@@ -11,10 +11,7 @@ export const authorizeRole = (allowedRoles: string[]) => {
       return errorResponse(res, 401, 'Unauthorized: User not authenticated.');
     }
 
-    // Temporary placeholder for actual role checking.
-    // For MVP, we assume any authenticated user is a "Cadre".
-    // Example: const userRole = await getUserRole(req.user.id);
-    const userRole = 'Cadre';
+    const userRole = req.appUser?.role || 'kader';
 
     if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
       return errorResponse(res, 403, 'Forbidden: Insufficient permissions.');
