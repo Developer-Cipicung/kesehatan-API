@@ -42,8 +42,7 @@ import userRoutes from './routes/user.routes';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
-import { success } from 'zod';
-import { timeStamp } from 'console';
+
 
 // Serve static files from public
 const publicDir = path.join(__dirname, 'public');
@@ -55,14 +54,20 @@ if (fs.existsSync(publicDir)) {
 // Load Swagger document
 const swaggerPath = path.join(__dirname, '../docs/swagger.yaml');
 
-// Swagger UI Route
+// Swagger UI Route — use CDN assets so it works on serverless (Vercel)
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
-  const swaggerOptions = fs.existsSync(path.join(publicDir, 'swagger-custom.js'))
-    ? { customJs: '/swagger-custom.js' }
-    : undefined;
-
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
+  app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument, {
+      customCssUrl: 'https://unpkg.com/swagger-ui-dist@5/swagger-ui.css',
+      customJs: [
+        'https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js',
+        'https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js',
+      ],
+    }),
+  );
 }
 
 

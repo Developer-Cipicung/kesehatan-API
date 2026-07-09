@@ -15,36 +15,38 @@ Target pengguna utama adalah kader Posyandu, bidan, dan administrator.
 | Category | Technology |
 |----------|------------|
 | Runtime | Node.js 22+ |
-| Framework | Express.js |
+| Framework | Express.js v5 |
 | Language | TypeScript |
 | Database | PostgreSQL (Supabase) |
-| ORM | Prisma ORM |
+| ORM | Prisma ORM v6 |
 | Authentication | Supabase Auth (JWT) |
-| Validation | Zod |
-| Logging | Pino |
-| Documentation | OpenAPI 3.0 (Swagger) |
+| Validation | Zod v4 |
+| Logging | Pino + pino-http |
+| Documentation | OpenAPI 3.0 (Swagger UI via CDN) |
+| Deployment | Vercel (serverless) |
 
 ---
 
 # High-Level Architecture
 
 ```text
-                Frontend (Next.js)
+            Frontend (React/Vite — Vercel)
 
                         │
                 HTTPS REST API
-
                         │
 
-                Express.js Backend
+            Express.js Backend (Vercel Serverless)
 
-        ┌────────────┬────────────┬────────────┐
-        │ Controllers│  Services  │Repositories│
-        └────────────┴────────────┴────────────┘
+    ┌────────────┬────────────┬────────────┐
+    │ Controllers│  Services  │Repositories│
+    └────────────┴────────────┴────────────┘
                         │
                      Prisma ORM
                         │
               PostgreSQL (Supabase)
+                  ├── Connection Pooler (DATABASE_URL, port 6543)
+                  └── Direct URL (DIRECT_URL, port 5432) — digunakan prisma migrate
 ```
 
 ---
@@ -52,34 +54,47 @@ Target pengguna utama adalah kader Posyandu, bidan, dan administrator.
 # Architectural Principles
 
 - RESTful API.
-- Layered Architecture.
+- Layered Architecture: Controller → Service → Repository.
 - Separation of Concerns.
 - Stateless API.
 - Type-safe database access using Prisma.
-- Validation before business logic.
-- Authentication using JWT.
-- Business rules handled by Services.
-- Database access handled exclusively by Repositories.
+- Validation (Zod) sebelum business logic.
+- Authentication menggunakan JWT Supabase.
+- Business rules dikelola oleh Services.
+- Database access eksklusif melalui Repositories.
+- Lock Validation: data tidak dapat diubah setelah pendataan ditandai selesai.
+- Audit Log: setiap operasi CUD dicatat di tabel `audit_log`.
 
 ---
 
 # Folder Structure
 
 ```text
-src/
-├── config/
-├── controllers/
-├── middleware/
-├── repositories/
-├── routes/
-├── services/
-├── validations/
-├── generated/
-├── lib/
-├── utils/
-├── types/
-├── app.ts
-└── server.ts
+kesehatan-API/
+├── prisma/
+│   ├── schema.prisma
+│   ├── seed.ts
+│   └── generated-schema/     ← Prisma Client hasil generate
+├── src/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── repositories/
+│   ├── routes/
+│   ├── services/
+│   ├── validations/
+│   ├── lib/
+│   │   ├── prisma.ts
+│   │   └── supabase.ts
+│   ├── utils/
+│   │   ├── AppError.ts
+│   │   ├── asyncHandler.ts
+│   │   ├── logger.ts
+│   │   ├── posyandu.ts
+│   │   └── response.ts
+│   ├── types/
+│   ├── app.ts
+│   └── server.ts
+└── docs/
 ```
 
 ---
@@ -88,248 +103,154 @@ src/
 
 ```text
 HTTP Request
-
-↓
-
-Authentication Middleware
-
-↓
-
-Validation Middleware
-
-↓
-
-Controller
-
-↓
-
-Service
-
-↓
-
-Repository
-
-↓
-
-Prisma
-
-↓
-
-PostgreSQL
-
-↓
-
-HTTP Response
+     ↓
+authMiddleware (verifikasi JWT Supabase, attach req.appUser)
+     ↓
+validateRequest (Zod schema validation)
+     ↓
+Controller (parse params, call service)
+     ↓
+Service (business logic, lock validation, audit log)
+     ↓
+Repository (Prisma query)
+     ↓
+PostgreSQL (Supabase)
+     ↓
+HTTP Response (format: { success, message, data })
 ```
 
 ---
 
 # Core Modules
 
-## Authentication
+## Authentication (`/api/v1/auth`)
 
-Responsibilities
-
-- Login using Supabase Auth.
-- Verify JWT.
-- Protect API endpoints.
-- Attach authenticated user information to requests.
+- Login menggunakan Supabase Auth → mengembalikan JWT.
+- Middleware `authMiddleware` memverifikasi JWT, mencari user di tabel `users`, dan meng-attach `req.appUser`.
+- Endpoint `GET /auth/me` untuk cek sesi aktif.
 
 ---
 
-## Posyandu
-
-Responsibilities
+## Posyandu (`/api/v1/posyandu`)
 
 - Master data Posyandu.
-- Menjadi induk untuk kader dan warga.
-- Menjadi dasar pelaporan bulanan.
+- Menjadi induk untuk warga dan pendataan bulanan.
 
 ---
 
-## Warga
+## Warga (`/api/v1/warga`)
 
-Responsibilities
-
-Master data seluruh warga.
-
-Features
-
-- CRUD warga
-- Search berdasarkan NIK
-- Search berdasarkan nama
-- Menyimpan data identitas
-- Terhubung ke Posyandu
-
-Semua pemeriksaan kesehatan mengacu pada tabel ini melalui `warga_id`.
+- Master data seluruh warga.
+- Field utama: `nik` (unik), `nama`, `jenis_kelamin`, `tanggal_lahir`, `kategori` (dihitung dinamis dari usia), `status_kehamilan`.
+- Endpoint `GET /warga` mendukung query: `page`, `limit`, `search`, `kategori`, `posyanduId`.
+- Semua pemeriksaan kesehatan mengacu ke tabel ini melalui `warga_id`.
 
 ---
 
-## Pemeriksaan Balita
+## Pemeriksaan Balita/Baduta (`/api/v1/balita`)
 
-Responsibilities
-
-- Menyimpan riwayat pemeriksaan balita/baduta.
-- Mendukung banyak kunjungan.
-- Tidak menyimpan status laporan bulanan.
-
----
-
-## Riwayat Imunisasi
-
-Responsibilities
-
-- Menyimpan seluruh riwayat imunisasi anak.
-- Terhubung langsung ke warga.
-- Tidak bergantung pada satu pemeriksaan tertentu.
+- Menyimpan riwayat pemeriksaan balita dan baduta (0–59 bulan).
+- Diferensiasi baduta (< 24 bulan) vs balita (24–59 bulan) dilakukan di frontend berdasarkan usia saat kunjungan.
+- Field: `bb`, `tb`, `lingkar_kepala`, `lingkar_lengan_atas`, `keluhan`.
+- Endpoint `GET /balita/:wargaId/history` untuk riwayat per warga.
 
 ---
 
-## Pemeriksaan Ibu Hamil
+## Riwayat Imunisasi (`/api/v1/imunisasi`)
 
-Responsibilities
+- Menyimpan seluruh riwayat imunisasi anak (balita/baduta).
+- Berdiri sendiri — tidak bergantung pada satu pemeriksaan tertentu.
+- Field: `jenis_vaksin` (teks bebas), `tanggal_pemberian`.
+- Endpoint `GET /imunisasi/:wargaId/history` untuk riwayat per warga.
+- Mendukung operasi CRUD dengan lock validation per periode.
+
+---
+
+## Pemeriksaan Ibu Hamil (`/api/v1/bumil`)
 
 - Menyimpan seluruh riwayat pemeriksaan ibu hamil.
-- Mendukung banyak kunjungan selama masa kehamilan.
+- Field: `bb`, `tb`, `lingkar_perut`, `lingkar_lengan_atas`, `usia_kehamilan_minggu`, `hpht`, `htp`, `keluhan`.
 
 ---
 
-## Pemeriksaan Pasca Persalinan
+## Pemeriksaan Pasca Persalinan (`/api/v1/pasca-persalinan`)
 
-Responsibilities
-
-- Menyimpan riwayat pemeriksaan pasca persalinan.
+- Menyimpan riwayat pemeriksaan ibu pasca persalinan.
+- Field: `tanggal_persalinan`, `bb`, `tekanan_darah_sistolik`, `tekanan_darah_diastolik`, `suhu_tubuh`, `kondisi_ibu`, `keluhan`.
 
 ---
 
-## Pemeriksaan Lansia
-
-Responsibilities
+## Pemeriksaan Lansia (`/api/v1/lansia`)
 
 - Menyimpan riwayat pemeriksaan lansia.
+- Field: `bb`, `tb`, `tekanan_darah_sistolik`, `tekanan_darah_diastolik`, `gula_darah_sewaktu`, `keluhan`.
 
 ---
 
-# Monthly Data Collection Module
+## Pendataan Bulanan (`/api/v1/pendataan-bulanan`)
 
-Selain menyimpan riwayat pemeriksaan kesehatan, sistem juga mendukung proses administrasi pendataan bulanan Posyandu.
-
-Setiap kategori pemeriksaan memiliki satu periode pendataan setiap bulan.
-
-Kategori meliputi:
-
-- Balita
-- Imunisasi
-- Ibu Hamil
-- Pasca Persalinan
-- Lansia
-
-Selama status masih **Draft**, kader dapat:
-
-- Menambah pemeriksaan
-- Mengubah pemeriksaan
-- Menghapus pemeriksaan
-
-Setelah seluruh data selesai diinput, kader dapat menekan tombol:
-
-> **Tandai Pendataan Selesai**
-
-Tindakan ini menandakan bahwa seluruh pendataan kategori tersebut pada bulan berjalan telah selesai dilakukan.
+- Mengelola status administrasi pendataan bulanan per kategori.
+- Kategori: `balita`, `imunisasi`, `bumil`, `pasca_persalinan`, `lansia`.
+- Status: `draft` → `selesai`.
+- Setelah `selesai`, semua operasi CUD pada pemeriksaan periode tersebut akan ditolak (HTTP 409).
+- Unique constraint: `(posyandu_id, bulan, tahun)` — satu record per posyandu per bulan.
 
 ---
 
-# Monthly Workflow
+## Dashboard (`/api/v1/dashboard`)
 
-```text
-Pilih Kategori
-
-↓
-
-Daftar seluruh warga muncul
-
-↓
-
-Tambah/Edit Pemeriksaan
-
-↓
-
-Data pemeriksaan langsung tersimpan
-
-↓
-
-Ulangi hingga seluruh warga selesai
-
-↓
-
-Tandai Pendataan Selesai
-
-↓
-
-Periode terkunci
-```
+- Ringkasan statistik: `total_warga`, `total_balita`, `total_bumil`, `total_lansia`.
+- Status pendataan per kategori bulan berjalan.
+- Aktivitas pemeriksaan terbaru.
 
 ---
 
-# Locking Rules
+## Users (`/api/v1/users`)
 
-Setelah periode ditandai **Selesai**:
-
-- Pemeriksaan pada periode tersebut tidak dapat diubah.
-- Tidak dapat menambah pemeriksaan baru.
-- Tidak dapat menghapus pemeriksaan.
-- Riwayat tetap dapat dilihat.
-
-Seluruh mekanisme penguncian wajib divalidasi di backend.
-
-Frontend hanya menampilkan status.
+- Manajemen user (hanya admin).
+- Field: `auth_id` (Supabase UUID), `posyandu_id`, `nama`, `username`, `role` (kader/bidan/admin), `is_active`.
 
 ---
 
-# Dashboard
+# Lock Validation
 
-Dashboard menyediakan ringkasan:
+`LockValidationService.ensureNotLocked()` dipanggil oleh seluruh service sebelum operasi Create, Update, Delete.
 
-- Jumlah warga
-- Jumlah pemeriksaan bulan berjalan
-- Status pendataan setiap kategori
-- Ringkasan Posyandu
+Jika `pendataan_bulanan.status === 'selesai'`, maka throw `AppError(409)`.
 
-Contoh
+---
 
-```text
-Posyandu Cipicung
+# Audit Log
 
-Balita             ✓ Selesai
-Imunisasi          ✓ Selesai
-Ibu Hamil          ✓ Selesai
-Pasca Persalinan   ⏳ Draft
-Lansia             ✓ Selesai
-```
+`AuditLogService.logAction()` dipanggil setiap selesai operasi CUD.
+
+Mencatat: `user_id`, `posyandu_id`, `action` (CREATE/UPDATE/DELETE/SUBMIT), `entity`, `entity_id`, `old_value`, `new_value`.
+
+---
+
+# Swagger / API Docs
+
+Tersedia di `/api-docs`.
+
+Asset Swagger UI (CSS dan JS) dimuat dari CDN `unpkg.com/swagger-ui-dist@5` sehingga dapat berjalan di environment serverless (Vercel).
+
+Spesifikasi lengkap tersedia di `docs/swagger.yaml`.
 
 ---
 
 # Security
 
-Semua endpoint menggunakan JWT Supabase.
-
-Data hanya dapat diakses oleh pengguna yang telah login.
-
-Seluruh tabel menggunakan Row Level Security (RLS).
-
-Backend tidak pernah mengekspos:
-
-- Service Role Key
-- Password
-- JWT Internal
-- Data sensitif yang tidak diperlukan
+- Semua endpoint dilindungi JWT Supabase (kecuali `/auth/login` dan `/`).
+- Helmet untuk HTTP security headers.
+- CORS aktif.
+- Rate limiting: 100 req/menit (general), 5 req/menit (auth).
+- Backend tidak pernah mengekspos Service Role Key, password, atau JWT internal.
 
 ---
 
 # Error Handling
 
-Backend menggunakan centralized error handler.
-
-Format response selalu konsisten.
+Backend menggunakan centralized error handler (`errorMiddleware`).
 
 ```json
 {
@@ -339,36 +260,44 @@ Format response selalu konsisten.
 }
 ```
 
+`AppError` digunakan untuk error yang sudah diantisipasi (404, 409, dll).
+
+`asyncHandler` membungkus seluruh controller untuk menangkap error async.
+
 ---
 
 # Logging
 
-Menggunakan Pino.
+Menggunakan Pino + pino-http.
 
-Log yang dicatat:
+Log yang dicatat: request HTTP, error, authentication failure.
 
-- Request
-- Error
-- Warning
-- Authentication Failure
+Tidak mencatat: password, JWT, NIK lengkap, informasi kesehatan sensitif.
 
-Tidak mencatat:
+---
 
-- Password
-- JWT
-- NIK lengkap
-- Informasi kesehatan sensitif
+# Implemented Features
+
+- ✅ CRUD Warga
+- ✅ Pemeriksaan Balita/Baduta (termasuk diferensiasi baduta vs balita)
+- ✅ Riwayat Imunisasi (tambah, hapus, edit, history per warga)
+- ✅ Pemeriksaan Ibu Hamil
+- ✅ Pemeriksaan Pasca Persalinan
+- ✅ Pemeriksaan Lansia
+- ✅ Pendataan Bulanan (draft → selesai, lock validation)
+- ✅ Dashboard statistik + aktivitas terbaru
+- ✅ Manajemen Posyandu dan User (admin)
+- ✅ Audit Log
+- ✅ Swagger UI (via CDN)
+- ✅ Export PDF dan Excel (dilakukan di frontend)
 
 ---
 
 # Future Improvements
 
-- Role-Based Access Control (RBAC)
+- Role-Based Access Control (RBAC) yang lebih granular
 - Multi-Puskesmas support
 - Reopen monthly period oleh Administrator
-- Audit log aktivitas pengguna
-- Background jobs
 - Notification system
-- Export PDF
-- Export Excel
 - Analytics Dashboard
+- Background jobs untuk laporan otomatis
