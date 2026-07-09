@@ -9,7 +9,7 @@ export const createPascaPersalinanSchema = z.object({
   tekanan_darah_diastolik: z.number().int().min(0),
   suhu_tubuh: z.number().min(0),
   kondisi_ibu: z.string().optional(),
-  keluhan: z.string().optional(),
+  catatan: z.string().optional(),
 });
 
 export const updatePascaPersalinanSchema = createPascaPersalinanSchema.partial();

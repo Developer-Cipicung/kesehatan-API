@@ -160,7 +160,7 @@ async function main() {
       usia_kehamilan_minggu: 24,
       hpht: new Date(),
       htp: new Date(),
-      keluhan: 'Mual pagi hari',
+      catatan: 'Mual pagi hari',
       tanggal_kunjungan: new Date(),
     },
   });
@@ -175,7 +175,7 @@ async function main() {
       tekanan_darah_diastolik: 70,
       suhu_tubuh: 36.5,
       kondisi_ibu: 'Sehat',
-      keluhan: 'Nyeri jahitan ringan',
+      catatan: 'Nyeri jahitan ringan',
       tanggal_kunjungan: new Date(),
     },
   });
@@ -190,7 +190,7 @@ async function main() {
       tekanan_darah_sistolik: 140,
       tekanan_darah_diastolik: 90,
       gula_darah_sewaktu: 110,
-      keluhan: 'Pegal linu di lutut',
+      catatan: 'Pegal linu di lutut',
       tanggal_kunjungan: new Date(),
     },
   });

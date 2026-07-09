@@ -9,7 +9,7 @@ export const createBalitaSchema = z.object({
   lingkar_lengan_atas: z.number().min(0),
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
-  keluhan: z.string().optional(),
+  catatan: z.string().optional(),
 });
 
 export const updateBalitaSchema = createBalitaSchema.partial();

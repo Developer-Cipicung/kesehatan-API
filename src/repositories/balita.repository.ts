@@ -42,7 +42,11 @@ export class BalitaRepository {
         skip,
         take: limit,
         orderBy: { tanggal_kunjungan: 'desc' },
-        include: { warga: true },
+        include: { 
+          warga: { 
+            include: { riwayat_imunisasi: { orderBy: { tanggal_pemberian: 'asc' } } } 
+          } 
+        },
       }),
       prisma.pemeriksaanBalitaBaduta.count({ where }),
     ]);

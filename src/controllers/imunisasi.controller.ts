@@ -11,6 +11,7 @@ export const getImunisasi = asyncHandler(async (req: Request, res: Response) => 
     page: req.query.page ? parseInt(req.query.page as string) : undefined,
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
     posyanduId: getRequiredPosyanduId(req),
+    wargaId: req.query.wargaId as string | undefined,
   });
   return successResponse(res, 200, 'Data riwayat imunisasi berhasil diambil.', result);
 });

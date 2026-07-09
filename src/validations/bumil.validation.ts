@@ -10,7 +10,7 @@ export const createBumilSchema = z.object({
   usia_kehamilan_minggu: z.number().int().min(0),
   hpht: z.string().date().transform(val => new Date(val).toISOString()),
   htp: z.string().date().transform(val => new Date(val).toISOString()),
-  keluhan: z.string().optional(),
+  catatan: z.string().optional(),
 });
 
 export const updateBumilSchema = createBumilSchema.partial();

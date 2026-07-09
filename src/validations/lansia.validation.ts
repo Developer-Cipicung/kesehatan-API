@@ -8,7 +8,7 @@ export const createLansiaSchema = z.object({
   tekanan_darah_sistolik: z.number().int().min(0),
   tekanan_darah_diastolik: z.number().int().min(0),
   gula_darah_sewaktu: z.number().min(0),
-  keluhan: z.string().optional(),
+  catatan: z.string().optional(),
 });
 
 export const updateLansiaSchema = createLansiaSchema.partial();

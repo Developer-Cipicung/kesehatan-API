@@ -107,6 +107,12 @@ export class WargaRepository {
   async findById(id: string, posyanduId: string) {
     return prisma.warga.findFirst({
       where: { id, posyandu_id: posyanduId },
+      include: {
+        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 1 },
+      }
     });
   }
 

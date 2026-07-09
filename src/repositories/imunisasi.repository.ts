@@ -5,6 +5,7 @@ export interface FindAllImunisasiParams {
   page?: number;
   limit?: number;
   posyanduId?: string;
+  wargaId?: string;
 }
 
 export class ImunisasiRepository {
@@ -16,6 +17,9 @@ export class ImunisasiRepository {
     const where: Prisma.RiwayatImunisasiWhereInput = {};
     if (params.posyanduId) {
       where.warga = { posyandu_id: params.posyanduId };
+    }
+    if (params.wargaId) {
+      where.warga_id = params.wargaId;
     }
 
     const [data, total] = await Promise.all([
@@ -54,8 +58,8 @@ export class ImunisasiRepository {
   }
 
   async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId: string) {
-    return prisma.riwayatImunisasi.updateMany({ 
-      where: { id, warga: { posyandu_id: posyanduId } }, 
+    return prisma.riwayatImunisasi.update({ 
+      where: { id }, 
       data 
     }).then(() => this.findById(id, posyanduId));
   }
@@ -63,8 +67,8 @@ export class ImunisasiRepository {
   async delete(id: string, posyanduId: string) {
     const record = await this.findById(id, posyanduId);
     if (record) {
-      await prisma.riwayatImunisasi.deleteMany({ 
-        where: { id, warga: { posyandu_id: posyanduId } } 
+      await prisma.riwayatImunisasi.delete({ 
+        where: { id } 
       });
     }
     return record;
