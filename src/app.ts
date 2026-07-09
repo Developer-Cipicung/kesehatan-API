@@ -26,11 +26,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://unpkg.com'],
+      scriptSrc: ["'self'", 'https://unpkg.com', "'unsafe-inline'"],
       styleSrc: ["'self'", 'https://unpkg.com', "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:'],
       fontSrc: ["'self'", 'https:', 'data:'],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", 'https://unpkg.com'],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
     },
