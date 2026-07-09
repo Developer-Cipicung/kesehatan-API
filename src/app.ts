@@ -21,22 +21,16 @@ const authLimiter = rateLimit({
   message: { success: false, message: 'Too many login attempts, please try again later.' },
 });
 
-// Disable CSP on /api-docs so Swagger UI CDN assets can load freely
-app.use('/api-docs', (_req, _res, next) => {
-  next();
-}, helmet({
-  contentSecurityPolicy: false,
-}));
-
-// For all other routes — use helmet with strict CSP
+// Middleware
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+      scriptSrc: ["'self'", 'https://unpkg.com'],
+      styleSrc: ["'self'", 'https://unpkg.com', "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:'],
       fontSrc: ["'self'", 'https:', 'data:'],
+      connectSrc: ["'self'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
     },
@@ -58,36 +52,57 @@ import pendataanRoutes from './routes/pendataan.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import posyanduRoutes from './routes/posyandu.routes';
 import userRoutes from './routes/user.routes';
-import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
 
-
-// Serve static files from public
-const publicDir = path.join(__dirname, 'public');
-
-if (fs.existsSync(publicDir)) {
-  app.use(express.static(publicDir));
-}
-
 // Load Swagger document
 const swaggerPath = path.join(__dirname, '../docs/swagger.yaml');
-
-// Swagger UI Route — use CDN assets so it works on serverless (Vercel)
+let swaggerDocument: Record<string, unknown> | null = null;
 if (fs.existsSync(swaggerPath)) {
-  const swaggerDocument = YAML.load(swaggerPath);
-  app.use(
-    '/api-docs',
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerDocument, {
-      customCssUrl: 'https://unpkg.com/swagger-ui-dist@5/swagger-ui.css',
-      customJs: [
-        'https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js',
-        'https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js',
-      ],
-    }),
-  );
+  swaggerDocument = YAML.load(swaggerPath) as Record<string, unknown>;
 }
+
+// Serve OpenAPI spec as JSON (used by Swagger UI)
+app.get('/api-docs/swagger.json', (_req: Request, res: Response) => {
+  if (!swaggerDocument) {
+    res.status(404).json({ error: 'Swagger spec not found' });
+    return;
+  }
+  res.setHeader('Content-Type', 'application/json');
+  res.json(swaggerDocument);
+});
+
+// Swagger UI — serve raw HTML loading all assets from CDN (works on Vercel serverless)
+app.get('/api-docs', (_req: Request, res: Response) => {
+  const specUrl = '/api-docs/swagger.json';
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>API Kesehatan Cipicung — Docs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function () {
+      SwaggerUIBundle({
+        url: "${specUrl}",
+        dom_id: '#swagger-ui',
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        layout: 'StandaloneLayout',
+        deepLinking: true,
+      });
+    };
+  </script>
+</body>
+</html>`;
+  res.setHeader('Content-Type', 'text/html');
+  res.send(html);
+});
 
 
 // Routes
