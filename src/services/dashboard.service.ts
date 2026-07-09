@@ -113,7 +113,7 @@ export class DashboardService {
     
     // Process recent activities
     const allActivities = [
-      ...recentPemeriksaanBalita.map(p => ({
+      ...recentPemeriksaanBalita.map((p: any) => ({
         id: `balita-${p.id}`,
         name: p.warga.nama,
         category: 'Balita/Baduta',
@@ -121,7 +121,7 @@ export class DashboardService {
         status: 'Normal', // simple mock status for now
         timestamp: p.created_at.getTime()
       })),
-      ...recentPemeriksaanBumil.map(p => ({
+      ...recentPemeriksaanBumil.map((p: any) => ({
         id: `bumil-${p.id}`,
         name: p.warga.nama,
         category: 'Ibu Hamil',
@@ -129,7 +129,7 @@ export class DashboardService {
         status: 'Normal',
         timestamp: p.created_at.getTime()
       })),
-      ...recentPemeriksaanLansia.map(p => ({
+      ...recentPemeriksaanLansia.map((p: any) => ({
         id: `lansia-${p.id}`,
         name: p.warga.nama,
         category: 'Lansia',

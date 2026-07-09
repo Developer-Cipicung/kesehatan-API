@@ -30,12 +30,12 @@ export class PendataanBulananService {
       }
     });
 
-    return posyandus.map(posyandu => {
-      const posyanduRecords = allRecords.filter(r => r.posyandu_id === posyandu.id);
+    return posyandus.map((posyandu: any) => {
+      const posyanduRecords = allRecords.filter((r: any) => r.posyandu_id === posyandu.id);
       
       const statusPerMonth = Array.from({ length: 12 }, (_, i) => {
         const month = i + 1;
-        const record = posyanduRecords.find(r => r.bulan === month);
+        const record = posyanduRecords.find((r: any) => r.bulan === month);
         return {
           bulan: month,
           status: record ? record.status : 'draft'
