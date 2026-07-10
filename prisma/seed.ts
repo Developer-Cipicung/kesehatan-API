@@ -69,14 +69,17 @@ async function main() {
   if (signInData?.user) {
     authId = signInData.user.id;
   } else {
-    const { data: signUpData } = await supabase.auth.signUp({
+    // try sign up using admin api to auto-confirm email
+    const { data: signUpData, error } = await supabase.auth.admin.createUser({
       email,
       password,
+      email_confirm: true,
     });
+    
     if (signUpData?.user) {
       authId = signUpData.user.id;
     } else {
-      logger.warn('Failed to sign in or sign up admin user. Using dummy auth_id.');
+      logger.warn('Failed to sign in or sign up admin user. Error: ' + error?.message);
     }
   }
 
