@@ -87,6 +87,8 @@ model Warga {
   alamat                 String?         @db.Text
   tempat_persalinan      String?
   penggunaan_kontrasepsi String?
+  nama_ayah              String?
+  nama_ibu               String?
   created_at             DateTime        @default(now())
   updated_at             DateTime        @updatedAt
 
