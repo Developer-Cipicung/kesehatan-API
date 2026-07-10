@@ -29,21 +29,13 @@ export class DashboardService {
     sixMonthsAgo.setMonth(now.getMonth() - 5);
     sixMonthsAgo.setDate(1);
 
+    // BATCH 1: Demographics (5 concurrent connections)
     const [
       totalWarga, 
       totalBaduta, 
       totalBalita, 
       totalAnakSekolah, 
       totalLansia, 
-      bumilGroups,
-      pascaGroups,
-      recentPemeriksaanBalita,
-      recentPemeriksaanBumil,
-      recentPemeriksaanLansia,
-      chartBumil,
-      chartPasca,
-      chartLansia,
-      chartAnak,
     ] = await Promise.all([
       // Aggregate across all posyandus if posyanduId is undefined
       prisma.warga.count(posyanduId ? { where: { posyandu_id: posyanduId } } : undefined),
@@ -54,7 +46,17 @@ export class DashboardService {
       // Anak Sekolah: > 18 years ago, <= 7 years ago
       prisma.warga.count({ where: { tanggal_lahir: { gt: eighteenYearsAgo, lte: sevenYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
       // Lansia
-      prisma.warga.count({ where: { tanggal_lahir: { lte: sixtyYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
+      prisma.warga.count({ where: { tanggal_lahir: { lte: sixtyYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } })
+    ]);
+
+    // BATCH 2: Recent Activities & Groupings (5 concurrent connections)
+    const [
+      bumilGroups,
+      pascaGroups,
+      recentPemeriksaanBalita,
+      recentPemeriksaanBumil,
+      recentPemeriksaanLansia,
+    ] = await Promise.all([
       // Bumil (active in last 9 months)
       prisma.pemeriksaanBumil.groupBy({
         by: ['warga_id'],
@@ -83,8 +85,16 @@ export class DashboardService {
         orderBy: { created_at: 'desc' },
         take: 3,
         include: { warga: true }
-      }),
-      // Chart data queries
+      })
+    ]);
+
+    // BATCH 3: Chart Data (4 concurrent connections)
+    const [
+      chartBumil,
+      chartPasca,
+      chartLansia,
+      chartAnak,
+    ] = await Promise.all([
       prisma.pemeriksaanBumil.findMany({
         where: { tanggal_kunjungan: { gte: sixMonthsAgo }, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
         select: { tanggal_kunjungan: true }
