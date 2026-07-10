@@ -79,12 +79,7 @@ export class BalitaService {
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const oldDate = new Date(record.tanggal_kunjungan);
-    await lockService.ensureNotLocked(
-      warga.posyandu_id,
-      'balita',
-      oldDate.getMonth() + 1,
-      oldDate.getFullYear(),
-    );
+    // removed lock check for update/delete
 
     if (data.tanggal_kunjungan) {
       const newDate = new Date(data.tanggal_kunjungan as Date | string);
@@ -92,12 +87,7 @@ export class BalitaService {
         oldDate.getMonth() !== newDate.getMonth() ||
         oldDate.getFullYear() !== newDate.getFullYear()
       ) {
-        await lockService.ensureNotLocked(
-          warga.posyandu_id,
-          'balita',
-          newDate.getMonth() + 1,
-          newDate.getFullYear(),
-        );
+        // removed lock check for update/delete
       }
     }
 
@@ -113,12 +103,7 @@ export class BalitaService {
     const warga = await wargaRepo.findById(record.warga_id, posyanduId);
     if (warga) {
       const date = new Date(record.tanggal_kunjungan);
-      await lockService.ensureNotLocked(
-        warga.posyandu_id,
-        'balita',
-        date.getMonth() + 1,
-        date.getFullYear(),
-      );
+      // removed lock check for update/delete
     }
 
     const deleted = await balitaRepo.delete(id, posyanduId);

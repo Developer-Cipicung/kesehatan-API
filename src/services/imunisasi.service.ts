@@ -50,12 +50,7 @@ export class ImunisasiService {
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const oldDate = new Date(record.tanggal_pemberian);
-    await lockService.ensureNotLocked(
-      warga.posyandu_id,
-      'imunisasi',
-      oldDate.getMonth() + 1,
-      oldDate.getFullYear(),
-    );
+    // removed lock check for update/delete
 
     if (data.tanggal_pemberian) {
       const newDate = new Date(data.tanggal_pemberian as Date | string);
@@ -63,12 +58,7 @@ export class ImunisasiService {
         oldDate.getMonth() !== newDate.getMonth() ||
         oldDate.getFullYear() !== newDate.getFullYear()
       ) {
-        await lockService.ensureNotLocked(
-          warga.posyandu_id,
-          'imunisasi',
-          newDate.getMonth() + 1,
-          newDate.getFullYear(),
-        );
+        // removed lock check for update/delete
       }
     }
 
@@ -84,12 +74,7 @@ export class ImunisasiService {
     const warga = await wargaRepo.findById(record.warga_id, posyanduId);
     if (warga) {
       const date = new Date(record.tanggal_pemberian);
-      await lockService.ensureNotLocked(
-        warga.posyandu_id,
-        'imunisasi',
-        date.getMonth() + 1,
-        date.getFullYear(),
-      );
+      // removed lock check for update/delete
     }
 
     const deleted = await imunisasiRepo.delete(id, posyanduId);

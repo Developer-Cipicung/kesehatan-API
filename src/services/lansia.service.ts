@@ -74,12 +74,7 @@ export class LansiaService {
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     const oldDate = new Date(record.tanggal_kunjungan);
-    await lockService.ensureNotLocked(
-      warga.posyandu_id,
-      'lansia',
-      oldDate.getMonth() + 1,
-      oldDate.getFullYear(),
-    );
+    // removed lock check for update/delete
 
     if (data.tanggal_kunjungan) {
       const newDate = new Date(data.tanggal_kunjungan as Date | string);
@@ -87,12 +82,7 @@ export class LansiaService {
         oldDate.getMonth() !== newDate.getMonth() ||
         oldDate.getFullYear() !== newDate.getFullYear()
       ) {
-        await lockService.ensureNotLocked(
-          warga.posyandu_id,
-          'lansia',
-          newDate.getMonth() + 1,
-          newDate.getFullYear(),
-        );
+        // removed lock check for update/delete
       }
     }
 
@@ -108,12 +98,7 @@ export class LansiaService {
     const warga = await wargaRepo.findById(record.warga_id, posyanduId);
     if (warga) {
       const date = new Date(record.tanggal_kunjungan);
-      await lockService.ensureNotLocked(
-        warga.posyandu_id,
-        'lansia',
-        date.getMonth() + 1,
-        date.getFullYear(),
-      );
+      // removed lock check for update/delete
     }
 
     const deleted = await lansiaRepo.delete(id, posyanduId);

@@ -7,6 +7,10 @@ export const createWargaSchema = z.object({
   jenis_kelamin: z.enum(['L', 'P']),
   status_kehamilan: z.enum(['TIDAK_HAMIL', 'HAMIL', 'PASCA_PERSALINAN']).optional(),
   tanggal_lahir: z.string().date().transform(val => new Date(val).toISOString()),
+  tempat_lahir: z.string().optional(),
+  alamat: z.string().optional(),
+  tempat_persalinan: z.string().optional(),
+  penggunaan_kontrasepsi: z.string().optional(),
 });
 
 export const updateWargaSchema = createWargaSchema.partial();

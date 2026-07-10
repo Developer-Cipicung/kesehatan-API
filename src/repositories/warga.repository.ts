@@ -60,20 +60,9 @@ export class WargaRepository {
       } else if (params.kategori === 'bumil') {
         where.jenis_kelamin = 'P';
         where.status_kehamilan = 'HAMIL';
-        // Optional age filter just to be safe
-        const fifteenYearsAgo = new Date();
-        fifteenYearsAgo.setFullYear(now.getFullYear() - 15);
-        const fiftyYearsAgo = new Date();
-        fiftyYearsAgo.setFullYear(now.getFullYear() - 50);
-        where.tanggal_lahir = { lte: fifteenYearsAgo, gt: fiftyYearsAgo };
       } else if (params.kategori === 'pasca_persalinan') {
         where.jenis_kelamin = 'P';
         where.status_kehamilan = 'PASCA_PERSALINAN';
-        const fifteenYearsAgo = new Date();
-        fifteenYearsAgo.setFullYear(now.getFullYear() - 15);
-        const fiftyYearsAgo = new Date();
-        fiftyYearsAgo.setFullYear(now.getFullYear() - 50);
-        where.tanggal_lahir = { lte: fifteenYearsAgo, gt: fiftyYearsAgo };
       }
     }
 

@@ -82,9 +82,13 @@ model Warga {
   nama             String
   jenis_kelamin    JenisKelamin
   status_kehamilan StatusKehamilan @default(TIDAK_HAMIL)
-  tanggal_lahir    DateTime        @db.Date
-  created_at       DateTime        @default(now())
-  updated_at       DateTime        @updatedAt
+  tanggal_lahir          DateTime        @db.Date
+  tempat_lahir           String?
+  alamat                 String?         @db.Text
+  tempat_persalinan      String?
+  penggunaan_kontrasepsi String?
+  created_at             DateTime        @default(now())
+  updated_at             DateTime        @updatedAt
 
   posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
 
@@ -109,9 +113,13 @@ model PemeriksaanBalitaBaduta {
   lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
   nama_ayah           String?
   nama_ibu            String?
-  catatan             String?  @db.Text
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
+  catatan                   String?   @db.Text
+  kondisi                   String?
+  asi_eksklusif             Boolean?
+  fasilitasi_bantuan_sosial Boolean?
+  tanggal_kunjungan_berikut DateTime? @db.Date
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 
   warga Warga @relation(fields: [warga_id], references: [id])
 
@@ -144,9 +152,17 @@ model PemeriksaanBumil {
   usia_kehamilan_minggu   Int
   hpht                    DateTime @db.Date
   htp                     DateTime @db.Date
-  catatan                 String?  @db.Text
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
+  catatan                   String?   @db.Text
+  jumlah_anak               Int?
+  riwayat_penyakit          String?   @db.Text
+  kadar_hemoglobin          Decimal?  @db.Decimal(5, 2)
+  berat_janin               Decimal?  @db.Decimal(5, 2)
+  terpapar_rokok            Boolean?
+  kie                       Boolean?
+  suplemen_tambah_darah     Boolean?
+  tanggal_kunjungan_berikut DateTime? @db.Date
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 
   warga Warga @relation(fields: [warga_id], references: [id])
 
@@ -164,9 +180,15 @@ model PemeriksaanPascaPersalinan {
   tekanan_darah_diastolik Int
   suhu_tubuh              Decimal  @db.Decimal(4, 2)
   kondisi_ibu             String?  @db.Text
-  catatan                 String?  @db.Text
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
+  catatan                   String?   @db.Text
+  tinggi_badan_bayi         Decimal?  @db.Decimal(5, 2)
+  berat_badan_bayi          Decimal?  @db.Decimal(5, 2)
+  kie                       Boolean?
+  fasilitasi_rujukan        Boolean?
+  fasilitasi_bantuan_sosial Boolean?
+  tanggal_kunjungan_berikut DateTime? @db.Date
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 
   warga Warga @relation(fields: [warga_id], references: [id])
 
