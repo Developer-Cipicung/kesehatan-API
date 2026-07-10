@@ -9,5 +9,8 @@ const dashboardService = new DashboardService();
 export const getDashboardSummary = asyncHandler(async (req: Request, res: Response) => {
   const result = await dashboardService.getSummary(getOptionalPosyanduId(req));
 
+  // Set Vercel Edge Caching (Cache for 5 mins, stale-while-revalidate for 10 mins)
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+
   return successResponse(res, 200, 'Ringkasan dashboard berhasil diambil.', result);
 });
