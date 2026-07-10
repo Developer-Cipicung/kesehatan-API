@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { PendataanBulananService } from './pendataan-bulanan.service';
+import { getBirthDateCutoffInMonths } from '../utils/age';
 
 const pendataanService = new PendataanBulananService();
 
@@ -41,11 +42,8 @@ export class DashboardService {
   private async computeSummary(posyanduId: string | undefined, cacheKey: string) {
     const now = new Date();
 
-    const twoYearsAgo = new Date();
-    twoYearsAgo.setFullYear(now.getFullYear() - 2);
-
-    const fiveYearsAgo = new Date();
-    fiveYearsAgo.setFullYear(now.getFullYear() - 5);
+    const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
+    const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
     
     const sevenYearsAgo = new Date();
     sevenYearsAgo.setFullYear(now.getFullYear() - 7);

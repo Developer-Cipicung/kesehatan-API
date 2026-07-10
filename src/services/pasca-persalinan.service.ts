@@ -7,6 +7,7 @@ import { LockValidationService } from './lock-validation.service';
 import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
+import { prisma } from '../lib/prisma';
 
 function calculatePascaPersalinanStatus(suhuTubuh: number): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
   // Placeholder medical rule logic
@@ -66,7 +67,14 @@ export class PascaPersalinanService {
       date.getFullYear(),
     );
 
-    const created = await pascaPersalinanRepo.create(data);
+    const created = await prisma.$transaction(async (tx) => {
+      const pemeriksaan = await tx.pemeriksaanPascaPersalinan.create({ data });
+      await tx.warga.updateMany({
+        where: { id: data.warga_id, posyandu_id: posyanduId },
+        data: { status_kehamilan: 'PASCA_PERSALINAN' },
+      });
+      return pemeriksaan;
+    });
     auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanPascaPersalinan', created.id, null, created);
     return mapWithStatus(created);
   }

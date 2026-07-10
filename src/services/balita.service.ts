@@ -49,8 +49,8 @@ export class BalitaService {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
-    if (calculateAgeInMonths(warga.tanggal_lahir) > 60) {
-      throw new AppError(422, 'Warga tidak valid untuk kategori balita (umur > 5 tahun).');
+    if (calculateAgeInMonths(warga.tanggal_lahir) >= 60) {
+      throw new AppError(422, 'Warga tidak valid untuk kategori balita (umur sudah 5 tahun atau lebih).');
     }
 
     const date = new Date(data.tanggal_kunjungan);

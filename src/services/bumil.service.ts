@@ -4,6 +4,7 @@ import { LockValidationService } from './lock-validation.service';
 import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
+import { prisma } from '../lib/prisma';
 
 function mapWithStatus(record: any) {
   if (!record) return record;
@@ -53,7 +54,14 @@ export class BumilService {
       date.getFullYear(),
     );
 
-    const created = await bumilRepo.create(data);
+    const created = await prisma.$transaction(async (tx) => {
+      const pemeriksaan = await tx.pemeriksaanBumil.create({ data });
+      await tx.warga.updateMany({
+        where: { id: data.warga_id, posyandu_id: posyanduId },
+        data: { status_kehamilan: 'HAMIL' },
+      });
+      return pemeriksaan;
+    });
     auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', created.id, null, created);
     return mapWithStatus(created);
   }

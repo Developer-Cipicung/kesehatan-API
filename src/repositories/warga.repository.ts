@@ -1,5 +1,6 @@
 import { Prisma } from '../../prisma/generated-schema';
 import { prisma } from '../lib/prisma';
+import { getBirthDateCutoffInMonths } from '../utils/age';
 
 export interface FindAllWargaParams {
   page?: number;
@@ -37,15 +38,12 @@ export class WargaRepository {
       const now = new Date();
       if (params.kategori === 'baduta') {
         // Under 2 years old
-        const twoYearsAgo = new Date();
-        twoYearsAgo.setFullYear(now.getFullYear() - 2);
+        const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
         where.tanggal_lahir = { gt: twoYearsAgo };
       } else if (params.kategori === 'balita') {
         // 2–5 years old (not baduta)
-        const twoYearsAgo = new Date();
-        twoYearsAgo.setFullYear(now.getFullYear() - 2);
-        const fiveYearsAgo = new Date();
-        fiveYearsAgo.setFullYear(now.getFullYear() - 5);
+        const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
+        const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
         where.tanggal_lahir = { lte: twoYearsAgo, gt: fiveYearsAgo };
       } else if (params.kategori === 'anak_sekolah') {
         const fiveYearsAgo = new Date();
