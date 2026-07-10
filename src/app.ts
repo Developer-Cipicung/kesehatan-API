@@ -8,7 +8,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 const app: Express = express();
-
+app.set('trust proxy', 1); // Trust the first proxy (e.g. Vercel) for express-rate-limit
 const generalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 100, // Limit each IP to 100 requests per `window` (here, per 1 minute),
