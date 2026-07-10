@@ -4,19 +4,41 @@ import { PendataanBulananService } from './pendataan-bulanan.service';
 const pendataanService = new PendataanBulananService();
 
 // In-Memory Cache untuk mengatasi bypass Cache CDN Vercel akibat header Authorization
+const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 const cache = new Map<string, { data: any; expiry: number }>();
+const pendingCache = new Map<string, Promise<any>>();
 
 export class DashboardService {
   async getSummary(posyanduId?: string) {
     const nowCache = Date.now();
     const cacheKey = posyanduId || 'GLOBAL';
-    const cachedItem = cache.get(cacheKey);
 
-    // Gunakan cache jika umurnya belum 5 menit
-    if (cachedItem && nowCache < cachedItem.expiry) {
-      return cachedItem.data;
+    try {
+      const cachedItem = cache.get(cacheKey);
+      // Gunakan cache singkat agar dashboard ringan tanpa terlalu lama stale.
+      if (cachedItem && nowCache < cachedItem.expiry) {
+        return cachedItem.data;
+      }
+
+      const pendingItem = pendingCache.get(cacheKey);
+      if (pendingItem) {
+        return pendingItem;
+      }
+    } catch {
+      // Cache hanya optimisasi; jika ada masalah, lanjut hitung normal.
     }
 
+    const summaryPromise = this.computeSummary(posyanduId, cacheKey);
+    pendingCache.set(cacheKey, summaryPromise);
+
+    try {
+      return await summaryPromise;
+    } finally {
+      pendingCache.delete(cacheKey);
+    }
+  }
+
+  private async computeSummary(posyanduId: string | undefined, cacheKey: string) {
     const now = new Date();
 
     const twoYearsAgo = new Date();
@@ -40,6 +62,10 @@ export class DashboardService {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(now.getMonth() - 5);
     sixMonthsAgo.setDate(1);
+
+    const pendataanStatusPromise = posyanduId
+      ? pendataanService.getStatus(posyanduId, now.getMonth() + 1, now.getFullYear())
+      : Promise.resolve({ status: 'draft' });
 
     // BATCH 1: Demographics (5 concurrent connections)
     const [
@@ -84,19 +110,33 @@ export class DashboardService {
         where: posyanduId ? { warga: { posyandu_id: posyanduId } } : {},
         orderBy: { created_at: 'desc' },
         take: 3,
-        include: { warga: true }
+        select: {
+          id: true,
+          created_at: true,
+          warga: { select: { nama: true } },
+        }
       }),
       prisma.pemeriksaanBumil.findMany({
         where: posyanduId ? { warga: { posyandu_id: posyanduId } } : {},
         orderBy: { created_at: 'desc' },
         take: 3,
-        include: { warga: true }
+        select: {
+          id: true,
+          created_at: true,
+          warga: { select: { nama: true } },
+        }
       }),
       prisma.pemeriksaanLansia.findMany({
         where: posyanduId ? { warga: { posyandu_id: posyanduId } } : {},
         orderBy: { created_at: 'desc' },
         take: 3,
-        include: { warga: true }
+        select: {
+          id: true,
+          created_at: true,
+          tekanan_darah_sistolik: true,
+          tekanan_darah_diastolik: true,
+          warga: { select: { nama: true } },
+        }
       })
     ]);
 
@@ -128,10 +168,7 @@ export class DashboardService {
     const totalBumil = bumilGroups.length;
     const totalPasca = pascaGroups.length;
 
-    let pendataanStatus = { status: 'draft' };
-    if (posyanduId) {
-      pendataanStatus = await pendataanService.getStatus(posyanduId, now.getMonth() + 1, now.getFullYear());
-    }
+    const pendataanStatus = await pendataanStatusPromise;
     
     // Process recent activities
     const allActivities = [
@@ -220,11 +257,15 @@ export class DashboardService {
       alerts: alerts
     };
 
-    // Simpan ke memory cache selama 5 menit
-    cache.set(cacheKey, {
-      data: result,
-      expiry: nowCache + (5 * 60 * 1000)
-    });
+    try {
+      // Simpan ke memory cache singkat; response tetap sama.
+      cache.set(cacheKey, {
+        data: result,
+        expiry: Date.now() + DASHBOARD_CACHE_TTL_MS
+      });
+    } catch {
+      // Cache hanya optimisasi; response tetap dikembalikan walau cache gagal.
+    }
 
     return result;
   }
