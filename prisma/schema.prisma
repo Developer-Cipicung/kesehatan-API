@@ -109,7 +109,7 @@ model PemeriksaanBalitaBaduta {
   lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
   nama_ayah           String?
   nama_ibu            String?
-  keluhan             String?  @db.Text
+  catatan             String?  @db.Text
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
 
@@ -144,7 +144,7 @@ model PemeriksaanBumil {
   usia_kehamilan_minggu   Int
   hpht                    DateTime @db.Date
   htp                     DateTime @db.Date
-  keluhan                 String?  @db.Text
+  catatan                 String?  @db.Text
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 
@@ -164,7 +164,7 @@ model PemeriksaanPascaPersalinan {
   tekanan_darah_diastolik Int
   suhu_tubuh              Decimal  @db.Decimal(4, 2)
   kondisi_ibu             String?  @db.Text
-  keluhan                 String?  @db.Text
+  catatan                 String?  @db.Text
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 
@@ -183,7 +183,7 @@ model PemeriksaanLansia {
   tekanan_darah_sistolik  Int
   tekanan_darah_diastolik Int
   gula_darah_sewaktu      Int
-  keluhan                 String?  @db.Text
+  catatan                 String?  @db.Text
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 

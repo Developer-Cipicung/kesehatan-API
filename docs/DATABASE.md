@@ -127,7 +127,7 @@ Menampung pemeriksaan balita (0–59 bulan) dan baduta (0–23 bulan). Diferensi
 | lingkar_lengan_atas | Decimal(5,2) | cm |
 | nama_ayah | String? | |
 | nama_ibu | String? | |
-| keluhan | Text? | |
+| catatan | Text? | |
 
 ---
 
@@ -157,7 +157,7 @@ Riwayat imunisasi berdiri sendiri dan tidak bergantung pada pemeriksaan balita.
 | usia_kehamilan_minggu | Integer | minggu |
 | hpht | Date | Hari Pertama Haid Terakhir |
 | htp | Date | Hari Tafsiran Persalinan |
-| keluhan | Text? | |
+| catatan | Text? | |
 
 ---
 
@@ -171,7 +171,7 @@ Riwayat imunisasi berdiri sendiri dan tidak bergantung pada pemeriksaan balita.
 | tekanan_darah_diastolik | Integer | mmHg |
 | suhu_tubuh | Decimal(4,2) | °C |
 | kondisi_ibu | Text? | |
-| keluhan | Text? | |
+| catatan | Text? | |
 
 ---
 
@@ -184,7 +184,7 @@ Riwayat imunisasi berdiri sendiri dan tidak bergantung pada pemeriksaan balita.
 | tekanan_darah_sistolik | Integer | mmHg |
 | tekanan_darah_diastolik | Integer | mmHg |
 | gula_darah_sewaktu | Integer | mg/dL |
-| keluhan | Text? | |
+| catatan | Text? | |
 
 ---
 

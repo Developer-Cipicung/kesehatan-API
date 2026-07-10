@@ -3,8 +3,20 @@ import { PendataanBulananService } from './pendataan-bulanan.service';
 
 const pendataanService = new PendataanBulananService();
 
+// In-Memory Cache untuk mengatasi bypass Cache CDN Vercel akibat header Authorization
+const cache = new Map<string, { data: any; expiry: number }>();
+
 export class DashboardService {
   async getSummary(posyanduId?: string) {
+    const nowCache = Date.now();
+    const cacheKey = posyanduId || 'GLOBAL';
+    const cachedItem = cache.get(cacheKey);
+
+    // Gunakan cache jika umurnya belum 5 menit
+    if (cachedItem && nowCache < cachedItem.expiry) {
+      return cachedItem.data;
+    }
+
     const now = new Date();
 
     const twoYearsAgo = new Date();
@@ -189,7 +201,7 @@ export class DashboardService {
     processChartRecords(chartLansia, 'lansia');
     processChartRecords(chartAnak, 'anak');
 
-    return {
+    const result = {
       total_warga: totalWarga,
       total_balita: totalBaduta + totalBalita, // aggregated for backwards compatibility if needed
       total_bumil: totalBumil,
@@ -207,5 +219,13 @@ export class DashboardService {
       aktivitas_terkini: aktivitas_terkini,
       alerts: alerts
     };
+
+    // Simpan ke memory cache selama 5 menit
+    cache.set(cacheKey, {
+      data: result,
+      expiry: nowCache + (5 * 60 * 1000)
+    });
+
+    return result;
   }
 }

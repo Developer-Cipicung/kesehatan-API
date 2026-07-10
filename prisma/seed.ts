@@ -1,4 +1,4 @@
-import { KategoriPendataan, StatusPendataan, PrismaClient, JenisKelamin, UserRole } from './generated-schema';
+import { PrismaClient, UserRole } from './generated-schema';
 import pino from 'pino';
 import { createClient } from '@supabase/supabase-js';
 
@@ -12,7 +12,7 @@ const logger = pino({
 const prisma = new PrismaClient();
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_ANON_KEY || ''
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || ''
 );
 
 async function main() {
@@ -25,6 +25,7 @@ async function main() {
   await prisma.pemeriksaanPascaPersalinan.deleteMany();
   await prisma.pemeriksaanLansia.deleteMany();
   await prisma.pendataanBulanan.deleteMany();
+  await prisma.auditLog.deleteMany();
   await prisma.warga.deleteMany();
   await prisma.user.deleteMany();
   await prisma.posyandu.deleteMany();
@@ -32,22 +33,35 @@ async function main() {
   logger.info('Cleaned up previous data');
 
   // 1. Create Posyandu
-  const posyandu = await prisma.posyandu.create({
-    data: {
-      nama: 'Posyandu Cipicung',
-      rw: '01',
-    },
+  const posyandus = [
+    { nama: 'Posyandu Cempaka 1', rw: '01' },
+    { nama: 'Posyandu Anggrek 1', rw: '02' },
+    { nama: 'Posyandu Anggrek 2', rw: '02' },
+    { nama: 'Posyandu Melati 1', rw: '03' },
+    { nama: 'Posyandu Melati 2', rw: '03' },
+    { nama: 'Posyandu Flamboyan 1', rw: '04' },
+    { nama: 'Posyandu Flamboyan 2', rw: '04' },
+    { nama: 'Posyandu Mawar 1', rw: '05' },
+    { nama: 'Posyandu Mawar 2', rw: '05' },
+    { nama: 'Posyandu Bougenvil', rw: '06' },
+    { nama: 'Posyandu Cempaka 2', rw: '06' },
+    { nama: 'Posyandu Aster', rw: '07' },
+  ];
+
+  await prisma.posyandu.createMany({ data: posyandus });
+  logger.info(`Created 12 Posyandu`);
+
+  const posyanduCempaka1 = await prisma.posyandu.findFirst({
+    where: { nama: 'Posyandu Cempaka 1' }
   });
-  logger.info(`Created Posyandu: ${posyandu.nama}`);
 
-  logger.info(`Created Posyandu: ${posyandu.nama}`);
-
-  const username = 'kader';
+  // 2. Create Admin User
+  const username = 'admin';
   const email = `${username}@cipicung.com`;
-  const password = 'kader123';
-  let authId = '00000000-0000-0000-0000-000000000001';
+  const password = 'admin123';
+  let authId = '00000000-0000-0000-0000-000000000000';
 
-  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+  const { data: signInData } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -55,148 +69,29 @@ async function main() {
   if (signInData?.user) {
     authId = signInData.user.id;
   } else {
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData } = await supabase.auth.signUp({
       email,
       password,
     });
     if (signUpData?.user) {
       authId = signUpData.user.id;
     } else {
-      logger.warn('Failed to sign in or sign up mock user. Using dummy auth_id.');
+      logger.warn('Failed to sign in or sign up admin user. Using dummy auth_id.');
     }
   }
 
   const adminUser = await prisma.user.create({
     data: {
       auth_id: authId,
-      posyandu_id: posyandu.id,
-      nama: 'Kader Cipicung',
+      posyandu_id: posyanduCempaka1?.id as string, // Default assign to Cempaka 1
+      nama: 'Administrator',
       username: username,
       role: UserRole.admin,
     },
   });
-  logger.info(`Created User: ${adminUser.nama} with auth_id: ${authId}`);
+  logger.info(`Created Admin User: ${adminUser.username} with auth_id: ${authId}`);
 
-  // 2. Create Warga
-  const wargaBalita = await prisma.warga.create({
-    data: {
-      posyandu_id: posyandu.id,
-      nomor: '001',
-      nik: '3201000000000001',
-      nama: 'Anak Balita',
-      jenis_kelamin: 'L',
-      tanggal_lahir: new Date(new Date().setFullYear(new Date().getFullYear() - 2)), // 2 tahun
-    },
-  });
-
-  const wargaBumil = await prisma.warga.create({
-    data: {
-      posyandu_id: posyandu.id,
-      nomor: '002',
-      nik: '3201020000000002',
-      nama: 'Siti Aminah',
-      jenis_kelamin: 'P',
-      status_kehamilan: 'HAMIL',
-      tanggal_lahir: new Date('1995-03-15'),
-    },
-  });
-
-  const wargaPasca = await prisma.warga.create({
-    data: {
-      posyandu_id: posyandu.id,
-      nomor: '004',
-      nik: '3201020000000004',
-      nama: 'Ibu Pasca',
-      jenis_kelamin: 'P',
-      status_kehamilan: 'PASCA_PERSALINAN',
-      tanggal_lahir: new Date('1995-05-15'),
-    },
-  });
-
-  const wargaLansia = await prisma.warga.create({
-    data: {
-      posyandu_id: posyandu.id,
-      nomor: '003',
-      nik: '3201000000000003',
-      nama: 'Kakek Lansia',
-      jenis_kelamin: 'L',
-      tanggal_lahir: new Date('1960-01-01'), // 66 tahun
-    },
-  });
-  logger.info('Created Warga dummies (Balita, Bumil/Pasca Persalinan, Lansia)');
-
-  // 3. Create Pemeriksaan Balita
-  await prisma.pemeriksaanBalitaBaduta.create({
-    data: {
-      warga_id: wargaBalita.id,
-      bb: 12.5,
-      tb: 85.0,
-      lingkar_kepala: 48.0,
-      lingkar_lengan_atas: 16.0,
-      nama_ayah: 'Budi',
-      nama_ibu: 'Siti',
-      tanggal_kunjungan: new Date(),
-    },
-  });
-
-  // 4. Create Riwayat Imunisasi
-  await prisma.riwayatImunisasi.create({
-    data: {
-      warga_id: wargaBalita.id,
-      jenis_vaksin: 'Campak',
-      tanggal_pemberian: new Date(),
-    },
-  });
-  logger.info('Created Pemeriksaan Balita & Imunisasi');
-
-  // 5. Create Pemeriksaan Bumil
-  await prisma.pemeriksaanBumil.create({
-    data: {
-      warga_id: wargaBumil.id,
-      bb: 65.0,
-      tb: 160.0,
-      lingkar_perut: 90.0,
-      lingkar_lengan_atas: 25.0,
-      usia_kehamilan_minggu: 24,
-      hpht: new Date(),
-      htp: new Date(),
-      catatan: 'Mual pagi hari',
-      tanggal_kunjungan: new Date(),
-    },
-  });
-
-  // 6. Create Pemeriksaan Pasca Persalinan
-  await prisma.pemeriksaanPascaPersalinan.create({
-    data: {
-      warga_id: wargaBumil.id,
-      tanggal_persalinan: new Date('2026-06-01'),
-      bb: 62.0,
-      tekanan_darah_sistolik: 110,
-      tekanan_darah_diastolik: 70,
-      suhu_tubuh: 36.5,
-      kondisi_ibu: 'Sehat',
-      catatan: 'Nyeri jahitan ringan',
-      tanggal_kunjungan: new Date(),
-    },
-  });
-  logger.info('Created Pemeriksaan Bumil & Pasca Persalinan');
-
-  // 7. Create Pemeriksaan Lansia
-  await prisma.pemeriksaanLansia.create({
-    data: {
-      warga_id: wargaLansia.id,
-      bb: 58.0,
-      tb: 165.0,
-      tekanan_darah_sistolik: 140,
-      tekanan_darah_diastolik: 90,
-      gula_darah_sewaktu: 110,
-      catatan: 'Pegal linu di lutut',
-      tanggal_kunjungan: new Date(),
-    },
-  });
-  logger.info('Created Pemeriksaan Lansia');
-
-  logger.info('Seed completed successfully.');
+  logger.info('Seed completed successfully. (Warga & Pendataan skipped as requested)');
 }
 
 main()

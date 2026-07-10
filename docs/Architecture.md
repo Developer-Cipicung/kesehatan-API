@@ -151,7 +151,7 @@ HTTP Response (format: { success, message, data })
 
 - Menyimpan riwayat pemeriksaan balita dan baduta (0–59 bulan).
 - Diferensiasi baduta (< 24 bulan) vs balita (24–59 bulan) dilakukan di frontend berdasarkan usia saat kunjungan.
-- Field: `bb`, `tb`, `lingkar_kepala`, `lingkar_lengan_atas`, `keluhan`.
+- Field: `bb`, `tb`, `lingkar_kepala`, `lingkar_lengan_atas`, `catatan`.
 - Endpoint `GET /balita/:wargaId/history` untuk riwayat per warga.
 
 ---
@@ -169,21 +169,21 @@ HTTP Response (format: { success, message, data })
 ## Pemeriksaan Ibu Hamil (`/api/v1/bumil`)
 
 - Menyimpan seluruh riwayat pemeriksaan ibu hamil.
-- Field: `bb`, `tb`, `lingkar_perut`, `lingkar_lengan_atas`, `usia_kehamilan_minggu`, `hpht`, `htp`, `keluhan`.
+- Field: `bb`, `tb`, `lingkar_perut`, `lingkar_lengan_atas`, `usia_kehamilan_minggu`, `hpht`, `htp`, `catatan`.
 
 ---
 
 ## Pemeriksaan Pasca Persalinan (`/api/v1/pasca-persalinan`)
 
 - Menyimpan riwayat pemeriksaan ibu pasca persalinan.
-- Field: `tanggal_persalinan`, `bb`, `tekanan_darah_sistolik`, `tekanan_darah_diastolik`, `suhu_tubuh`, `kondisi_ibu`, `keluhan`.
+- Field: `tanggal_persalinan`, `bb`, `tekanan_darah_sistolik`, `tekanan_darah_diastolik`, `suhu_tubuh`, `kondisi_ibu`, `catatan`.
 
 ---
 
 ## Pemeriksaan Lansia (`/api/v1/lansia`)
 
 - Menyimpan riwayat pemeriksaan lansia.
-- Field: `bb`, `tb`, `tekanan_darah_sistolik`, `tekanan_darah_diastolik`, `gula_darah_sewaktu`, `keluhan`.
+- Field: `bb`, `tb`, `tekanan_darah_sistolik`, `tekanan_darah_diastolik`, `gula_darah_sewaktu`, `catatan`.
 
 ---
 

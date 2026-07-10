@@ -179,7 +179,7 @@ components:
         hemoglobin:
           type: number
           example: 11.5
-        keluhan:
+        catatan:
           type: string
           example: "Mual di pagi hari"
         tanggal_kunjungan:
@@ -215,7 +215,7 @@ components:
         kondisi_ibu:
           type: string
           example: "Sehat"
-        keluhan:
+        catatan:
           type: string
           example: "Mual di pagi hari"
         tanggal_kunjungan:
@@ -247,7 +247,7 @@ components:
         gula_darah_sewaktu:
           type: integer
           example: 110
-        keluhan:
+        catatan:
           type: string
           example: "Mual di pagi hari"
         tanggal_kunjungan:
