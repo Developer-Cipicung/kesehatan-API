@@ -159,7 +159,7 @@ export class PendataanBulananService {
     return {
       balita: balita.map((b: any) => ({ 
         id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
-        bb: b.bb, tb: b.tb 
+        bb: b.bb, tb: b.tb, tanggal_lahir: b.warga.tanggal_lahir
       })),
       bumil: bumil.map((b: any) => ({ 
         id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
