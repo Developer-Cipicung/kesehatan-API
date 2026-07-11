@@ -150,6 +150,7 @@ model PemeriksaanBumil {
   bb                      Decimal  @db.Decimal(5, 2)
   tb                      Decimal  @db.Decimal(5, 2)
   lingkar_perut           Decimal  @db.Decimal(5, 2)
+  tinggi_fundus           Decimal? @db.Decimal(5, 2)
   lingkar_lengan_atas     Decimal  @db.Decimal(5, 2)
   usia_kehamilan_minggu   Int
   hpht                    DateTime @db.Date
@@ -161,7 +162,10 @@ model PemeriksaanBumil {
   berat_janin               Decimal?  @db.Decimal(5, 2)
   terpapar_rokok            Boolean?
   kie                       Boolean?
-  suplemen_tambah_darah     Boolean?
+  suplemen_tambah_darah     Int?
+  mms                       Int?
+  fasilitasi_rujukan        Boolean?
+  fasilitasi_bantuan_sosial Boolean?
   tanggal_kunjungan_berikut DateTime? @db.Date
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt

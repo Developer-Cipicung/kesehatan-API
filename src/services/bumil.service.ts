@@ -8,9 +8,25 @@ import { prisma } from '../lib/prisma';
 
 function mapWithStatus(record: any) {
   if (!record) return record;
+  
+  let status = 'Normal';
+  const lila = Number(record.lingkar_lengan_atas) || 0;
+  const hb = Number(record.kadar_hemoglobin) || 0;
+  
+  const isKEK = lila > 0 && lila < 23.5;
+  const isAnemia = hb > 0 && hb < 11;
+
+  if (isKEK && isAnemia) {
+    status = 'Risiko KEK & Anemia';
+  } else if (isKEK) {
+    status = 'Risiko KEK';
+  } else if (isAnemia) {
+    status = 'Risiko Anemia';
+  }
+
   return {
     ...record,
-    status_medis: 'Normal',
+    status_medis: status,
   };
 }
 

@@ -59,15 +59,17 @@ import userRoutes from './routes/user.routes';
 import YAML from 'yamljs';
 import path from 'path';
 
-// Load Swagger document
+// Load Swagger document lazily
 const swaggerPath = path.join(__dirname, '../docs/swagger.yaml');
 let swaggerDocument: Record<string, unknown> | null = null;
-if (fs.existsSync(swaggerPath)) {
-  swaggerDocument = YAML.load(swaggerPath) as Record<string, unknown>;
-}
 
 // Serve OpenAPI spec as JSON (used by Swagger UI)
 app.get('/api-docs/swagger.json', (_req: Request, res: Response) => {
+  if (!swaggerDocument && fs.existsSync(swaggerPath)) {
+    // Load lazily to prevent cold start blocking
+    swaggerDocument = YAML.load(swaggerPath) as Record<string, unknown>;
+  }
+
   if (!swaggerDocument) {
     res.status(404).json({ error: 'Swagger spec not found' });
     return;
