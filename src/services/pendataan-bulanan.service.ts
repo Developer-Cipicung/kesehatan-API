@@ -115,4 +115,71 @@ export class PendataanBulananService {
     auditLogService.logAction(submittedBy, posyanduId, 'SUBMIT', 'PendataanBulanan', id, record, updated);
     return updated;
   }
+
+  async getSummaryList(posyanduId: string, bulan: number, tahun: number) {
+    const { prisma } = await import('../lib/prisma');
+    const startDate = new Date(tahun, bulan - 1, 1);
+    const endDate = new Date(tahun, bulan, 0, 23, 59, 59, 999);
+
+    const baseWhere = {
+      warga: { posyandu_id: posyanduId },
+      tanggal_kunjungan: { gte: startDate, lte: endDate },
+    };
+
+    const [balita, bumil, pasca, lansia, wargaBaru] = await Promise.all([
+      prisma.pemeriksaanBalitaBaduta.findMany({
+        where: baseWhere,
+        include: { warga: { select: { nama: true, nik: true, tanggal_lahir: true } } },
+        orderBy: { tanggal_kunjungan: 'desc' }
+      }),
+      prisma.pemeriksaanBumil.findMany({
+        where: baseWhere,
+        include: { warga: { select: { nama: true, nik: true, tanggal_lahir: true } } },
+        orderBy: { tanggal_kunjungan: 'desc' }
+      }),
+      prisma.pemeriksaanPascaPersalinan.findMany({
+        where: baseWhere,
+        include: { warga: { select: { nama: true, nik: true, tanggal_lahir: true } } },
+        orderBy: { tanggal_kunjungan: 'desc' }
+      }),
+      prisma.pemeriksaanLansia.findMany({
+        where: baseWhere,
+        include: { warga: { select: { nama: true, nik: true, tanggal_lahir: true } } },
+        orderBy: { tanggal_kunjungan: 'desc' }
+      }),
+      prisma.warga.findMany({
+        where: {
+          posyandu_id: posyanduId,
+          created_at: { gte: startDate, lte: endDate }
+        },
+        orderBy: { created_at: 'desc' }
+      })
+    ]);
+
+    return {
+      balita: balita.map((b: any) => ({ 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        bb: b.bb, tb: b.tb 
+      })),
+      bumil: bumil.map((b: any) => ({ 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        bb: b.bb, usia_kehamilan_minggu: b.usia_kehamilan_minggu, lingkar_lengan_atas: b.lingkar_lengan_atas 
+      })),
+      pasca_persalinan: pasca.map((b: any) => ({ 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        td_sistolik: b.tekanan_darah_sistolik, td_diastolik: b.tekanan_darah_diastolik 
+      })),
+      lansia: lansia.map((b: any) => ({ 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        bb: b.bb, td_sistolik: b.tekanan_darah_sistolik, td_diastolik: b.tekanan_darah_diastolik, gula_darah_sewaktu: b.gula_darah_sewaktu 
+      })),
+      warga_baru: wargaBaru.map((w: any) => ({
+        id: w.id,
+        nama: w.nama,
+        nik: w.nik,
+        jenis_kelamin: w.jenis_kelamin,
+        tanggal_daftar: w.created_at
+      }))
+    };
+  }
 }

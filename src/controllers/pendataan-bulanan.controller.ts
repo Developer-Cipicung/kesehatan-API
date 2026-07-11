@@ -43,6 +43,19 @@ export const getPendataanStatusAll = asyncHandler(async (req: Request, res: Resp
   return successResponse(res, 200, 'Status pendataan berhasil diambil.', result);
 });
 
+export const getSummary = asyncHandler(async (req: Request, res: Response) => {
+  const posyanduId = getPosyanduId(req);
+  const { bulan, tahun } = req.query;
+
+  const result = await pendataanService.getSummaryList(
+    posyanduId,
+    parseInt(bulan as string),
+    parseInt(tahun as string),
+  );
+
+  return successResponse(res, 200, 'Ringkasan pendataan berhasil diambil.', result);
+});
+
 export const getAdminStatusAll = asyncHandler(async (req: Request, res: Response) => {
 
   const { tahun } = req.query;

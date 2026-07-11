@@ -4,6 +4,7 @@ import {
   getPendataanStatusAll,
   getAdminStatusAll,
   selesaikanPendataan,
+  getSummary
 } from '../controllers/pendataan-bulanan.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { validateRequest, validateQuery } from '../middleware/validation.middleware';
@@ -18,6 +19,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/', validateQuery(getPendataanStatusSchema), getPendataan);
+router.get('/summary', validateQuery(getPendataanStatusSchema), getSummary);
 router.get('/status', validateQuery(getPendataanStatusSchema), getPendataanStatusAll);
 router.get('/admin/status', validateQuery(getAdminStatusSchema), getAdminStatusAll);
 router.post('/:id/submit', selesaikanPendataan);
