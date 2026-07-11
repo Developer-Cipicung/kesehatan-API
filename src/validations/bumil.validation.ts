@@ -13,7 +13,7 @@ export const createBumilSchema = z.object({
   htp: z.string().date().transform(val => new Date(val).toISOString()),
   jumlah_anak: z.number().int().min(0).optional(),
   riwayat_penyakit: z.string().optional(),
-  kadar_hemoglobin: z.number().min(0).optional(),
+  kadar_hemoglobin: z.number().min(0),
   berat_janin: z.number().min(0).optional(),
   terpapar_rokok: z.boolean().optional(),
   kie: z.boolean().optional(),
