@@ -19,8 +19,8 @@ Backend REST API untuk Sistem Digitalisasi Posyandu. Proyek ini dibangun menggun
 - Pemeriksaan Ibu Hamil
 - Pemeriksaan Pasca Persalinan
 - Pemeriksaan Lansia
-- Tracking Pendataan Bulanan
-- Dashboard & Statistik
+- Tracking Pendataan Bulanan (Penguncian Data)
+- Dashboard & Global Patient Search (One-Stop Action Center)
 
 ## 🛠 Teknologi
 

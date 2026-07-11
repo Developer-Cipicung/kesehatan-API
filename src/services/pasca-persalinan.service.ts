@@ -9,10 +9,8 @@ import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
 import { prisma } from '../lib/prisma';
 
-function calculatePascaPersalinanStatus(suhuTubuh: number): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
+function calculatePascaPersalinanStatus(): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
   // Placeholder medical rule logic
-  if (suhuTubuh > 39) return 'Dirujuk';
-  if (suhuTubuh > 38) return 'Perlu Perhatian';
   return 'Normal';
 }
 
@@ -20,7 +18,7 @@ function mapWithStatus(record: any) {
   if (!record) return record;
   return {
     ...record,
-    status_medis: calculatePascaPersalinanStatus(Number(record.suhu_tubuh)),
+    status_medis: calculatePascaPersalinanStatus(),
   };
 }
 

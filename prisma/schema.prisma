@@ -115,6 +115,7 @@ model PemeriksaanBalitaBaduta {
   lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
   nama_ayah           String?
   nama_ibu            String?
+  penggunaan_kontrasepsi    String?
   catatan                   String?   @db.Text
   kondisi                   String?
   asi_eksklusif             Boolean?
@@ -182,9 +183,7 @@ model PemeriksaanPascaPersalinan {
   tanggal_kunjungan       DateTime @db.Date
   tanggal_persalinan      DateTime @db.Date
   bb                      Decimal  @db.Decimal(5, 2)
-  tekanan_darah_sistolik  Int
-  tekanan_darah_diastolik Int
-  suhu_tubuh              Decimal  @db.Decimal(4, 2)
+  tb                      Decimal? @db.Decimal(5, 2)
   kondisi_ibu             String?  @db.Text
   catatan                   String?   @db.Text
   tinggi_badan_bayi         Decimal?  @db.Decimal(5, 2)
@@ -211,6 +210,8 @@ model PemeriksaanLansia {
   tekanan_darah_sistolik  Int
   tekanan_darah_diastolik Int
   gula_darah_sewaktu      Int
+  kolesterol              Int?
+  asam_urat               Decimal? @db.Decimal(4, 2)
   catatan                 String?  @db.Text
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt

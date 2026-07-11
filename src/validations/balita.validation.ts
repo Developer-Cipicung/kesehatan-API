@@ -13,6 +13,7 @@ export const createBalitaSchema = z.object({
   tanggal_kunjungan_berikut: z.string().date().transform(val => new Date(val).toISOString()).optional(),
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
+  penggunaan_kontrasepsi: z.string().optional(),
   catatan: z.string().optional(),
 });
 
