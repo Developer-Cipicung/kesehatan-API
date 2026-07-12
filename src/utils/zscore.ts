@@ -40,13 +40,13 @@ export async function calculateZScoreWHO(params: ZScoreParams): Promise<ZScoreRe
     let kategori_bb_tb = null;
 
     if (assessment.results) {
-      const wfa = assessment.results.find(r => r.indicator === 'weight-for-age');
-      const lfa = assessment.results.find(r => r.indicator === 'length-height-for-age');
-      const wfl = assessment.results.find(r => r.indicator === 'weight-for-length' || r.indicator === 'weight-for-height');
+      const wfa = assessment.results.find((r: any) => r.indicator === 'weight-for-age');
+      const lfa = assessment.results.find((r: any) => r.indicator === 'length-height-for-age');
+      const wfl = assessment.results.find((r: any) => r.indicator === 'weight-for-length' || r.indicator === 'weight-for-height');
 
       if (wfa) {
         bb_u = Number(wfa.zScore.toFixed(2));
-        const severity = assessment.classifications?.find(c => c.indicator === 'weight-for-age')?.severity;
+        const severity = assessment.classifications?.find((c: any) => c.indicator === 'weight-for-age')?.severity;
         if (severity === 'adequate') kategori_bb_u = 'Normal';
         else if (severity === 'low') kategori_bb_u = 'Kurang';
         else if (severity === 'very-low') kategori_bb_u = 'Sangat Kurang';
@@ -55,7 +55,7 @@ export async function calculateZScoreWHO(params: ZScoreParams): Promise<ZScoreRe
       
       if (lfa) {
         tb_u = Number(lfa.zScore.toFixed(2));
-        const severity = assessment.classifications?.find(c => c.indicator === 'length-height-for-age')?.severity;
+        const severity = assessment.classifications?.find((c: any) => c.indicator === 'length-height-for-age')?.severity;
         if (severity === 'adequate') kategori_tb_u = 'Normal';
         else if (severity === 'low') kategori_tb_u = 'Pendek (Stunted)';
         else if (severity === 'very-low') kategori_tb_u = 'Sangat Pendek (Severely Stunted)';
@@ -64,7 +64,7 @@ export async function calculateZScoreWHO(params: ZScoreParams): Promise<ZScoreRe
 
       if (wfl) {
         bb_tb = Number(wfl.zScore.toFixed(2));
-        const severity = assessment.classifications?.find(c => c.indicator === wfl.indicator)?.severity;
+        const severity = assessment.classifications?.find((c: any) => c.indicator === wfl.indicator)?.severity;
         if (severity === 'adequate') kategori_bb_tb = 'Gizi Baik';
         else if (severity === 'low') kategori_bb_tb = 'Gizi Kurang';
         else if (severity === 'very-low') kategori_bb_tb = 'Gizi Buruk';

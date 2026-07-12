@@ -15,7 +15,7 @@ const cekKartuSchema = z.object({
 export const cekKartu = asyncHandler(async (req: Request, res: Response) => {
   const result = cekKartuSchema.safeParse(req.body);
   if (!result.success) {
-    throw new AppError(400, result.error.errors[0].message);
+    throw new AppError(400, result.error.issues[0].message);
   }
 
   const { nik, tanggal_lahir } = result.data;
