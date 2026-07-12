@@ -16,6 +16,41 @@ export class WargaService {
     return warga;
   }
 
+  async findByNikAndTanggalLahir(nik: string, tanggalLahir: string) {
+    const warga = await wargaRepo.findByNikAndTanggalLahir(nik, new Date(tanggalLahir));
+    if (!warga) throw new AppError(404, 'Data warga tidak ditemukan. Pastikan NIK dan Tanggal Lahir sesuai.');
+    
+    // Return sanitized data for public view
+    return {
+      id: warga.id,
+      nik: warga.nik,
+      nama: warga.nama,
+      jenis_kelamin: warga.jenis_kelamin,
+      tanggal_lahir: warga.tanggal_lahir,
+      tempat_lahir: warga.tempat_lahir,
+      alamat: warga.alamat,
+      rt: warga.rt,
+      rw: warga.rw,
+      no_hp: warga.no_hp,
+      golongan_darah: warga.golongan_darah,
+      pekerjaan: warga.pekerjaan,
+      pendidikan: warga.pendidikan,
+      status_perkawinan: warga.status_perkawinan,
+      status_kehamilan: warga.status_kehamilan,
+      posyandu: {
+        nama: warga.posyandu.nama,
+        desa_kelurahan: warga.posyandu.desa_kelurahan,
+        kecamatan: warga.posyandu.kecamatan,
+        kabupaten_kota: warga.posyandu.kabupaten_kota,
+        provinsi: warga.posyandu.provinsi,
+      },
+      pemeriksaan_balita_baduta: warga.pemeriksaan_balita_baduta,
+      pemeriksaan_bumil: warga.pemeriksaan_bumil,
+      pemeriksaan_pasca_persalinan: warga.pemeriksaan_pasca_persalinan,
+      pemeriksaan_lansia: warga.pemeriksaan_lansia,
+    };
+  }
+
   async create(data: Prisma.WargaUncheckedCreateInput, userId: string) {
     const existing = await wargaRepo.findByNik(data.nik, data.posyandu_id);
     if (existing) throw new AppError(409, 'NIK sudah terdaftar');

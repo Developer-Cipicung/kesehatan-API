@@ -122,6 +122,19 @@ export class WargaRepository {
     });
   }
 
+  async findByNikAndTanggalLahir(nik: string, tanggalLahir: Date) {
+    return prisma.warga.findFirst({
+      where: { nik, tanggal_lahir: tanggalLahir },
+      include: {
+        posyandu: true,
+        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 1 },
+      }
+    });
+  }
+
   async create(data: Prisma.WargaUncheckedCreateInput) {
     return prisma.warga.create({
       data,

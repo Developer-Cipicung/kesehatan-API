@@ -56,6 +56,7 @@ import pendataanRoutes from './routes/pendataan.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import posyanduRoutes from './routes/posyandu.routes';
 import userRoutes from './routes/user.routes';
+import publicRoutes from './routes/public.routes';
 import YAML from 'yamljs';
 import path from 'path';
 
@@ -127,6 +128,7 @@ app.get('/', (req: Request, res: Response) => {
 })
 
 app.use('/api/v1/auth', authLimiter, authRoutes);
+app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/warga', wargaRoutes);
 app.use('/api/v1/balita', balitaRoutes);
 app.use('/api/v1/imunisasi', imunisasiRoutes);

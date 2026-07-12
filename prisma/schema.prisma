@@ -119,6 +119,9 @@ model PemeriksaanBalitaBaduta {
   catatan                   String?   @db.Text
   kondisi                   String?
   asi_eksklusif             Boolean?
+  zscore_bb_u               Decimal?  @db.Decimal(5, 2)
+  zscore_tb_u               Decimal?  @db.Decimal(5, 2)
+  zscore_bb_tb              Decimal?  @db.Decimal(5, 2)
   fasilitasi_bantuan_sosial Boolean?
   tanggal_kunjungan_berikut DateTime? @db.Date
   created_at                DateTime  @default(now())

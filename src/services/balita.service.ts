@@ -6,6 +6,8 @@ import { AppError } from '../utils/AppError';
 import { calculateAgeInMonths } from '../utils/age';
 import { auditLogService } from './audit-log.service';
 
+import { calculateZScoreWHO, classifyZScore } from '../utils/zscore';
+
 function calculateBalitaStatus(bb: number): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
   // Placeholder medical rule logic
   if (bb < 5) return 'Dirujuk';
@@ -15,9 +17,16 @@ function calculateBalitaStatus(bb: number): 'Normal' | 'Perlu Perhatian' | 'Diru
 
 function mapWithStatus(record: any) {
   if (!record) return record;
+  const categories = classifyZScore(
+    record.zscore_bb_u ? Number(record.zscore_bb_u) : null,
+    record.zscore_tb_u ? Number(record.zscore_tb_u) : null,
+    record.zscore_bb_tb ? Number(record.zscore_bb_tb) : null
+  );
+
   return {
     ...record,
     status_medis: calculateBalitaStatus(Number(record.bb)),
+    status_gizi: categories
   };
 }
 
@@ -61,6 +70,19 @@ export class BalitaService {
       date.getFullYear(),
     );
 
+    const zscore = await calculateZScoreWHO({
+      jenis_kelamin: warga.jenis_kelamin as 'L' | 'P',
+      tanggal_lahir: warga.tanggal_lahir,
+      tanggal_kunjungan: date,
+      bb: Number(data.bb),
+      tb: Number(data.tb),
+      lingkar_kepala: data.lingkar_kepala ? Number(data.lingkar_kepala) : undefined,
+    });
+
+    data.zscore_bb_u = zscore.bb_u;
+    data.zscore_tb_u = zscore.tb_u;
+    data.zscore_bb_tb = zscore.bb_tb;
+
     const created = await balitaRepo.create(data);
     auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBalitaBaduta', created.id, null, created);
     return mapWithStatus(created);
@@ -90,6 +112,19 @@ export class BalitaService {
         // removed lock check for update/delete
       }
     }
+
+    const zscore = await calculateZScoreWHO({
+      jenis_kelamin: warga.jenis_kelamin as 'L' | 'P',
+      tanggal_lahir: warga.tanggal_lahir,
+      tanggal_kunjungan: data.tanggal_kunjungan ? new Date(data.tanggal_kunjungan as Date | string) : oldDate,
+      bb: data.bb ? Number(data.bb) : Number(record.bb),
+      tb: data.tb ? Number(data.tb) : Number(record.tb),
+      lingkar_kepala: data.lingkar_kepala ? Number(data.lingkar_kepala) : (record.lingkar_kepala ? Number(record.lingkar_kepala) : undefined),
+    });
+
+    data.zscore_bb_u = zscore.bb_u;
+    data.zscore_tb_u = zscore.tb_u;
+    data.zscore_bb_tb = zscore.bb_tb;
 
     const updated = await balitaRepo.update(id, data, posyanduId);
     auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PemeriksaanBalitaBaduta', id, record, updated);
