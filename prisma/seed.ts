@@ -220,6 +220,13 @@ async function main() {
             : randomDate(new Date('2021-08-01'), new Date('2024-07-31')), // 24-59 months (Balita)
           tempat_lahir: getRandomKota(),
           alamat: getRandomAlamat(),
+          riwayat_imunisasi: {
+            create: [
+              { jenis_vaksin: 'BCG', tanggal_pemberian: randomDate(new Date('2024-08-01'), new Date('2025-01-01')) },
+              { jenis_vaksin: 'Polio 1', tanggal_pemberian: randomDate(new Date('2024-08-01'), new Date('2025-01-01')) },
+              { jenis_vaksin: 'DPT 1', tanggal_pemberian: randomDate(new Date('2025-02-01'), new Date('2025-06-01')) }
+            ]
+          },
           pemeriksaan_balita_baduta: {
             create: [
               {
@@ -229,6 +236,16 @@ async function main() {
                 lingkar_kepala: randomDec(35.0, 52.0),
                 lingkar_lengan_atas: randomDec(10.0, 18.0),
                 kondisi: Math.random() > 0.1 ? 'Sehat' : 'Sakit',
+                nama_ayah: getRandomName(),
+                nama_ibu: getRandomName(),
+                penggunaan_kontrasepsi: Math.random() > 0.5 ? 'IUD' : 'Pil',
+                catatan: 'Perkembangan baik, asupan gizi cukup.',
+                asi_eksklusif: Math.random() > 0.5,
+                zscore_bb_u: randomDec(-2.0, 2.0),
+                zscore_tb_u: randomDec(-2.0, 2.0),
+                zscore_bb_tb: randomDec(-2.0, 2.0),
+                fasilitasi_bantuan_sosial: Math.random() > 0.8,
+                tanggal_kunjungan_berikut: new Date('2026-07-15T08:00:00Z'),
               },
               {
                 tanggal_kunjungan: julyDate,
@@ -237,6 +254,16 @@ async function main() {
                 lingkar_kepala: randomDec(35.0, 52.0),
                 lingkar_lengan_atas: randomDec(10.0, 18.0),
                 kondisi: Math.random() > 0.1 ? 'Sehat' : 'Sakit',
+                nama_ayah: getRandomName(),
+                nama_ibu: getRandomName(),
+                penggunaan_kontrasepsi: Math.random() > 0.5 ? 'IUD' : 'Pil',
+                catatan: 'Perkembangan normal, anak aktif.',
+                asi_eksklusif: Math.random() > 0.5,
+                zscore_bb_u: randomDec(-2.0, 2.0),
+                zscore_tb_u: randomDec(-2.0, 2.0),
+                zscore_bb_tb: randomDec(-2.0, 2.0),
+                fasilitasi_bantuan_sosial: Math.random() > 0.8,
+                tanggal_kunjungan_berikut: new Date('2026-08-10T08:00:00Z'),
               }
             ]
           }
@@ -260,6 +287,10 @@ async function main() {
           tanggal_lahir: randomDate(new Date('1985-01-01'), new Date('2005-12-31')),
           tempat_lahir: getRandomKota(),
           alamat: getRandomAlamat(),
+          nama_ayah: getRandomName('L'), // Suami/Ayah dari bayi
+          nama_ibu: getRandomName('P'), // Ibu dari bumil
+          tempat_persalinan: Math.random() > 0.5 ? 'Bidan' : 'Puskesmas',
+          penggunaan_kontrasepsi: Math.random() > 0.5 ? 'IUD' : 'Pil',
           hpht: randomDate(new Date('2025-09-01'), new Date('2026-03-01')),
           htp: randomDate(new Date('2026-06-01'), new Date('2026-12-31')),
           pemeriksaan_bumil: {
@@ -271,6 +302,19 @@ async function main() {
                 lingkar_perut: randomDec(80.0, 110.0),
                 lingkar_lengan_atas: randomDec(20.0, 35.0),
                 usia_kehamilan_minggu: randomInt(4, 38),
+                tinggi_fundus: randomDec(15.0, 35.0),
+                catatan: 'Kehamilan sehat, ibu tidak mengeluh mual berlebihan.',
+                jumlah_anak: randomInt(1, 4),
+                riwayat_penyakit: Math.random() > 0.8 ? 'Hipertensi' : 'Tidak ada',
+                kadar_hemoglobin: randomDec(10.0, 14.0),
+                berat_janin: randomDec(1.0, 3.5),
+                terpapar_rokok: Math.random() > 0.7,
+                kie: true,
+                suplemen_tambah_darah: randomInt(10, 30),
+                mms: randomInt(0, 5),
+                fasilitasi_rujukan: false,
+                fasilitasi_bantuan_sosial: Math.random() > 0.8,
+                tanggal_kunjungan_berikut: new Date('2026-07-15T08:00:00Z'),
               },
               {
                 tanggal_kunjungan: julyDate,
@@ -279,6 +323,19 @@ async function main() {
                 lingkar_perut: randomDec(80.0, 110.0),
                 lingkar_lengan_atas: randomDec(20.0, 35.0),
                 usia_kehamilan_minggu: randomInt(8, 40),
+                tinggi_fundus: randomDec(15.0, 35.0),
+                catatan: 'Perkembangan janin baik, detak jantung normal.',
+                jumlah_anak: randomInt(1, 4),
+                riwayat_penyakit: Math.random() > 0.8 ? 'Diabetes Gestasional' : 'Tidak ada',
+                kadar_hemoglobin: randomDec(10.0, 14.0),
+                berat_janin: randomDec(1.0, 3.5),
+                terpapar_rokok: Math.random() > 0.7,
+                kie: true,
+                suplemen_tambah_darah: randomInt(10, 30),
+                mms: randomInt(0, 5),
+                fasilitasi_rujukan: Math.random() > 0.9,
+                fasilitasi_bantuan_sosial: Math.random() > 0.8,
+                tanggal_kunjungan_berikut: new Date('2026-08-10T08:00:00Z'),
               }
             ]
           }
@@ -302,8 +359,12 @@ async function main() {
           tanggal_lahir: randomDate(new Date('1985-01-01'), new Date('2005-12-31')),
           tempat_lahir: getRandomKota(),
           alamat: getRandomAlamat(),
+          nama_ayah: getRandomName('L'),
+          nama_ibu: getRandomName('P'),
           tempat_persalinan: Math.random() > 0.5 ? 'Bidan' : 'Puskesmas',
           penggunaan_kontrasepsi: Math.random() > 0.5 ? 'IUD' : 'Pil',
+          hpht: randomDate(new Date('2025-09-01'), new Date('2026-03-01')),
+          htp: randomDate(new Date('2026-06-01'), new Date('2026-12-31')),
           pemeriksaan_pasca_persalinan: {
             create: [
               {
@@ -315,6 +376,12 @@ async function main() {
                 tekanan_darah_diastolik: randomInt(60, 90),
                 tinggi_badan_bayi: randomDec(45.0, 55.0),
                 berat_badan_bayi: randomDec(2.5, 4.5),
+                kondisi_ibu: 'Sehat, pemulihan lancar',
+                catatan: 'Ibu disarankan untuk banyak konsumsi sayur hijau.',
+                kie: true,
+                fasilitasi_rujukan: false,
+                fasilitasi_bantuan_sosial: Math.random() > 0.8,
+                tanggal_kunjungan_berikut: new Date('2026-07-15T08:00:00Z'),
               },
               {
                 tanggal_kunjungan: julyDate,
@@ -325,6 +392,12 @@ async function main() {
                 tekanan_darah_diastolik: randomInt(60, 90),
                 tinggi_badan_bayi: randomDec(45.0, 55.0),
                 berat_badan_bayi: randomDec(2.5, 4.5),
+                kondisi_ibu: 'Ibu sehat dan menyusui eksklusif',
+                catatan: 'Asupan gizi ibu menyusui perlu dipertahankan.',
+                kie: true,
+                fasilitasi_rujukan: false,
+                fasilitasi_bantuan_sosial: Math.random() > 0.8,
+                tanggal_kunjungan_berikut: new Date('2026-08-10T08:00:00Z'),
               }
             ]
           }
@@ -348,6 +421,8 @@ async function main() {
           tanggal_lahir: randomDate(new Date('1945-01-01'), new Date('1965-12-31')),
           tempat_lahir: getRandomKota(),
           alamat: getRandomAlamat(),
+          nama_ayah: getRandomName('L'),
+          nama_ibu: getRandomName('P'),
           pemeriksaan_lansia: {
             create: [
               {
@@ -359,6 +434,7 @@ async function main() {
                 gula_darah_sewaktu: randomInt(80, 200),
                 kolesterol: randomInt(150, 300),
                 asam_urat: randomDec(3.0, 9.0),
+                catatan: 'Tekanan darah cukup tinggi, perlu kurangi garam.',
               },
               {
                 tanggal_kunjungan: julyDate,
@@ -369,6 +445,7 @@ async function main() {
                 gula_darah_sewaktu: randomInt(80, 200),
                 kolesterol: randomInt(150, 300),
                 asam_urat: randomDec(3.0, 9.0),
+                catatan: 'Gula darah normal, kolesterol perlu dipantau.',
               }
             ]
           }
