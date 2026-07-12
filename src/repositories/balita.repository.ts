@@ -4,6 +4,8 @@ import { prisma } from '../lib/prisma';
 export interface FindAllBalitaParams {
   bulan?: number;
   tahun?: number;
+  startDate?: string;
+  endDate?: string;
   page?: number;
   limit?: number;
   search?: string;
@@ -18,7 +20,12 @@ export class BalitaRepository {
 
     const where: Prisma.PemeriksaanBalitaBadutaWhereInput = {};
 
-    if (params.bulan && params.tahun) {
+    if (params.startDate && params.endDate) {
+      where.tanggal_kunjungan = {
+        gte: new Date(params.startDate),
+        lte: new Date(params.endDate),
+      };
+    } else if (params.bulan && params.tahun) {
       // Assuming we filter by month and year of tanggal_kunjungan
       const startDate = new Date(params.tahun, params.bulan - 1, 1);
       const endDate = new Date(params.tahun, params.bulan, 1);

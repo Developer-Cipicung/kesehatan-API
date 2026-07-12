@@ -4,6 +4,8 @@ import { prisma } from '../lib/prisma';
 export interface FindAllLansiaParams {
   bulan?: number;
   tahun?: number;
+  startDate?: string;
+  endDate?: string;
   page?: number;
   limit?: number;
   search?: string;
@@ -18,7 +20,12 @@ export class LansiaRepository {
 
     const where: Prisma.PemeriksaanLansiaWhereInput = {};
 
-    if (params.bulan && params.tahun) {
+    if (params.startDate && params.endDate) {
+      where.tanggal_kunjungan = {
+        gte: new Date(params.startDate),
+        lte: new Date(params.endDate),
+      };
+    } else if (params.bulan && params.tahun) {
       const startDate = new Date(params.tahun, params.bulan - 1, 1);
       const endDate = new Date(params.tahun, params.bulan, 1);
 
