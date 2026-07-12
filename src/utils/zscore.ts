@@ -1,3 +1,4 @@
+import { calculateAll } from '@pedi-growth/core';
 
 export interface ZScoreParams {
   jenis_kelamin: 'L' | 'P';
@@ -19,8 +20,7 @@ export interface ZScoreResult {
 
 export async function calculateZScoreWHO(params: ZScoreParams): Promise<ZScoreResult> {
   try {
-    const pediGrowth = await import('@pedi-growth/core');
-    const calculateAll = pediGrowth.calculateAll;
+    // use static calculateAll
 
     const assessment = await calculateAll({
       sex: params.jenis_kelamin === 'L' ? 'male' : 'female',
