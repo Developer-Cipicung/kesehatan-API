@@ -19,7 +19,7 @@ export interface ZScoreResult {
 
 export async function calculateZScoreWHO(params: ZScoreParams): Promise<ZScoreResult> {
   try {
-    const pediGrowth = await new Function("return import('@pedi-growth/core')")();
+    const pediGrowth = await import('@pedi-growth/core');
     const calculateAll = pediGrowth.calculateAll;
 
     const assessment = await calculateAll({
