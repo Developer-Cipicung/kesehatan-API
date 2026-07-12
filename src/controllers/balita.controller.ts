@@ -3,6 +3,7 @@ import { BalitaService } from '../services/balita.service';
 import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
 import { getOptionalPosyanduId, getRequiredPosyanduId } from '../utils/posyandu';
+import { calculateZScoreWHO, classifyZScore } from '../utils/zscore';
 
 const balitaService = new BalitaService();
 
@@ -51,4 +52,24 @@ export const updateBalita = asyncHandler(async (req: Request, res: Response) => 
 export const deleteBalita = asyncHandler(async (req: Request, res: Response) => {
   const data = await balitaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan balita berhasil dihapus.', data);
+});
+
+export const calculateBalitaZscore = asyncHandler(async (req: Request, res: Response) => {
+  const { jenis_kelamin, tanggal_lahir, tanggal_kunjungan, bb, tb, lingkar_kepala } = req.body;
+  if (!jenis_kelamin || !tanggal_lahir || !tanggal_kunjungan || bb == null || tb == null) {
+     return res.status(400).json({ success: false, message: 'Parameter tidak lengkap' });
+  }
+  
+  const zscore = await calculateZScoreWHO({
+     jenis_kelamin, 
+     tanggal_lahir: new Date(tanggal_lahir),
+     tanggal_kunjungan: new Date(tanggal_kunjungan),
+     bb: Number(bb),
+     tb: Number(tb),
+     lingkar_kepala: lingkar_kepala ? Number(lingkar_kepala) : undefined
+  });
+  
+  const categories = classifyZScore(zscore.bb_u, zscore.tb_u, zscore.bb_tb);
+  
+  return successResponse(res, 200, 'Z-Score berhasil dikalkulasi', { ...zscore, categories });
 });
