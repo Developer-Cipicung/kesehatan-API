@@ -172,6 +172,38 @@ async function main() {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   }
 
+  function getRandomNik() {
+    const prefix = '3201';
+    const rest = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('');
+    return prefix + rest;
+  }
+
+  function getRandomPhone() {
+    const length = randomInt(8, 11);
+    const rest = Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
+    return `08${rest}`;
+  }
+
+  function getRandomLilaBalita() {
+    const rand = Math.random();
+    if (rand < 0.15) return randomDec(9.0, 11.4);
+    if (rand < 0.30) return randomDec(11.5, 12.4);
+    return randomDec(12.5, 16.0);
+  }
+
+  function getRandomLilaBumil() {
+    const rand = Math.random();
+    if (rand < 0.3) return randomDec(18.0, 23.4);
+    return randomDec(23.5, 32.0);
+  }
+
+  function getRandomTbBalita() {
+    const rand = Math.random();
+    if (rand < 0.2) return randomDec(45.0, 65.0); // Sangat Pendek / Pendek
+    if (rand < 0.8) return randomDec(65.0, 95.0); // Normal
+    return randomDec(95.0, 115.0); // Tinggi
+  }
+
   // 4. Create 10 Warga records for each category with June & July 2026 checkups for EACH Posyandu
   const juneDate = new Date('2026-06-15T08:00:00Z');
   const julyDate = new Date('2026-07-10T08:00:00Z');
@@ -208,8 +240,8 @@ async function main() {
       balitaPromises.push(prisma.warga.create({
         data: {
           posyandu_id: posyandu.id,
-          nomor: `BALITA-${posyanduPrefix}-${i.toString().padStart(3, '0')}`,
-          nik: `320101${posyanduPrefix}00${i.toString().padStart(4, '0')}`,
+          nomor: getRandomPhone(),
+          nik: getRandomNik(),
           jenis_kelamin: i % 2 === 0 ? 'L' : 'P',
           nama: getRandomName(i % 2 === 0 ? 'L' : 'P'),
           nama_ayah: getRandomName('L'),
@@ -232,9 +264,9 @@ async function main() {
               {
                 tanggal_kunjungan: juneDate,
                 bb: randomDec(3.0, 20.0),
-                tb: randomDec(50.0, 110.0),
+                tb: getRandomTbBalita(),
                 lingkar_kepala: randomDec(35.0, 52.0),
-                lingkar_lengan_atas: randomDec(10.0, 18.0),
+                lingkar_lengan_atas: getRandomLilaBalita(),
                 kondisi: Math.random() > 0.1 ? 'Sehat' : 'Sakit',
                 nama_ayah: getRandomName(),
                 nama_ibu: getRandomName(),
@@ -250,9 +282,9 @@ async function main() {
               {
                 tanggal_kunjungan: julyDate,
                 bb: randomDec(3.0, 20.0),
-                tb: randomDec(50.0, 110.0),
+                tb: getRandomTbBalita(),
                 lingkar_kepala: randomDec(35.0, 52.0),
-                lingkar_lengan_atas: randomDec(10.0, 18.0),
+                lingkar_lengan_atas: getRandomLilaBalita(),
                 kondisi: Math.random() > 0.1 ? 'Sehat' : 'Sakit',
                 nama_ayah: getRandomName(),
                 nama_ibu: getRandomName(),
@@ -279,8 +311,8 @@ async function main() {
       bumilPromises.push(prisma.warga.create({
         data: {
           posyandu_id: posyandu.id,
-          nomor: `BUMIL-${posyanduPrefix}-${i.toString().padStart(3, '0')}`,
-          nik: `320102${posyanduPrefix}00${i.toString().padStart(4, '0')}`,
+          nomor: getRandomPhone(),
+          nik: getRandomNik(),
           jenis_kelamin: 'P',
           nama: getRandomName('P'),
           status_kehamilan: 'HAMIL',
@@ -300,7 +332,7 @@ async function main() {
                 bb: randomDec(45.0, 90.0),
                 tb: randomDec(145.0, 170.0),
                 lingkar_perut: randomDec(80.0, 110.0),
-                lingkar_lengan_atas: randomDec(20.0, 35.0),
+                lingkar_lengan_atas: getRandomLilaBumil(),
                 usia_kehamilan_minggu: randomInt(4, 38),
                 tinggi_fundus: randomDec(15.0, 35.0),
                 catatan: 'Kehamilan sehat, ibu tidak mengeluh mual berlebihan.',
@@ -321,7 +353,7 @@ async function main() {
                 bb: randomDec(45.0, 90.0),
                 tb: randomDec(145.0, 170.0),
                 lingkar_perut: randomDec(80.0, 110.0),
-                lingkar_lengan_atas: randomDec(20.0, 35.0),
+                lingkar_lengan_atas: getRandomLilaBumil(),
                 usia_kehamilan_minggu: randomInt(8, 40),
                 tinggi_fundus: randomDec(15.0, 35.0),
                 catatan: 'Perkembangan janin baik, detak jantung normal.',
@@ -351,8 +383,8 @@ async function main() {
       pascaPromises.push(prisma.warga.create({
         data: {
           posyandu_id: posyandu.id,
-          nomor: `PASCA-${posyanduPrefix}-${i.toString().padStart(3, '0')}`,
-          nik: `320103${posyanduPrefix}00${i.toString().padStart(4, '0')}`,
+          nomor: getRandomPhone(),
+          nik: getRandomNik(),
           jenis_kelamin: 'P',
           nama: getRandomName('P'),
           status_kehamilan: 'PASCA_PERSALINAN',
@@ -413,8 +445,8 @@ async function main() {
       lansiaPromises.push(prisma.warga.create({
         data: {
           posyandu_id: posyandu.id,
-          nomor: `LANSIA-${posyanduPrefix}-${i.toString().padStart(3, '0')}`,
-          nik: `320104${posyanduPrefix}00${i.toString().padStart(4, '0')}`,
+          nomor: getRandomPhone(),
+          nik: getRandomNik(),
           jenis_kelamin: i % 2 === 0 ? 'L' : 'P',
           nama: getRandomName(i % 2 === 0 ? 'L' : 'P'),
           status_kehamilan: 'TIDAK_HAMIL',
