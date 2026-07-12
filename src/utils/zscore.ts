@@ -3,8 +3,8 @@ export interface ZScoreParams {
   jenis_kelamin: 'L' | 'P';
   tanggal_lahir: Date;
   tanggal_kunjungan: Date;
-  bb: number; // in kg
-  tb: number; // in cm
+  bb?: number; // in kg
+  tb?: number; // in cm
   lingkar_kepala?: number;
 }
 

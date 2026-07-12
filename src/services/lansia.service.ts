@@ -49,9 +49,7 @@ export class LansiaService {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
-    if (calculateAgeInYears(warga.tanggal_lahir) < 60) {
-      throw new AppError(422, 'Warga tidak valid untuk kategori lansia (umur < 60 tahun).');
-    }
+    // Age validation removed as Lansia is now the fallback category for adults
 
     const date = new Date(data.tanggal_kunjungan);
     await lockService.ensureNotLocked(

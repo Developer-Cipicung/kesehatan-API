@@ -58,7 +58,7 @@ export const deleteBalita = asyncHandler(async (req: Request, res: Response) => 
 
 export const calculateBalitaZscore = asyncHandler(async (req: Request, res: Response) => {
   const { jenis_kelamin, tanggal_lahir, tanggal_kunjungan, bb, tb, lingkar_kepala } = req.body;
-  if (!jenis_kelamin || !tanggal_lahir || !tanggal_kunjungan || bb == null || tb == null) {
+  if (!jenis_kelamin || !tanggal_lahir || !tanggal_kunjungan || (bb == null && tb == null && lingkar_kepala == null)) {
      return res.status(400).json({ success: false, message: 'Parameter tidak lengkap' });
   }
   
@@ -66,9 +66,9 @@ export const calculateBalitaZscore = asyncHandler(async (req: Request, res: Resp
      jenis_kelamin, 
      tanggal_lahir: new Date(tanggal_lahir),
      tanggal_kunjungan: new Date(tanggal_kunjungan),
-     bb: Number(bb),
-     tb: Number(tb),
-     lingkar_kepala: lingkar_kepala ? Number(lingkar_kepala) : undefined
+     bb: bb != null ? Number(bb) : undefined,
+     tb: tb != null ? Number(tb) : undefined,
+     lingkar_kepala: lingkar_kepala != null ? Number(lingkar_kepala) : undefined
   });
   
   const categories = classifyZScore(zscore.bb_u, zscore.tb_u, zscore.bb_tb);
