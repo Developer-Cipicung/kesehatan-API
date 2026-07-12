@@ -71,7 +71,7 @@ export class BalitaRepository {
   async findById(id: string, posyanduId: string) {
     return prisma.pemeriksaanBalitaBaduta.findFirst({ 
       where: { id, warga: { posyandu_id: posyanduId } }, 
-      include: { warga: true } 
+      include: { warga: { include: { posyandu: true } } } 
     });
   }
 

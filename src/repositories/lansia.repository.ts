@@ -48,7 +48,7 @@ export class LansiaRepository {
         skip,
         take: limit,
         orderBy: { tanggal_kunjungan: 'desc' },
-        include: { warga: true },
+        include: { warga: { include: { posyandu: true } } },
       }),
       prisma.pemeriksaanLansia.count({ where }),
     ]);
@@ -62,7 +62,7 @@ export class LansiaRepository {
   async findById(id: string, posyanduId: string) {
     return prisma.pemeriksaanLansia.findFirst({ 
       where: { id, warga: { posyandu_id: posyanduId } }, 
-      include: { warga: true } 
+      include: { warga: { include: { posyandu: true } } } 
     });
   }
 

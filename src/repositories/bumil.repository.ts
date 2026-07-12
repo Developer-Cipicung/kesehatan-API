@@ -48,7 +48,7 @@ export class BumilRepository {
         skip,
         take: limit,
         orderBy: { tanggal_kunjungan: 'desc' },
-        include: { warga: true },
+        include: { warga: { include: { posyandu: true } } },
       }),
       prisma.pemeriksaanBumil.count({ where }),
     ]);
@@ -62,7 +62,7 @@ export class BumilRepository {
   async findById(id: string, posyanduId: string) {
     return prisma.pemeriksaanBumil.findFirst({ 
       where: { id, warga: { posyandu_id: posyanduId } }, 
-      include: { warga: true } 
+      include: { warga: { include: { posyandu: true } } } 
     });
   }
 
