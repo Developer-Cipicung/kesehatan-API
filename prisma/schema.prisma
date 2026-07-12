@@ -89,8 +89,14 @@ model Warga {
   penggunaan_kontrasepsi String?
   nama_ayah              String?
   nama_ibu               String?
+  hpht                   DateTime?       @db.Date
+  htp                    DateTime?       @db.Date
   created_at             DateTime        @default(now())
   updated_at             DateTime        @updatedAt
+
+  ibu_id                 String?         @db.Uuid
+  ibu                    Warga?          @relation("IbuAnak", fields: [ibu_id], references: [id])
+  anak                   Warga[]         @relation("IbuAnak")
 
   posyandu Posyandu @relation(fields: [posyandu_id], references: [id])
 
@@ -157,8 +163,6 @@ model PemeriksaanBumil {
   tinggi_fundus           Decimal? @db.Decimal(5, 2)
   lingkar_lengan_atas     Decimal  @db.Decimal(5, 2)
   usia_kehamilan_minggu   Int
-  hpht                    DateTime @db.Date
-  htp                     DateTime @db.Date
   catatan                   String?   @db.Text
   jumlah_anak               Int?
   riwayat_penyakit          String?   @db.Text

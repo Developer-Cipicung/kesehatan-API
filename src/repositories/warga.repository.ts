@@ -81,6 +81,11 @@ export class WargaRepository {
       include.pemeriksaan_pasca_persalinan = { orderBy: { created_at: 'desc' }, take: 1 };
       include.pemeriksaan_lansia = { orderBy: { created_at: 'desc' }, take: 1 };
     }
+    
+    // Always include ibu if it's a child
+    if (params.kategori === 'baduta' || params.kategori === 'balita' || !params.kategori) {
+      include.ibu = true;
+    }
 
     const [data, total] = await Promise.all([
       prisma.warga.findMany({
@@ -112,6 +117,7 @@ export class WargaRepository {
         pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 1 },
         pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 1 },
         pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 1 },
+        ibu: true,
       }
     });
   }

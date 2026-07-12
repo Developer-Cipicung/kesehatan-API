@@ -13,6 +13,9 @@ export const createWargaSchema = z.object({
   penggunaan_kontrasepsi: z.string().optional(),
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
+  ibu_id: z.string().uuid().optional(),
+  hpht: z.string().date().transform(val => new Date(val).toISOString()).optional(),
+  htp: z.string().date().transform(val => new Date(val).toISOString()).optional(),
 });
 
 export const updateWargaSchema = createWargaSchema.partial();

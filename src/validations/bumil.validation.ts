@@ -9,8 +9,6 @@ export const createBumilSchema = z.object({
   lingkar_lengan_atas: z.number().min(0),
   tinggi_fundus: z.number().min(0).optional(),
   usia_kehamilan_minggu: z.number().int().min(0),
-  hpht: z.string().date().transform(val => new Date(val).toISOString()),
-  htp: z.string().date().transform(val => new Date(val).toISOString()),
   jumlah_anak: z.number().int().min(0).optional(),
   riwayat_penyakit: z.string().optional(),
   kadar_hemoglobin: z.number().min(0),
