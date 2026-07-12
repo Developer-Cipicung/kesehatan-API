@@ -158,19 +158,19 @@ export class PendataanBulananService {
 
     return {
       balita: balita.map((b: any) => ({ 
-        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, created_at: b.created_at,
         bb: b.bb, tb: b.tb, tanggal_lahir: b.warga.tanggal_lahir
       })),
       bumil: bumil.map((b: any) => ({ 
-        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, created_at: b.created_at,
         bb: b.bb, usia_kehamilan_minggu: b.usia_kehamilan_minggu, lingkar_lengan_atas: b.lingkar_lengan_atas 
       })),
       pasca_persalinan: pasca.map((b: any) => ({ 
-        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, created_at: b.created_at,
         td_sistolik: b.tekanan_darah_sistolik, td_diastolik: b.tekanan_darah_diastolik 
       })),
       lansia: lansia.map((b: any) => ({ 
-        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, 
+        id: b.id, nama: b.warga.nama, tanggal: b.tanggal_kunjungan, created_at: b.created_at,
         bb: b.bb, td_sistolik: b.tekanan_darah_sistolik, td_diastolik: b.tekanan_darah_diastolik, gula_darah_sewaktu: b.gula_darah_sewaktu 
       })),
       warga_baru: wargaBaru.map((w: any) => ({
