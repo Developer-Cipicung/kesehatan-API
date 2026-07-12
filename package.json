@@ -24,7 +24,6 @@
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "@pedi-growth/core": "^1.1.0",
     "@prisma/client": "^6.19.3",
     "@supabase/supabase-js": "^2.110.0",
     "cors": "^2.8.6",
