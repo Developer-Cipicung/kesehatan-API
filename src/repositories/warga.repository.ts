@@ -52,9 +52,10 @@ export class WargaRepository {
         eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
         where.tanggal_lahir = { lte: fiveYearsAgo, gt: eighteenYearsAgo };
       } else if (params.kategori === 'lansia') {
-        const sixtyYearsAgo = new Date();
-        sixtyYearsAgo.setFullYear(now.getFullYear() - 60);
-        where.tanggal_lahir = { lte: sixtyYearsAgo };
+        // Lansia (now used as fallback for all adults), exclude balita/baduta and pregnant/pasca women
+        const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
+        where.tanggal_lahir = { lte: fiveYearsAgo };
+        where.status_kehamilan = 'TIDAK_HAMIL';
       } else if (params.kategori === 'bumil') {
         where.jenis_kelamin = 'P';
         where.status_kehamilan = 'HAMIL';
