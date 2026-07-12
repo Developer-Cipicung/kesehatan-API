@@ -134,3 +134,11 @@ Untuk mencoba API secara langsung dengan data dummy lengkap (termasuk pemeriksaa
 
 - NIK dienkripsi/divalidasi sebelum masuk database.
 - Terdapat mekanisme penguncian (Locking Mechanism) untuk pendataan bulanan yang menandakan periode bulan berjalan telah selesai dan data tidak bisa dimodifikasi.
+
+## 📊 Standar Pertumbuhan (Z-Score)
+
+Perhitungan status gizi balita pada sistem ini (BB/U, TB/U, dan BB/TB) dilakukan secara mandiri di dalam server menggunakan rumus matematis **Box-Cox Power Exponential (LMS)**. 
+Dataset referensi yang digunakan bersumber langsung dari standar resmi **WHO Child Growth Standards (2006)**.
+
+Referensi tabel L, M, S dapat divalidasi langsung melalui portal resmi WHO:
+👉 [WHO Child Growth Standards - LMS Tables](https://www.who.int/tools/child-growth-standards/standards)
