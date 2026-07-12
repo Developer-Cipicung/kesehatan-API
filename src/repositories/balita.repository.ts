@@ -44,7 +44,11 @@ export class BalitaRepository {
         orderBy: { tanggal_kunjungan: 'desc' },
         include: { 
           warga: { 
-            include: { riwayat_imunisasi: { orderBy: { tanggal_pemberian: 'asc' } } } 
+            include: { 
+              riwayat_imunisasi: { orderBy: { tanggal_pemberian: 'asc' } },
+              ibu: true,
+              posyandu: true
+            } 
           } 
         },
       }),
