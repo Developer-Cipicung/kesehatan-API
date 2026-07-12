@@ -114,10 +114,11 @@ export class WargaRepository {
     return prisma.warga.findFirst({
       where: { id, posyandu_id: posyanduId },
       include: {
-        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 1 },
-        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 1 },
-        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 1 },
-        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 3 },
+        riwayat_imunisasi: { orderBy: { tanggal_pemberian: 'desc' }, take: 3 },
         ibu: true,
       }
     });
@@ -134,10 +135,11 @@ export class WargaRepository {
       where: { nik, tanggal_lahir: tanggalLahir },
       include: {
         posyandu: true,
-        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 1 },
-        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 1 },
-        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 1 },
-        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 1 },
+        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 3 },
+        riwayat_imunisasi: { orderBy: { tanggal_pemberian: 'desc' }, take: 3 },
       }
     });
   }

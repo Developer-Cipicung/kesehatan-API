@@ -39,6 +39,7 @@ export class WargaService {
       pemeriksaan_bumil: warga.pemeriksaan_bumil,
       pemeriksaan_pasca_persalinan: warga.pemeriksaan_pasca_persalinan,
       pemeriksaan_lansia: warga.pemeriksaan_lansia,
+      riwayat_imunisasi: warga.riwayat_imunisasi,
     };
   }
 
