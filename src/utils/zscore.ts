@@ -1,4 +1,4 @@
-import { calculateAll } from '@pedi-growth/core';
+
 
 export interface ZScoreParams {
   jenis_kelamin: 'L' | 'P';
@@ -21,6 +21,16 @@ export interface ZScoreResult {
 export async function calculateZScoreWHO(params: ZScoreParams): Promise<ZScoreResult> {
   try {
     // use static calculateAll
+    let pediGrowth: any;
+    try {
+      // Dummy require to force Vercel's NFT (Node File Trace) to bundle the package
+      require.resolve('@pedi-growth/core');
+    } catch (e) {
+      // Ignored: expected to throw ERR_PACKAGE_PATH_NOT_EXPORTED in CommonJS
+    }
+    // Dynamic import evaluated at runtime to bypass TypeScript's CommonJS transform
+    pediGrowth = await new Function("return import('@pedi-growth/core')")();
+    const calculateAll = pediGrowth.calculateAll;
 
     const assessment = await calculateAll({
       sex: params.jenis_kelamin === 'L' ? 'male' : 'female',
