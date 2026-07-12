@@ -9,6 +9,8 @@ export const createPascaPersalinanSchema = z.object({
   kondisi_ibu: z.string().optional(),
   tinggi_badan_bayi: z.number().min(0).optional(),
   berat_badan_bayi: z.number().min(0).optional(),
+  tekanan_darah_sistolik: z.number().min(0).optional(),
+  tekanan_darah_diastolik: z.number().min(0).optional(),
   kie: z.boolean().optional(),
   fasilitasi_rujukan: z.boolean().optional(),
   fasilitasi_bantuan_sosial: z.boolean().optional(),

@@ -187,6 +187,8 @@ model PemeriksaanPascaPersalinan {
   tanggal_persalinan      DateTime @db.Date
   bb                      Decimal  @db.Decimal(5, 2)
   tb                      Decimal? @db.Decimal(5, 2)
+  tekanan_darah_sistolik  Int?
+  tekanan_darah_diastolik Int?
   kondisi_ibu             String?  @db.Text
   catatan                   String?   @db.Text
   tinggi_badan_bayi         Decimal?  @db.Decimal(5, 2)
