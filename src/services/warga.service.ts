@@ -2,6 +2,7 @@ import { WargaRepository, FindAllWargaParams } from '../repositories/warga.repos
 import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
+import { clearDashboardCache } from './dashboard.service';
 
 const wargaRepo = new WargaRepository();
 
@@ -49,7 +50,35 @@ export class WargaService {
 
     const created = await wargaRepo.create(data);
     auditLogService.logAction(userId, data.posyandu_id, 'CREATE', 'Warga', created.id, null, created);
+    
+    // Invalidate dashboard cache
+    clearDashboardCache(data.posyandu_id);
+    
     return created;
+  }
+
+  async bulkCreate(dataList: Prisma.WargaUncheckedCreateInput[], posyanduId: string, userId: string) {
+    // Filter out potential duplicates already in the payload itself (by NIK)
+    const uniqueDataMap = new Map<string, Prisma.WargaUncheckedCreateInput>();
+    for (const item of dataList) {
+      if (!uniqueDataMap.has(item.nik)) {
+        uniqueDataMap.set(item.nik, { ...item, posyandu_id: posyanduId });
+      }
+    }
+    const uniqueDataList = Array.from(uniqueDataMap.values());
+
+    // In PostgreSQL / Prisma, createMany with skipDuplicates will ignore rows that violate unique constraints
+    const result = await wargaRepo.createMany(uniqueDataList);
+    
+    auditLogService.logAction(userId, posyanduId, 'CREATE', 'Warga', 'bulk', null, { count: result.count });
+    
+    // Invalidate dashboard cache
+    clearDashboardCache(posyanduId);
+    
+    return {
+      count: result.count,
+      message: `${result.count} data warga berhasil diimpor.`
+    };
   }
 
   async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId: string, userId: string) {

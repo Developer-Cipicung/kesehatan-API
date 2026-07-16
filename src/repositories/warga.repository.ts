@@ -52,9 +52,9 @@ export class WargaRepository {
         eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
         where.tanggal_lahir = { lte: fiveYearsAgo, gt: eighteenYearsAgo };
       } else if (params.kategori === 'lansia') {
-        // Lansia (now used as fallback for all adults), exclude balita/baduta and pregnant/pasca women
-        const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
-        where.tanggal_lahir = { lte: fiveYearsAgo };
+        // Lansia: >= 60 years old
+        const sixtyYearsAgo = getBirthDateCutoffInMonths(720, now);
+        where.tanggal_lahir = { lte: sixtyYearsAgo };
         where.status_kehamilan = 'TIDAK_HAMIL';
       } else if (params.kategori === 'bumil') {
         where.jenis_kelamin = 'P';
@@ -147,6 +147,13 @@ export class WargaRepository {
   async create(data: Prisma.WargaUncheckedCreateInput) {
     return prisma.warga.create({
       data,
+    });
+  }
+
+  async createMany(data: Prisma.WargaUncheckedCreateInput[]) {
+    return prisma.warga.createMany({
+      data,
+      skipDuplicates: true,
     });
   }
 

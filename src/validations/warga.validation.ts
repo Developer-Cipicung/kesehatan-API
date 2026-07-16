@@ -19,3 +19,5 @@ export const createWargaSchema = z.object({
 });
 
 export const updateWargaSchema = createWargaSchema.partial();
+
+export const bulkCreateWargaSchema = z.array(createWargaSchema);

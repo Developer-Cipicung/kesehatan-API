@@ -7,7 +7,7 @@ export const createLansiaSchema = z.object({
   tb: z.number().min(0),
   tekanan_darah_sistolik: z.number().int().min(0),
   tekanan_darah_diastolik: z.number().int().min(0),
-  gula_darah_sewaktu: z.number().min(0),
+  gula_darah_sewaktu: z.number().min(0).optional(),
   kolesterol: z.number().int().min(0).optional(),
   asam_urat: z.number().min(0).optional(),
   catatan: z.string().optional(),

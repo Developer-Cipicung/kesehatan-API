@@ -38,6 +38,15 @@ export const createWarga = asyncHandler(async (req: Request, res: Response) => {
   return successResponse(res, 201, 'Warga berhasil ditambahkan.', data);
 });
 
+export const bulkCreateWarga = asyncHandler(async (req: Request, res: Response) => {
+  const data = await wargaService.bulkCreate(
+    req.body, // Assumes body is already validated as an array of Warga by Zod middleware
+    getRequiredPosyanduId(req),
+    req.appUser!.id,
+  );
+  return successResponse(res, 201, data.message, data);
+});
+
 export const updateWarga = asyncHandler(async (req: Request, res: Response) => {
   const data = await wargaService.update(
     req.params.id as string,

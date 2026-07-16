@@ -9,6 +9,14 @@ const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 const cache = new Map<string, { data: any; expiry: number }>();
 const pendingCache = new Map<string, Promise<any>>();
 
+export const clearDashboardCache = (posyanduId?: string) => {
+  if (posyanduId) {
+    cache.delete(posyanduId);
+  } else {
+    cache.clear();
+  }
+};
+
 export class DashboardService {
   async getSummary(posyanduId?: string) {
     const nowCache = Date.now();
