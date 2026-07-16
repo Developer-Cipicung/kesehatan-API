@@ -68,19 +68,19 @@ export class WargaRepository {
     // Build dynamic include object based on kategori
     const include: Prisma.WargaInclude = {};
     if (params.kategori === 'baduta' || params.kategori === 'balita') {
-      include.pemeriksaan_balita_baduta = { orderBy: { created_at: 'desc' }, take: 1 };
+      include.pemeriksaan_balita_baduta = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
     } else if (params.kategori === 'bumil') {
-      include.pemeriksaan_bumil = { orderBy: { created_at: 'desc' }, take: 1 };
+      include.pemeriksaan_bumil = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
     } else if (params.kategori === 'pasca_persalinan') {
-      include.pemeriksaan_pasca_persalinan = { orderBy: { created_at: 'desc' }, take: 1 };
+      include.pemeriksaan_pasca_persalinan = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
     } else if (params.kategori === 'lansia') {
-      include.pemeriksaan_lansia = { orderBy: { created_at: 'desc' }, take: 1 };
+      include.pemeriksaan_lansia = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
     } else if (!params.kategori) {
       // If no category specified, include all just in case, but this should be rare for limit=10000
-      include.pemeriksaan_balita_baduta = { orderBy: { created_at: 'desc' }, take: 1 };
-      include.pemeriksaan_bumil = { orderBy: { created_at: 'desc' }, take: 1 };
-      include.pemeriksaan_pasca_persalinan = { orderBy: { created_at: 'desc' }, take: 1 };
-      include.pemeriksaan_lansia = { orderBy: { created_at: 'desc' }, take: 1 };
+      include.pemeriksaan_balita_baduta = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
+      include.pemeriksaan_bumil = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
+      include.pemeriksaan_pasca_persalinan = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
+      include.pemeriksaan_lansia = { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 1 };
     }
     
     // Always include ibu if it's a child
@@ -114,10 +114,10 @@ export class WargaRepository {
     return prisma.warga.findFirst({
       where: { id, posyandu_id: posyanduId },
       include: {
-        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 3 },
-        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 3 },
-        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 3 },
-        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_balita_baduta: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
+        pemeriksaan_bumil: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
+        pemeriksaan_pasca_persalinan: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
+        pemeriksaan_lansia: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
         riwayat_imunisasi: { orderBy: { tanggal_pemberian: 'desc' }, take: 3 },
         ibu: true,
       }
@@ -135,10 +135,10 @@ export class WargaRepository {
       where: { nik, tanggal_lahir: tanggalLahir },
       include: {
         posyandu: true,
-        pemeriksaan_balita_baduta: { orderBy: { created_at: 'desc' }, take: 3 },
-        pemeriksaan_bumil: { orderBy: { created_at: 'desc' }, take: 3 },
-        pemeriksaan_pasca_persalinan: { orderBy: { created_at: 'desc' }, take: 3 },
-        pemeriksaan_lansia: { orderBy: { created_at: 'desc' }, take: 3 },
+        pemeriksaan_balita_baduta: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
+        pemeriksaan_bumil: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
+        pemeriksaan_pasca_persalinan: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
+        pemeriksaan_lansia: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
         riwayat_imunisasi: { orderBy: { tanggal_pemberian: 'desc' }, take: 3 },
       }
     });
