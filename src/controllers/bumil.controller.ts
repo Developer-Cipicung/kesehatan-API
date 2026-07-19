@@ -40,6 +40,11 @@ export const createBumil = asyncHandler(async (req: Request, res: Response) => {
   return successResponse(res, 201, 'Pemeriksaan bumil berhasil ditambahkan.', data);
 });
 
+export const bulkCreateBumil = asyncHandler(async (req: Request, res: Response) => {
+  const data = await bumilService.bulkCreate(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  return successResponse(res, 201, 'Data pemeriksaan massal bumil berhasil ditambahkan.', data);
+});
+
 export const updateBumil = asyncHandler(async (req: Request, res: Response) => {
   const data = await bumilService.update(
     req.params.id as string,

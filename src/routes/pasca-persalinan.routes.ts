@@ -4,6 +4,7 @@ import {
   getPascaPersalinanById,
   getPascaPersalinanHistory,
   createPascaPersalinan,
+  bulkCreatePascaPersalinan,
   updatePascaPersalinan,
   deletePascaPersalinan,
 } from '../controllers/pasca-persalinan.controller';
@@ -20,6 +21,7 @@ router.use(authMiddleware);
 
 router.get('/', getPascaPersalinan);
 router.post('/', validateRequest(createPascaPersalinanSchema), createPascaPersalinan);
+router.post('/bulk-pemeriksaan', bulkCreatePascaPersalinan);
 router.get('/:id', getPascaPersalinanById);
 router.put('/:id', validateRequest(updatePascaPersalinanSchema), updatePascaPersalinan);
 router.delete('/:id', deletePascaPersalinan);

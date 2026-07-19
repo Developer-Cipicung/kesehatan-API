@@ -40,6 +40,11 @@ export const createLansia = asyncHandler(async (req: Request, res: Response) => 
   return successResponse(res, 201, 'Pemeriksaan lansia berhasil ditambahkan.', data);
 });
 
+export const bulkCreateLansia = asyncHandler(async (req: Request, res: Response) => {
+  const data = await lansiaService.bulkCreate(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  return successResponse(res, 201, 'Data pemeriksaan massal lansia berhasil ditambahkan.', data);
+});
+
 export const updateLansia = asyncHandler(async (req: Request, res: Response) => {
   const data = await lansiaService.update(
     req.params.id as string,

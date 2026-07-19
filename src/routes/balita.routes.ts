@@ -4,6 +4,7 @@ import {
   getBalitaById,
   getBalitaHistory,
   createBalita,
+  bulkCreateBalita,
   updateBalita,
   deleteBalita,
   calculateBalitaZscore,
@@ -18,6 +19,7 @@ router.use(authMiddleware);
 
 router.get('/', getBalita);
 router.post('/', validateRequest(createBalitaSchema), createBalita);
+router.post('/bulk-pemeriksaan', bulkCreateBalita);
 router.post('/calculate-zscore', calculateBalitaZscore);
 router.get('/:id', getBalitaById);
 router.put('/:id', validateRequest(updateBalitaSchema), updateBalita);

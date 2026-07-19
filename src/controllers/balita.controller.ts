@@ -41,6 +41,11 @@ export const createBalita = asyncHandler(async (req: Request, res: Response) => 
   return successResponse(res, 201, 'Pemeriksaan balita berhasil ditambahkan.', data);
 });
 
+export const bulkCreateBalita = asyncHandler(async (req: Request, res: Response) => {
+  const data = await balitaService.bulkCreate(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  return successResponse(res, 201, 'Data pemeriksaan massal balita berhasil ditambahkan.', data);
+});
+
 export const updateBalita = asyncHandler(async (req: Request, res: Response) => {
   const data = await balitaService.update(
     req.params.id as string,

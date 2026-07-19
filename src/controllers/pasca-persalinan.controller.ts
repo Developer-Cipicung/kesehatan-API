@@ -43,6 +43,11 @@ export const createPascaPersalinan = asyncHandler(async (req: Request, res: Resp
   return successResponse(res, 201, 'Pemeriksaan pasca persalinan berhasil ditambahkan.', data);
 });
 
+export const bulkCreatePascaPersalinan = asyncHandler(async (req: Request, res: Response) => {
+  const data = await pascaPersalinanService.bulkCreate(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  return successResponse(res, 201, 'Data pemeriksaan massal pasca persalinan berhasil ditambahkan.', data);
+});
+
 export const updatePascaPersalinan = asyncHandler(async (req: Request, res: Response) => {
   const data = await pascaPersalinanService.update(
     req.params.id as string,

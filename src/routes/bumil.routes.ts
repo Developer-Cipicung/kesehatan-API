@@ -4,6 +4,7 @@ import {
   getBumilById,
   getBumilHistory,
   createBumil,
+  bulkCreateBumil,
   updateBumil,
   deleteBumil,
 } from '../controllers/bumil.controller';
@@ -17,6 +18,7 @@ router.use(authMiddleware);
 
 router.get('/', getBumil);
 router.post('/', validateRequest(createBumilSchema), createBumil);
+router.post('/bulk-pemeriksaan', bulkCreateBumil);
 router.get('/:id', getBumilById);
 router.put('/:id', validateRequest(updateBumilSchema), updateBumil);
 router.delete('/:id', deleteBumil);

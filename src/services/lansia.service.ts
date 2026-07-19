@@ -5,6 +5,10 @@ import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
 import { calculateAgeInYears } from '../utils/age';
 import { auditLogService } from './audit-log.service';
+import { prisma } from '../lib/prisma';
+import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.repository';
+
+const pendataanRepo = new PendataanBulananRepository();
 
 function calculateLansiaStatus(tekananDarahSistolik: number): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
   // Placeholder medical rule logic
@@ -62,6 +66,71 @@ export class LansiaService {
     const created = await lansiaRepo.create(data);
     auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanLansia', created.id, null, created);
     return mapWithStatus(created);
+  }
+
+  async bulkCreate(dataList: any[], posyanduId: string, userId: string) {
+    let successCount = 0;
+    const errors: string[] = [];
+
+    const niks = dataList.map(d => d.nik).filter(Boolean);
+    const wargasList = await prisma.warga.findMany({
+      where: {
+        posyandu_id: posyanduId,
+        nik: { in: niks },
+      }
+    });
+    
+    const wargaMap = new Map(wargasList.map((w: any) => [w.nik, w]));
+
+    for (const data of dataList) {
+       try {
+         const warga = wargaMap.get(data.nik);
+         if (!warga) {
+           errors.push(`NIK ${data.nik} tidak ditemukan.`);
+           continue;
+         }
+
+         const date = new Date(data.tanggal_kunjungan);
+         const month = date.getMonth() + 1;
+         const year = date.getFullYear();
+
+         await prisma.$transaction(async (tx: any) => {
+           const pemeriksaan = await tx.pemeriksaanLansia.create({ 
+             data: {
+               warga_id: warga.id,
+               tanggal_kunjungan: date.toISOString(),
+               bb: data.bb || 0,
+               tb: data.tb || 0,
+             } 
+           });
+           auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanLansia', pemeriksaan.id, null, pemeriksaan);
+         });
+         successCount++;
+       } catch (err: any) {
+         errors.push(`Gagal memproses NIK ${data.nik}: ${err.message}`);
+       }
+    }
+
+    if (successCount === 0 && dataList.length > 0) {
+      throw new AppError(400, 'Gagal mengimpor semua data: ' + errors.join(', '));
+    }
+
+    // Auto-verify all affected months
+    const uniquePeriods = new Set(dataList.map(d => {
+      const date = new Date(d.tanggal_kunjungan);
+      return `${date.getMonth() + 1}-${date.getFullYear()}`;
+    }));
+
+    for (const period of uniquePeriods) {
+      const [m, y] = period.split('-');
+      await pendataanRepo.upsert(posyanduId, parseInt(m), parseInt(y), {
+        status: 'selesai',
+        submitted_at: new Date(),
+        submitted_by: userId
+      });
+    }
+
+    return { successCount, errors };
   }
 
   async update(id: string, data: Prisma.PemeriksaanLansiaUncheckedUpdateInput, posyanduId: string, userId: string) {

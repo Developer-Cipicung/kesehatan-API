@@ -5,6 +5,7 @@ import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
 import { prisma } from '../lib/prisma';
+import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.repository';
 
 function mapWithStatus(record: any) {
   if (!record) return record;
@@ -33,6 +34,7 @@ function mapWithStatus(record: any) {
 const bumilRepo = new BumilRepository();
 const wargaRepo = new WargaRepository();
 const lockService = new LockValidationService();
+const pendataanRepo = new PendataanBulananRepository();
 
 export class BumilService {
   async findAll(params: FindAllBumilParams) {
@@ -80,6 +82,81 @@ export class BumilService {
     });
     auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', created.id, null, created);
     return mapWithStatus(created);
+  }
+
+  async bulkCreate(dataList: any[], posyanduId: string, userId: string) {
+    let successCount = 0;
+    const errors: string[] = [];
+
+    // Pre-fetch all matching warga by NIKs
+    const niks = dataList.map(d => d.nik).filter(Boolean);
+    const wargasList = await prisma.warga.findMany({
+      where: {
+        posyandu_id: posyanduId,
+        nik: { in: niks },
+        jenis_kelamin: 'P'
+      }
+    });
+    
+    const wargaMap = new Map(wargasList.map(w => [w.nik, w]));
+
+    for (const data of dataList) {
+       try {
+         const warga = wargaMap.get(data.nik);
+         if (!warga) {
+           errors.push(`NIK ${data.nik} tidak ditemukan atau bukan perempuan.`);
+           continue;
+         }
+
+         const date = new Date(data.tanggal_kunjungan);
+         const month = date.getMonth() + 1;
+         const year = date.getFullYear();
+
+         await prisma.$transaction(async (tx) => {
+           const pemeriksaan = await tx.pemeriksaanBumil.create({ 
+             data: {
+               warga_id: warga.id,
+               tanggal_kunjungan: date.toISOString(),
+               bb: data.bb || 0,
+               tb: data.tb || 0,
+               lingkar_perut: data.lingkar_perut || 0,
+               lingkar_lengan_atas: data.lingkar_lengan_atas || 0,
+               usia_kehamilan_minggu: data.usia_kehamilan_minggu || 0,
+               kadar_hemoglobin: data.kadar_hemoglobin || 0,
+             } 
+           });
+           await tx.warga.update({
+             where: { id: warga.id },
+             data: { status_kehamilan: 'HAMIL' },
+           });
+           auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', pemeriksaan.id, null, pemeriksaan);
+         });
+         successCount++;
+       } catch (err: any) {
+         errors.push(`Gagal memproses NIK ${data.nik}: ${err.message}`);
+       }
+    }
+
+    if (successCount === 0 && dataList.length > 0) {
+      throw new AppError(400, 'Gagal mengimpor semua data: ' + errors.join(', '));
+    }
+
+    // Auto-verify all affected months
+    const uniquePeriods = new Set(dataList.map(d => {
+      const date = new Date(d.tanggal_kunjungan);
+      return `${date.getMonth() + 1}-${date.getFullYear()}`;
+    }));
+
+    for (const period of uniquePeriods) {
+      const [m, y] = period.split('-');
+      await pendataanRepo.upsert(posyanduId, parseInt(m), parseInt(y), {
+        status: 'selesai',
+        submitted_at: new Date(),
+        submitted_by: userId
+      });
+    }
+
+    return { successCount, errors };
   }
 
   async update(id: string, data: Prisma.PemeriksaanBumilUncheckedUpdateInput, posyanduId: string, userId: string) {

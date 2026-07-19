@@ -4,6 +4,7 @@ import {
   getLansiaById,
   getLansiaHistory,
   createLansia,
+  bulkCreateLansia,
   updateLansia,
   deleteLansia,
 } from '../controllers/lansia.controller';
@@ -17,6 +18,7 @@ router.use(authMiddleware);
 
 router.get('/', getLansia);
 router.post('/', validateRequest(createLansiaSchema), createLansia);
+router.post('/bulk-pemeriksaan', bulkCreateLansia);
 router.get('/:id', getLansiaById);
 router.put('/:id', validateRequest(updateLansiaSchema), updateLansia);
 router.delete('/:id', deleteLansia);
