@@ -112,6 +112,19 @@ export class BumilService {
          const month = date.getMonth() + 1;
          const year = date.getFullYear();
 
+         let calculatedUsia = data.usia_kehamilan_minggu || 0;
+         let newHpht = data.hpht ? new Date(data.hpht) : warga.hpht;
+         
+         if (!calculatedUsia && newHpht) {
+            const diffMs = date.getTime() - newHpht.getTime();
+            calculatedUsia = Math.max(0, Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)));
+         }
+
+         const updateWargaData: any = { status_kehamilan: 'HAMIL' };
+         if (data.hpht) {
+            updateWargaData.hpht = new Date(data.hpht);
+         }
+
          await prisma.$transaction(async (tx) => {
            const pemeriksaan = await tx.pemeriksaanBumil.create({ 
              data: {
@@ -121,13 +134,13 @@ export class BumilService {
                tb: data.tb || 0,
                lingkar_perut: data.lingkar_perut || 0,
                lingkar_lengan_atas: data.lingkar_lengan_atas || 0,
-               usia_kehamilan_minggu: data.usia_kehamilan_minggu || 0,
+               usia_kehamilan_minggu: calculatedUsia,
                kadar_hemoglobin: data.kadar_hemoglobin || 0,
              } 
            });
            await tx.warga.update({
              where: { id: warga.id },
-             data: { status_kehamilan: 'HAMIL' },
+             data: updateWargaData,
            });
            auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', pemeriksaan.id, null, pemeriksaan);
          });
