@@ -78,15 +78,18 @@ model Warga {
   id               String          @id @default(uuid()) @db.Uuid
   posyandu_id      String          @db.Uuid
   nomor            String
-  nik              String          @unique
+  nik              String?         @unique
   nama             String
   jenis_kelamin    JenisKelamin
   status_kehamilan StatusKehamilan @default(TIDAK_HAMIL)
   tanggal_lahir          DateTime        @db.Date
   tempat_lahir           String?
   alamat                 String?         @db.Text
+  rt                     String?
+  rw                     String?
   tempat_persalinan      String?
   penggunaan_kontrasepsi String?
+  jumlah_anak            Int?
   nama_ayah              String?
   nama_ibu               String?
   hpht                   DateTime?       @db.Date
@@ -121,7 +124,6 @@ model PemeriksaanBalitaBaduta {
   lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
   nama_ayah           String?
   nama_ibu            String?
-  penggunaan_kontrasepsi    String?
   catatan                   String?   @db.Text
   kondisi                   String?
   asi_eksklusif             Boolean?
@@ -162,9 +164,8 @@ model PemeriksaanBumil {
   lingkar_perut           Decimal  @db.Decimal(5, 2)
   tinggi_fundus           Decimal? @db.Decimal(5, 2)
   lingkar_lengan_atas     Decimal  @db.Decimal(5, 2)
-  usia_kehamilan_minggu   Int
+  usia_kehamilan_minggu   Int?
   catatan                   String?   @db.Text
-  jumlah_anak               Int?
   riwayat_penyakit          String?   @db.Text
   kadar_hemoglobin          Decimal?  @db.Decimal(5, 2)
   berat_janin               Decimal?  @db.Decimal(5, 2)

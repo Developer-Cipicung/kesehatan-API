@@ -45,8 +45,12 @@ export class WargaService {
   }
 
   async create(data: Prisma.WargaUncheckedCreateInput, userId: string) {
-    const existing = await wargaRepo.findByNik(data.nik, data.posyandu_id);
-    if (existing) throw new AppError(409, 'NIK sudah terdaftar');
+    if (data.nik === '-') data.nik = null;
+    
+    if (data.nik) {
+      const existing = await wargaRepo.findByNik(data.nik, data.posyandu_id);
+      if (existing) throw new AppError(409, 'NIK sudah terdaftar');
+    }
 
     const created = await wargaRepo.create(data);
     auditLogService.logAction(userId, data.posyandu_id, 'CREATE', 'Warga', created.id, null, created);
@@ -61,8 +65,11 @@ export class WargaService {
     // Filter out potential duplicates already in the payload itself (by NIK)
     const uniqueDataMap = new Map<string, Prisma.WargaUncheckedCreateInput>();
     for (const item of dataList) {
-      if (!uniqueDataMap.has(item.nik)) {
-        uniqueDataMap.set(item.nik, { ...item, posyandu_id: posyanduId });
+      if (item.nik === '-') item.nik = null;
+      
+      const key = item.nik || `null-${Math.random()}`; // Allow multiple nulls
+      if (!uniqueDataMap.has(key)) {
+        uniqueDataMap.set(key, { ...item, posyandu_id: posyanduId });
       }
     }
     const uniqueDataList = Array.from(uniqueDataMap.values());
@@ -84,6 +91,8 @@ export class WargaService {
   async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId: string, userId: string) {
     const warga = await wargaRepo.findById(id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga not found');
+
+    if (data.nik === '-') data.nik = null;
 
     if (data.nik && data.nik !== warga.nik) {
       const existing = await wargaRepo.findByNik(data.nik as string, posyanduId);

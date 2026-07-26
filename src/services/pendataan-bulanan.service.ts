@@ -116,6 +116,30 @@ export class PendataanBulananService {
     return updated;
   }
 
+  async batalkanVerifikasi(id: string, posyanduId: string, userId: string) {
+    const record = await pendataanRepo.findById(id, posyanduId);
+    if (!record) {
+      throw new AppError(404, 'Data pendataan bulanan tidak ditemukan.');
+    }
+
+    if (record.status !== 'selesai') {
+      return record;
+    }
+
+    const { prisma } = await import('../lib/prisma');
+    const updated = await prisma.pendataanBulanan.update({
+      where: { id },
+      data: {
+        status: 'draft',
+        submitted_at: null,
+        submitted_by: null,
+      },
+    });
+
+    auditLogService.logAction(userId, posyanduId, 'UNVERIFY', 'PendataanBulanan', id, record, updated);
+    return updated;
+  }
+
   async getSummaryList(posyanduId: string, bulan: number, tahun: number) {
     const { prisma } = await import('../lib/prisma');
     const startDate = new Date(tahun, bulan - 1, 1);
