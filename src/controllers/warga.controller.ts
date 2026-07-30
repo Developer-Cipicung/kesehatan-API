@@ -61,3 +61,13 @@ export const deleteWarga = asyncHandler(async (req: Request, res: Response) => {
   const data = await wargaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Warga berhasil dihapus.', data);
 });
+
+export const tandaiBersalin = asyncHandler(async (req: Request, res: Response) => {
+  const data = await wargaService.tandaiBersalin(
+    req.params.id as string,
+    getRequiredPosyanduId(req),
+    req.appUser!.id,
+    req.body
+  );
+  return successResponse(res, 200, 'Warga berhasil ditandai telah bersalin, dan data bayi telah dibuat.', data);
+});

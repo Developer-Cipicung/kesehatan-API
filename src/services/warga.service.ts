@@ -1,5 +1,6 @@
 import { WargaRepository, FindAllWargaParams } from '../repositories/warga.repository';
 import { Prisma } from '../../prisma/generated-schema';
+import { prisma } from '../lib/prisma';
 import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
 import { clearDashboardCache } from './dashboard.service';
@@ -105,11 +106,80 @@ export class WargaService {
   }
 
   async delete(id: string, posyanduId: string, userId: string) {
-    const warga = await wargaRepo.findById(id, posyanduId);
-    if (!warga) throw new AppError(404, 'Warga not found');
+    const record = await this.findById(id, posyanduId);
+    if (record) {
+      await wargaRepo.delete(id, posyanduId);
+      auditLogService.logAction(userId, posyanduId, 'DELETE', 'Warga', id, record, null);
+      clearDashboardCache(posyanduId);
+    }
+    return record;
+  }
 
-    const deleted = await wargaRepo.delete(id, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'DELETE', 'Warga', id, warga, null);
-    return deleted;
+  async tandaiBersalin(
+    ibuId: string,
+    posyanduId: string,
+    userId: string,
+    data: {
+      tanggal_persalinan: string;
+      tempat_persalinan: string;
+      nama_bayi: string;
+      jenis_kelamin_bayi: 'L' | 'P';
+      nama_ayah: string;
+    }
+  ) {
+    const ibu = await this.findById(ibuId, posyanduId);
+    if (!ibu) throw new AppError(404, 'Data ibu tidak ditemukan');
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Update Ibu
+      const updatedIbu = await tx.warga.update({
+        where: { id: ibuId },
+        data: {
+          status_kehamilan: 'PASCA_PERSALINAN',
+          tempat_persalinan: data.tempat_persalinan,
+        },
+      });
+
+      // 2. Create Pemeriksaan Pasca Persalinan for Ibu
+      // Fetch latest bumil checkup for BB
+      const lastBumil = await tx.pemeriksaanBumil.findFirst({
+        where: { warga_id: ibuId },
+        orderBy: { tanggal_kunjungan: 'desc' },
+      });
+      await tx.pemeriksaanPascaPersalinan.create({
+        data: {
+          warga_id: ibuId,
+          tanggal_kunjungan: new Date(),
+          tanggal_persalinan: new Date(data.tanggal_persalinan),
+          bb: lastBumil?.bb || 0,
+          catatan: 'Data otomatis dari perubahan status Ibu Hamil ke Pasca Persalinan',
+        },
+      });
+
+      // 3. Create Bayi Warga Record
+      const bayi = await tx.warga.create({
+        data: {
+          posyandu_id: posyanduId,
+          nama: data.nama_bayi,
+          jenis_kelamin: data.jenis_kelamin_bayi,
+          tanggal_lahir: new Date(data.tanggal_persalinan),
+          tempat_lahir: data.tempat_persalinan,
+          nomor: ibu.nomor, // Inherit from mom
+          alamat: ibu.alamat,
+          rt: ibu.rt,
+          rw: ibu.rw,
+          ibu_id: ibuId,
+          nama_ibu: ibu.nama,
+          nama_ayah: data.nama_ayah,
+        },
+      });
+
+      return { ibu: updatedIbu, bayi };
+    });
+
+    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'Warga', ibuId, null, { action: 'Tandai Bersalin', data: result });
+    clearDashboardCache(posyanduId);
+
+    return result;
   }
 }
