@@ -104,6 +104,7 @@ export class BalitaService {
     });
     
     const wargaMap = new Map(wargasList.map((w: any) => [w.nik, w]));
+    const validRecords: any[] = [];
 
     for (const data of dataList) {
        try {
@@ -114,25 +115,27 @@ export class BalitaService {
          }
 
          const date = new Date(data.tanggal_kunjungan);
-         const month = date.getMonth() + 1;
-         const year = date.getFullYear();
-
-         await prisma.$transaction(async (tx: any) => {
-           const pemeriksaan = await tx.pemeriksaanBalitaBaduta.create({ 
-             data: {
-               warga_id: warga.id,
-               tanggal_kunjungan: date.toISOString(),
-               bb: data.bb || 0,
-               tb: data.tb || 0,
-               lingkar_kepala: data.lingkar_kepala || 0,
-             } 
-           });
-           auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBalita', pemeriksaan.id, null, pemeriksaan);
+         
+         validRecords.push({
+           warga_id: warga.id,
+           tanggal_kunjungan: date.toISOString(),
+           bb: data.bb || 0,
+           tb: data.tb || 0,
+           lingkar_kepala: data.lingkar_kepala || 0,
          });
+         
          successCount++;
        } catch (err: any) {
          errors.push(`Gagal memproses NIK ${data.nik}: ${err.message}`);
        }
+    }
+
+    if (validRecords.length > 0) {
+      const result = await prisma.pemeriksaanBalitaBaduta.createMany({
+        data: validRecords,
+        skipDuplicates: true
+      });
+      auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBalita', 'bulk', null, { count: result.count });
     }
 
     if (successCount === 0 && dataList.length > 0) {

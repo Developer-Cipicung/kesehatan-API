@@ -16,7 +16,7 @@ export const createWargaSchema = z.object({
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
   jumlah_anak: z.union([z.string(), z.number()]).transform(v => typeof v === 'string' && v.trim() !== '' ? parseInt(v, 10) : v).optional(),
-  ibu_id: z.string().uuid().optional(),
+  ibu_id: z.string().uuid().optional().nullable(),
   hpht: z.string().date().transform(val => new Date(val).toISOString()).optional(),
   htp: z.string().date().transform(val => new Date(val).toISOString()).optional(),
 });

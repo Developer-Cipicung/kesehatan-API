@@ -100,6 +100,10 @@ export class BumilService {
     
     const wargaMap = new Map(wargasList.map(w => [w.nik, w]));
 
+    const validPemeriksaan: any[] = [];
+    const wargaUpdatePromises: any[] = [];
+    const affectedWargaIds = new Set<string>();
+
     for (const data of dataList) {
        try {
          const warga = wargaMap.get(data.nik);
@@ -109,9 +113,7 @@ export class BumilService {
          }
 
          const date = new Date(data.tanggal_kunjungan);
-         const month = date.getMonth() + 1;
-         const year = date.getFullYear();
-
+         
          let calculatedUsia = data.usia_kehamilan_minggu || 0;
          let newHpht = data.hpht ? new Date(data.hpht) : warga.hpht;
          
@@ -120,34 +122,51 @@ export class BumilService {
             calculatedUsia = Math.max(0, Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)));
          }
 
-         const updateWargaData: any = { status_kehamilan: 'HAMIL' };
+         validPemeriksaan.push({
+           warga_id: warga.id,
+           tanggal_kunjungan: date.toISOString(),
+           bb: data.bb || 0,
+           tb: data.tb || 0,
+           lingkar_perut: data.lingkar_perut || 0,
+           lingkar_lengan_atas: data.lingkar_lengan_atas || 0,
+           usia_kehamilan_minggu: calculatedUsia,
+           kadar_hemoglobin: data.kadar_hemoglobin || 0,
+         });
+
          if (data.hpht) {
-            updateWargaData.hpht = new Date(data.hpht);
+           wargaUpdatePromises.push((tx: any) => tx.warga.update({
+             where: { id: warga.id },
+             data: { status_kehamilan: 'HAMIL', hpht: new Date(data.hpht) }
+           }));
+         } else {
+           affectedWargaIds.add(warga.id);
          }
 
-         await prisma.$transaction(async (tx) => {
-           const pemeriksaan = await tx.pemeriksaanBumil.create({ 
-             data: {
-               warga_id: warga.id,
-               tanggal_kunjungan: date.toISOString(),
-               bb: data.bb || 0,
-               tb: data.tb || 0,
-               lingkar_perut: data.lingkar_perut || 0,
-               lingkar_lengan_atas: data.lingkar_lengan_atas || 0,
-               usia_kehamilan_minggu: calculatedUsia,
-               kadar_hemoglobin: data.kadar_hemoglobin || 0,
-             } 
-           });
-           await tx.warga.update({
-             where: { id: warga.id },
-             data: updateWargaData,
-           });
-           auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', pemeriksaan.id, null, pemeriksaan);
-         });
          successCount++;
        } catch (err: any) {
          errors.push(`Gagal memproses NIK ${data.nik}: ${err.message}`);
        }
+    }
+
+    if (validPemeriksaan.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        // Bulk insert
+        await tx.pemeriksaanBumil.createMany({ data: validPemeriksaan });
+        
+        // Bulk update status HAMIL for those without specific hpht
+        if (affectedWargaIds.size > 0) {
+          await tx.warga.updateMany({
+            where: { id: { in: Array.from(affectedWargaIds) } },
+            data: { status_kehamilan: 'HAMIL' }
+          });
+        }
+        
+        // Individual updates for specific hpht
+        for (const updateFn of wargaUpdatePromises) {
+          await updateFn(tx);
+        }
+      });
+      auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', 'bulk', null, { count: validPemeriksaan.length });
     }
 
     if (successCount === 0 && dataList.length > 0) {
