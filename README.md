@@ -1,41 +1,31 @@
-# Posyandu Digital API (Backend)
+# API Dashboard Kesehatan Cipicung
 
-Backend REST API untuk Sistem Digitalisasi Posyandu. Proyek ini dibangun menggunakan Node.js, Express.js, TypeScript, dan Prisma ORM dengan database PostgreSQL (Supabase).
+Backend REST API untuk Sistem Dashboard Kesehatan Cipicung. Proyek ini dibangun menggunakan Node.js, Express.js, TypeScript, dan Prisma ORM dengan database PostgreSQL (Supabase), dirancang untuk mendukung operasional kader posyandu dari pencatatan hingga pelaporan secara terpusat dan digital.
 
-## 🚀 Fitur Utama
+## 📑 Daftar Isi 
+- [Teknologi (Tech Stack)](#-teknologi-tech-stack)
+- [Quick Start](#-quick-start)
+- [Commands](#-commands)
+- [Architecture & Struktur Proyek](#-architecture--struktur-proyek)
+- [Deployment (Vercel)](#-deployment-vercel)
+- [Dokumentasi API & Pengujian](#-dokumentasi-api--pengujian)
 
-- **Authentication & Authorization**: Supabase JWT (Bearer Token)
-- **Validation**: Schema-based validation using Zod
-- **Database**: PostgreSQL (Supabase) + Prisma ORM
-- **Error Handling**: Centralized error mapping
-- **API Documentation**: OpenAPI 3.1.0 Swagger UI
-
-## 📋 Modul Sistem
-
-- Manajemen Posyandu
-- Registrasi Warga
-- Pemeriksaan Balita (Tumbuh Kembang)
-- Riwayat Imunisasi
-- Pemeriksaan Ibu Hamil
-- Pemeriksaan Pasca Persalinan
-- Pemeriksaan Lansia
-- Tracking Pendataan Bulanan (Penguncian Data)
-- Dashboard & Global Patient Search (One-Stop Action Center)
-
-## 🛠 Teknologi
+## 🛠 Teknologi (Tech Stack)
 
 - **Runtime**: Node.js 22+
 - **Framework**: Express.js
 - **Language**: TypeScript
 - **ORM**: Prisma Client
+- **Database**: PostgreSQL (via Supabase)
 - **Validation**: Zod
 - **Logger**: Pino
 - **Security**: Helmet, CORS, Express-Rate-Limit
+- **Authentication**: Supabase JWT (Bearer Token)
 
-## 📦 Instalasi
+## 🚀 Quick Start
 
 1. Clone repositori ini.
-2. Install dependensi:
+2. Install dependensi: 
    ```bash
    npm install
    ```
@@ -52,93 +42,58 @@ Backend REST API untuk Sistem Digitalisasi Posyandu. Proyek ini dibangun menggun
    ```bash
    npx prisma generate
    ```
+7. Jalankan server:
+   ```bash
+   npm run dev
+   ```
 
-## 🚀 Menjalankan Server
+## 💻 Commands
 
-### Development
-```bash
-npm run dev
-```
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Menjalankan development server dengan fitur auto-reload |
+| `npm run build` | Melakukan compile TypeScript ke JavaScript untuk environment production |
+| `npm start` | Menjalankan server production dari hasil build |
+| `npm test` | Menjalankan *unit test* dan *integration test* menggunakan Jest |
+| `npx prisma db seed` | Menghapus dan mengisi ulang database dengan data *dummy* secara otomatis |
 
-### Production Build
-```bash
-npm run build
-npm start
-```
+## 🏗 Architecture & Struktur Proyek
 
-### Deploy ke Vercel
-Kalau backend ini dipasang ke Vercel, pakai konfigurasi ini:
+Proyek ini dibangun dengan arsitektur MVC berlapis (*Layered Architecture*) untuk memisahkan *concern* dan mempermudah pengujian:
 
-```bash
-npm install
-npm run build
-```
+- `/src/controllers` — Menangani *request/response* HTTP
+- `/src/services` — Berisi *business logic* dan validasi operasional tingkat lanjut
+- `/src/repositories` — Menangani isolasi akses data dan query menggunakan Prisma ORM
+- `/src/validations` — Skema Zod untuk validasi ketat *payload request*
+- `/src/routes` — Registrasi *routing endpoint* API Express
+- `/docs` — Spesifikasi teknis, ADRs (Architecture Decision Records), dan rancangan database
 
-File `vercel.json` sudah disiapkan untuk route semua request ke handler serverless di folder `api`.
+**Catatan Arsitektur:**
+- **Z-Score Calculation**: Perhitungan status gizi balita dilakukan secara mandiri di sisi server menggunakan rumus matematis **Box-Cox Power Exponential (LMS)** berdasarkan dataset referensi **WHO Child Growth Standards (2006)**.
 
-### Checklist Vercel
-Sebelum klik deploy, pastikan ini sudah diisi di Project Settings Vercel:
+## ☁️ Deployment (Vercel)
 
-- `DATABASE_URL`
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` jika memang dipakai backend
+File `vercel.json` telah dikonfigurasi untuk menjalankan aplikasi ini sebagai kumpulan Serverless Functions (`api/index.ts`).
 
-`JWT_SECRET` tidak dipakai oleh flow auth yang ada sekarang. Token login dan validasi user saat ini semuanya lewat Supabase Auth, jadi secret itu baru perlu kalau nanti kamu menambah JWT custom sendiri.
+### Checklist Produksi
+1. Jika terjadi error resolusi dependensi (seperti `jest-mock-extended`), pastikan Anda menjalankan install dengan konfigurasi `.npmrc` (`legacy-peer-deps=true`).
+2. Pastikan *Environment Variables* berikut dikonfigurasi di Vercel:
+   - `DATABASE_URL`
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY` (jika digunakan)
 
-Kalau pakai domain produksi, pastikan CORS di backend mengizinkan origin frontend yang benar. Untuk backend ini, Swagger UI tetap tersedia di `/api-docs` selama file docs ikut terbaca saat build serverless.
+## 📚 Dokumentasi API & Pengujian
 
-## 📚 Dokumentasi API
-
-Sistem menyediakan interaktif Swagger UI untuk mengeksplorasi API secara langsung.
-
-Setelah server berjalan, akses melalui browser:
+Sistem menyediakan **Swagger UI** interaktif yang selalu diperbarui, dapat diakses di:
 ```
 http://localhost:3000/api-docs
 ```
 
-## 🧪 Panduan Testing API
-
-Untuk mencoba API secara langsung dengan data dummy lengkap (termasuk pemeriksaan Balita, Lansia, Bumil, dsb.), ikuti langkah berikut:
-
-1. **Jalankan Seed Database**
-   Pastikan Anda sudah menjalankan migrasi (`npx prisma migrate dev`), lalu jalankan perintah seed berikut untuk membuat dummy data secara otomatis:
-   ```bash
-   npx prisma db seed
-   ```
-   *(Catatan: Perintah ini akan menghapus data lama dan mereset Posyandu serta Warga agar tidak terjadi konflik NIK).*
-
-2. **Gunakan Swagger UI (Auto-Auth)**
-   - Buka Swagger UI di `http://localhost:3000/api-docs`.
-   - Buka endpoint `POST /api/v1/auth/login` dan gunakan kredensial berikut untuk login uji coba:
-     - **Email**: `kader@cipicung.com`
-     - **Password**: `kader123`
-   - Klik **Execute**. 
-   - 🎉 **Selesai!** Script internal kami akan secara otomatis menangkap token dari response dan mengotorisasi seluruh sesi Swagger Anda. Anda tidak perlu lagi melakukan copy-paste secara manual ke tombol Authorize di atas!
-   - *(Catatan: Tersedia juga tombol "Copy Bearer Token" di bawah hasil response jika Anda membutuhkan tokennya untuk pengujian manual menggunakan Postman).*
-
-3. **Mulai Mengeksplorasi API**
-   - Setelah login, semua gembok di sebelah kanan setiap endpoint akan terkunci (terotorisasi).
-   - Sekarang Anda dapat langsung mencoba endpoint `GET /api/v1/balita`, `GET /api/v1/dashboard`, dll. Semua data dari proses seeding akan muncul dan otomatis difilter khusus untuk Posyandu dari akun Anda (tenant isolation).
-
-## 📄 Struktur Proyek
-
-- `/src/controllers` — Logic request dan response HTTP
-- `/src/services` — Business logic dan validasi operasional
-- `/src/repositories` — Akses ke database (Prisma)
-- `/src/validations` — Schema Zod
-- `/src/routes` — Pendaftaran routing Express
-- `/docs` — Spesifikasi arsitektur, database, dan tugas
-
-## 🔐 Keamanan & Validasi Bulanan
-
-- NIK dienkripsi/divalidasi sebelum masuk database.
-- Terdapat mekanisme penguncian (Locking Mechanism) untuk pendataan bulanan yang menandakan periode bulan berjalan telah selesai dan data tidak bisa dimodifikasi.
-
-## 📊 Standar Pertumbuhan (Z-Score)
-
-Perhitungan status gizi balita pada sistem ini (BB/U, TB/U, dan BB/TB) dilakukan secara mandiri di dalam server menggunakan rumus matematis **Box-Cox Power Exponential (LMS)**. 
-Dataset referensi yang digunakan bersumber langsung dari standar resmi **WHO Child Growth Standards (2006)**.
-
-Referensi tabel L, M, S dapat divalidasi langsung melalui portal resmi WHO:
-👉 [WHO Child Growth Standards - LMS Tables](https://www.who.int/tools/child-growth-standards/standards)
+### Panduan Testing & Auto-Auth
+1. Jalankan seed database (`npx prisma db seed`).
+2. Buka Swagger UI, cari endpoint `POST /api/v1/auth/login`.
+3. Login menggunakan data uji coba:
+   - **Email**: `kader@cipicung.com`
+   - **Password**: `kader123`
+4. Klik **Execute**. Script internal swagger UI secara otomatis akan menangkap Bearer Token dan mengunci (authorize) sesi Anda, sehingga Anda dapat langsung mencoba endpoint privat seperti `GET /api/v1/balita` tanpa perlu memasukkan token secara manual.
