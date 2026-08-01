@@ -75,6 +75,35 @@ export class WargaService {
     }
     const uniqueDataList = Array.from(uniqueDataMap.values());
 
+    // Auto-link mothers (ibu_id) if nama_ibu matches an existing mother's name
+    const namaIbuList = [...new Set(uniqueDataList.map(item => item.nama_ibu).filter(Boolean))] as string[];
+    if (namaIbuList.length > 0) {
+      const existingMothers = await wargaRepo.findAll({
+        posyanduId,
+        jenisKelamin: 'P',
+        limit: 10000 // Get as many as possible to match
+      });
+      
+      const motherMap = new Map<string, string>();
+      // Note: Since name is not unique, this will pick the first match.
+      // But we refine it by ensuring it matches the exact name and posyandu
+      for (const mother of existingMothers.data) {
+        const normalizedName = mother.nama.trim().toLowerCase();
+        if (!motherMap.has(normalizedName)) {
+          motherMap.set(normalizedName, mother.id);
+        }
+      }
+
+      for (const item of uniqueDataList) {
+        if (item.nama_ibu) {
+          const normalizedInput = item.nama_ibu.trim().toLowerCase();
+          if (motherMap.has(normalizedInput)) {
+            item.ibu_id = motherMap.get(normalizedInput);
+          }
+        }
+      }
+    }
+
     // In PostgreSQL / Prisma, createMany with skipDuplicates will ignore rows that violate unique constraints
     const result = await wargaRepo.createMany(uniqueDataList);
     
