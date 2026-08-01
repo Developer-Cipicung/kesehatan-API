@@ -1,7 +1,7 @@
 export function classifyZScore(bb_u: number | null, tb_u: number | null, bb_tb: number | null) {
-  let kategori_bb_u = null;
-  let kategori_tb_u = null;
-  let kategori_bb_tb = null;
+  let kategori_bb_u = 'Tidak Ada';
+  let kategori_tb_u = 'Tidak Ada';
+  let kategori_bb_tb = 'Tidak Ada';
 
   if (bb_u !== null) {
     if (bb_u < -3) kategori_bb_u = 'Sangat Kurang';

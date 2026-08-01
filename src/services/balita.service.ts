@@ -10,8 +10,9 @@ import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.re
 
 import { calculateZScoreWHO, classifyZScore } from '../utils/zscore';
 
-function calculateBalitaStatus(bb: number): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
+function calculateBalitaStatus(bb: number | null): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' | 'Tidak Ada' {
   // Placeholder medical rule logic
+  if (bb === null) return 'Tidak Ada';
   if (bb < 5) return 'Dirujuk';
   if (bb < 10) return 'Perlu Perhatian';
   return 'Normal';
@@ -27,7 +28,7 @@ function mapWithStatus(record: any) {
 
   return {
     ...record,
-    status_medis: calculateBalitaStatus(Number(record.bb)),
+    status_medis: calculateBalitaStatus(record.bb !== null ? Number(record.bb) : null),
     status_gizi: categories
   };
 }
@@ -77,9 +78,9 @@ export class BalitaService {
       jenis_kelamin: warga.jenis_kelamin as 'L' | 'P',
       tanggal_lahir: warga.tanggal_lahir,
       tanggal_kunjungan: date,
-      bb: Number(data.bb),
-      tb: Number(data.tb),
-      lingkar_kepala: data.lingkar_kepala ? Number(data.lingkar_kepala) : undefined,
+      bb: data.bb !== null && data.bb !== undefined ? Number(data.bb) : undefined,
+      tb: data.tb !== null && data.tb !== undefined ? Number(data.tb) : undefined,
+      lingkar_kepala: data.lingkar_kepala !== null && data.lingkar_kepala !== undefined ? Number(data.lingkar_kepala) : undefined,
     });
 
     data.zscore_bb_u = zscore.bb_u;
@@ -119,9 +120,9 @@ export class BalitaService {
          validRecords.push({
            warga_id: warga.id,
            tanggal_kunjungan: date.toISOString(),
-           bb: data.bb || 0,
-           tb: data.tb || 0,
-           lingkar_kepala: data.lingkar_kepala || 0,
+           bb: data.bb || data.bb === 0 ? (data.bb === 0 || data.bb === '-' ? null : data.bb) : null,
+           tb: data.tb || data.tb === 0 ? (data.tb === 0 || data.tb === '-' ? null : data.tb) : null,
+           lingkar_kepala: data.lingkar_kepala || data.lingkar_kepala === 0 ? (data.lingkar_kepala === 0 || data.lingkar_kepala === '-' ? null : data.lingkar_kepala) : null,
          });
          
          successCount++;
@@ -189,9 +190,9 @@ export class BalitaService {
       jenis_kelamin: warga.jenis_kelamin as 'L' | 'P',
       tanggal_lahir: warga.tanggal_lahir,
       tanggal_kunjungan: data.tanggal_kunjungan ? new Date(data.tanggal_kunjungan as Date | string) : oldDate,
-      bb: data.bb ? Number(data.bb) : Number(record.bb),
-      tb: data.tb ? Number(data.tb) : Number(record.tb),
-      lingkar_kepala: data.lingkar_kepala ? Number(data.lingkar_kepala) : (record.lingkar_kepala ? Number(record.lingkar_kepala) : undefined),
+      bb: data.bb !== undefined ? (data.bb === null ? undefined : Number(data.bb)) : (record.bb !== null ? Number(record.bb) : undefined),
+      tb: data.tb !== undefined ? (data.tb === null ? undefined : Number(data.tb)) : (record.tb !== null ? Number(record.tb) : undefined),
+      lingkar_kepala: data.lingkar_kepala !== undefined ? (data.lingkar_kepala === null ? undefined : Number(data.lingkar_kepala)) : (record.lingkar_kepala !== null ? Number(record.lingkar_kepala) : undefined),
     });
 
     data.zscore_bb_u = zscore.bb_u;

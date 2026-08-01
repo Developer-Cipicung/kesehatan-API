@@ -77,12 +77,12 @@ model User {
 model Warga {
   id               String          @id @default(uuid()) @db.Uuid
   posyandu_id      String          @db.Uuid
-  nomor            String
+  nomor            String?
   nik              String?         @unique
   nama             String
-  jenis_kelamin    JenisKelamin
-  status_kehamilan StatusKehamilan @default(TIDAK_HAMIL)
-  tanggal_lahir          DateTime        @db.Date
+  jenis_kelamin    JenisKelamin?
+  status_kehamilan StatusKehamilan? @default(TIDAK_HAMIL)
+  tanggal_lahir          DateTime?        @db.Date
   tempat_lahir           String?
   alamat                 String?         @db.Text
   rt                     String?
@@ -118,10 +118,10 @@ model PemeriksaanBalitaBaduta {
   id                  String   @id @default(uuid()) @db.Uuid
   warga_id            String   @db.Uuid
   tanggal_kunjungan   DateTime @db.Date
-  bb                  Decimal  @db.Decimal(5, 2)
-  tb                  Decimal  @db.Decimal(5, 2)
-  lingkar_kepala      Decimal  @db.Decimal(5, 2)
-  lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
+  bb                  Decimal?  @db.Decimal(5, 2)
+  tb                  Decimal?  @db.Decimal(5, 2)
+  lingkar_kepala      Decimal?  @db.Decimal(5, 2)
+  lingkar_lengan_atas Decimal?  @db.Decimal(5, 2)
   nama_ayah           String?
   nama_ibu            String?
   catatan                   String?   @db.Text
@@ -159,11 +159,11 @@ model PemeriksaanBumil {
   id                      String   @id @default(uuid()) @db.Uuid
   warga_id                String   @db.Uuid
   tanggal_kunjungan       DateTime @db.Date
-  bb                      Decimal  @db.Decimal(5, 2)
-  tb                      Decimal  @db.Decimal(5, 2)
-  lingkar_perut           Decimal  @db.Decimal(5, 2)
+  bb                      Decimal?  @db.Decimal(5, 2)
+  tb                      Decimal?  @db.Decimal(5, 2)
+  lingkar_perut           Decimal?  @db.Decimal(5, 2)
   tinggi_fundus           Decimal? @db.Decimal(5, 2)
-  lingkar_lengan_atas     Decimal  @db.Decimal(5, 2)
+  lingkar_lengan_atas     Decimal?  @db.Decimal(5, 2)
   usia_kehamilan_minggu   Int?
   catatan                   String?   @db.Text
   riwayat_penyakit          String?   @db.Text
@@ -189,8 +189,8 @@ model PemeriksaanPascaPersalinan {
   id                      String   @id @default(uuid()) @db.Uuid
   warga_id                String   @db.Uuid
   tanggal_kunjungan       DateTime @db.Date
-  tanggal_persalinan      DateTime @db.Date
-  bb                      Decimal  @db.Decimal(5, 2)
+  tanggal_persalinan      DateTime? @db.Date
+  bb                      Decimal?  @db.Decimal(5, 2)
   tb                      Decimal? @db.Decimal(5, 2)
   tekanan_darah_sistolik  Int?
   tekanan_darah_diastolik Int?
@@ -215,11 +215,11 @@ model PemeriksaanLansia {
   id                      String   @id @default(uuid()) @db.Uuid
   warga_id                String   @db.Uuid
   tanggal_kunjungan       DateTime @db.Date
-  bb                      Decimal  @db.Decimal(5, 2)
-  tb                      Decimal  @db.Decimal(5, 2)
-  tekanan_darah_sistolik  Int
-  tekanan_darah_diastolik Int
-  gula_darah_sewaktu      Int
+  bb                      Decimal?  @db.Decimal(5, 2)
+  tb                      Decimal?  @db.Decimal(5, 2)
+  tekanan_darah_sistolik  Int?
+  tekanan_darah_diastolik Int?
+  gula_darah_sewaktu      Int?
   kolesterol              Int?
   asam_urat               Decimal? @db.Decimal(4, 2)
   catatan                 String?  @db.Text
