@@ -8,7 +8,7 @@ import { AppError } from '../utils/AppError';
 const wargaService = new WargaService();
 
 const cekKartuSchema = z.object({
-  nik: z.string().length(16, 'NIK harus 16 karakter'),
+  nik: z.string().min(1, 'NIK wajib diisi'),
   tanggal_lahir: z.string().date('Format tanggal lahir harus YYYY-MM-DD'),
 });
 

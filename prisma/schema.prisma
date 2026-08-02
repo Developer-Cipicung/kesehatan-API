@@ -136,7 +136,7 @@ model PemeriksaanBalitaBaduta {
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_balita_baduta")
@@ -150,7 +150,7 @@ model RiwayatImunisasi {
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("riwayat_imunisasi")
@@ -180,7 +180,7 @@ model PemeriksaanBumil {
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_bumil")
@@ -206,7 +206,7 @@ model PemeriksaanPascaPersalinan {
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_pasca_persalinan")
@@ -227,7 +227,7 @@ model PemeriksaanLansia {
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_lansia")
