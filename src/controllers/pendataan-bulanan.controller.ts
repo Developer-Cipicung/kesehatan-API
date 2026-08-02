@@ -8,16 +8,8 @@ import { getRequiredPosyanduId } from '../utils/posyandu';
 
 const pendataanService = new PendataanBulananService();
 
-const getPosyanduId = (req: Request): string => {
-  if (req.method === 'GET' && req.query.posyanduId) {
-    return req.query.posyanduId as string;
-  }
-
-  return getRequiredPosyanduId(req);
-};
-
 export const getPendataan = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getPosyanduId(req);
+  const posyanduId = getRequiredPosyanduId(req);
   const { bulan, tahun } = req.query;
 
   const result = await pendataanService.getStatus(
@@ -31,7 +23,7 @@ export const getPendataan = asyncHandler(async (req: Request, res: Response) => 
 
 export const getPendataanStatusAll = asyncHandler(async (req: Request, res: Response) => {
   // We can just use getStatus here since it's now global per month
-  const posyanduId = getPosyanduId(req);
+  const posyanduId = getRequiredPosyanduId(req);
   const { bulan, tahun } = req.query;
 
   const result = await pendataanService.getStatus(
@@ -44,7 +36,7 @@ export const getPendataanStatusAll = asyncHandler(async (req: Request, res: Resp
 });
 
 export const getSummary = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getPosyanduId(req);
+  const posyanduId = getRequiredPosyanduId(req);
   const { bulan, tahun } = req.query;
 
   const result = await pendataanService.getSummaryList(
@@ -68,7 +60,7 @@ export const getAdminStatusAll = asyncHandler(async (req: Request, res: Response
 });
 
 export const selesaikanPendataan = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getPosyanduId(req);
+  const posyanduId = getRequiredPosyanduId(req);
   const id = req.params.id as string;
   const userId = req.appUser!.id;
   const { tanggal_pelaksanaan } = req.body;
@@ -87,7 +79,7 @@ export const selesaikanPendataan = asyncHandler(async (req: Request, res: Respon
 });
 
 export const batalkanVerifikasi = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getPosyanduId(req);
+  const posyanduId = getRequiredPosyanduId(req);
   const id = req.params.id as string;
   const userId = req.appUser!.id;
 

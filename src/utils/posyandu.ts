@@ -7,7 +7,7 @@ export const getOptionalPosyanduId = (req: Request): string | undefined => {
   }
 
   const requestedPosyanduId = req.query.posyanduId as string | undefined;
-  if (requestedPosyanduId) {
+  if (requestedPosyanduId && requestedPosyanduId !== 'my') {
     return requestedPosyanduId;
   }
 
