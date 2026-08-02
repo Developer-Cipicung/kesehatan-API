@@ -109,6 +109,13 @@ export class WargaRepository {
       include.ibu = true;
     }
 
+    include.posyandu = {
+      select: {
+        id: true,
+        nama: true,
+      },
+    };
+
     const [data, total] = await Promise.all([
       prisma.warga.findMany({
         where,
