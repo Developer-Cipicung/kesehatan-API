@@ -11,8 +11,8 @@ export const notFoundMiddleware = (req: Request, res: Response, next: NextFuncti
 export const errorMiddleware = (err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error(err);
 
-  if (err instanceof ZodError) {
-    return errorResponse(res, 422, 'Validation failed.', err.issues);
+  if (err.name === 'ZodError' || err.name === 'ValidationError') {
+    return errorResponse(res, 422, 'Gagal memvalidasi data: pastikan form/data yang dikirim sudah benar.', (err as any).issues || (err as any).errors);
   }
 
   if (err instanceof AppError) {
