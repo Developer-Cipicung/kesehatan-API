@@ -17,21 +17,23 @@ export class WargaRepository {
     const limit = params.limit || 10;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.WargaWhereInput = {};
+    const andConditions: Prisma.WargaWhereInput[] = [];
 
     if (params.search) {
-      where.OR = [
-        { nama: { contains: params.search, mode: 'insensitive' } },
-        { nik: { contains: params.search, mode: 'insensitive' } },
-      ];
+      andConditions.push({
+        OR: [
+          { nama: { contains: params.search, mode: 'insensitive' } },
+          { nik: { contains: params.search, mode: 'insensitive' } },
+        ]
+      });
     }
 
     if (params.jenisKelamin) {
-      where.jenis_kelamin = params.jenisKelamin;
+      andConditions.push({ jenis_kelamin: params.jenisKelamin });
     }
 
     if (params.posyanduId) {
-      where.posyandu_id = params.posyanduId;
+      andConditions.push({ posyandu_id: params.posyanduId });
     }
 
     if (params.kategori) {
@@ -39,42 +41,50 @@ export class WargaRepository {
       if (params.kategori === 'baduta') {
         // Under 2 years old
         const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
-        where.OR = [
-          { tanggal_lahir: { gt: twoYearsAgo } },
-          { tanggal_lahir: null, kategori_terdaftar: 'baduta' }
-        ];
+        andConditions.push({
+          OR: [
+            { tanggal_lahir: { gt: twoYearsAgo } },
+            { tanggal_lahir: null, kategori_terdaftar: 'baduta' }
+          ]
+        });
       } else if (params.kategori === 'balita') {
         // 2–5 years old (not baduta)
         const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
         const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
-        where.OR = [
-          { tanggal_lahir: { lte: twoYearsAgo, gt: fiveYearsAgo } },
-          { tanggal_lahir: null, kategori_terdaftar: 'balita' }
-        ];
+        andConditions.push({
+          OR: [
+            { tanggal_lahir: { lte: twoYearsAgo, gt: fiveYearsAgo } },
+            { tanggal_lahir: null, kategori_terdaftar: 'balita' }
+          ]
+        });
       } else if (params.kategori === 'anak_sekolah') {
         const fiveYearsAgo = new Date();
         fiveYearsAgo.setFullYear(now.getFullYear() - 5);
         const eighteenYearsAgo = new Date();
         eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
-        where.OR = [
-          { tanggal_lahir: { lte: fiveYearsAgo, gt: eighteenYearsAgo } },
-          { tanggal_lahir: null, kategori_terdaftar: 'anak_sekolah' }
-        ];
+        andConditions.push({
+          OR: [
+            { tanggal_lahir: { lte: fiveYearsAgo, gt: eighteenYearsAgo } },
+            { tanggal_lahir: null, kategori_terdaftar: 'anak_sekolah' }
+          ]
+        });
       } else if (params.kategori === 'lansia') {
         // Lansia: >= 60 years old
         const sixtyYearsAgo = getBirthDateCutoffInMonths(720, now);
-        where.OR = [
-          { tanggal_lahir: { lte: sixtyYearsAgo }, status_kehamilan: 'TIDAK_HAMIL' },
-          { tanggal_lahir: null, kategori_terdaftar: 'lansia', status_kehamilan: 'TIDAK_HAMIL' }
-        ];
+        andConditions.push({
+          OR: [
+            { tanggal_lahir: { lte: sixtyYearsAgo }, status_kehamilan: 'TIDAK_HAMIL' },
+            { tanggal_lahir: null, kategori_terdaftar: 'lansia', status_kehamilan: 'TIDAK_HAMIL' }
+          ]
+        });
       } else if (params.kategori === 'bumil') {
-        where.jenis_kelamin = 'P';
-        where.status_kehamilan = 'HAMIL';
+        andConditions.push({ jenis_kelamin: 'P', status_kehamilan: 'HAMIL' });
       } else if (params.kategori === 'pasca_persalinan') {
-        where.jenis_kelamin = 'P';
-        where.status_kehamilan = 'PASCA_PERSALINAN';
+        andConditions.push({ jenis_kelamin: 'P', status_kehamilan: 'PASCA_PERSALINAN' });
       }
     }
+
+    const where: Prisma.WargaWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
 
     // Build dynamic include object based on kategori
     const include: Prisma.WargaInclude = {};
