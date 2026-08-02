@@ -5,7 +5,7 @@ const emptyAsNull = (schema: z.ZodTypeAny) => z.preprocess((val) => val === 0 ||
 export const createLansiaSchema = z.object({
   warga_id: z.string().uuid(),
   tanggal_kunjungan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
-  bb: emptyAsNull(z.number().min(0).optional().nullable()),
+  bb: z.coerce.number({ message: 'BB wajib diisi' }).min(0.1, 'BB wajib diisi'),
   tb: emptyAsNull(z.number().min(0).optional().nullable()),
   tekanan_darah_sistolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
   tekanan_darah_diastolik: emptyAsNull(z.number().int().min(0).optional().nullable()),

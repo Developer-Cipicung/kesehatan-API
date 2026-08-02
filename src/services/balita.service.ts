@@ -10,9 +10,9 @@ import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.re
 
 import { calculateZScoreWHO, classifyZScore } from '../utils/zscore';
 
-function calculateBalitaStatus(bb: number | null): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' | 'Tidak Ada' {
+function calculateBalitaStatus(bb: number | null): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' | null {
   // Placeholder medical rule logic
-  if (bb === null) return 'Tidak Ada';
+  if (bb === null) return null;
   if (bb < 5) return 'Dirujuk';
   if (bb < 10) return 'Perlu Perhatian';
   return 'Normal';
@@ -62,7 +62,7 @@ export class BalitaService {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
-    if (calculateAgeInMonths(warga.tanggal_lahir) >= 60) {
+    if (warga.tanggal_lahir && calculateAgeInMonths(warga.tanggal_lahir) >= 60) {
       throw new AppError(422, 'Warga tidak valid untuk kategori balita (umur sudah 5 tahun atau lebih).');
     }
 

@@ -9,7 +9,14 @@ import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.re
 
 function mapWithStatus(record: any) {
   if (!record) return record;
-  
+
+  if (record.lingkar_lengan_atas === null && record.kadar_hemoglobin === null) {
+    return {
+      ...record,
+      status_medis: null,
+    };
+  }
+
   let status = 'Normal';
   const lila = Number(record.lingkar_lengan_atas) || 0;
   const hb = Number(record.kadar_hemoglobin) || 0;

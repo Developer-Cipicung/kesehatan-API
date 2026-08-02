@@ -12,7 +12,8 @@ import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.re
 
 const pendataanRepo = new PendataanBulananRepository();
 
-function calculatePascaPersalinanStatus(): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
+function calculatePascaPersalinanStatus(td_sistolik: number | null, td_diastolik: number | null): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' | null {
+  if (td_sistolik === null && td_diastolik === null) return null;
   // Placeholder medical rule logic
   return 'Normal';
 }
@@ -21,7 +22,7 @@ function mapWithStatus(record: any) {
   if (!record) return record;
   return {
     ...record,
-    status_medis: calculatePascaPersalinanStatus(),
+    status_medis: calculatePascaPersalinanStatus(record.td_sistolik, record.td_diastolik),
   };
 }
 

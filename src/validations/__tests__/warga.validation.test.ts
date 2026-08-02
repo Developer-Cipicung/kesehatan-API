@@ -27,4 +27,23 @@ describe('createWargaSchema', () => {
       expect(result.data.jumlah_anak).toBeNull();
     }
   });
+
+  it('should convert empty strings "" to null for optional fields', () => {
+    const payload = {
+      nama: 'Fulan',
+      nik: '',
+      alamat: '',
+      nama_ayah: '',
+      nama_ibu: ''
+    };
+    
+    const result = createWargaSchema.safeParse(payload);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.nik).toBeNull();
+      expect(result.data.alamat).toBeNull();
+      expect(result.data.nama_ayah).toBeNull();
+      expect(result.data.nama_ibu).toBeNull();
+    }
+  });
 });

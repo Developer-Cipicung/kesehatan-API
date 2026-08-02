@@ -10,7 +10,8 @@ import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.re
 
 const pendataanRepo = new PendataanBulananRepository();
 
-function calculateLansiaStatus(tekananDarahSistolik: number): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' {
+function calculateLansiaStatus(tekananDarahSistolik: number | null): 'Normal' | 'Perlu Perhatian' | 'Dirujuk' | null {
+  if (tekananDarahSistolik === null) return null;
   // Placeholder medical rule logic
   if (tekananDarahSistolik > 160) return 'Dirujuk';
   if (tekananDarahSistolik > 140) return 'Perlu Perhatian';
@@ -21,7 +22,7 @@ function mapWithStatus(record: any) {
   if (!record) return record;
   return {
     ...record,
-    status_medis: calculateLansiaStatus(Number(record.tekanan_darah_sistolik)),
+    status_medis: calculateLansiaStatus(record.tekanan_darah_sistolik !== null ? Number(record.tekanan_darah_sistolik) : null),
   };
 }
 

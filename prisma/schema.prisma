@@ -94,6 +94,7 @@ model Warga {
   nama_ibu               String?
   hpht                   DateTime?       @db.Date
   htp                    DateTime?       @db.Date
+  kategori_terdaftar     String?
   created_at             DateTime        @default(now())
   updated_at             DateTime        @updatedAt
 

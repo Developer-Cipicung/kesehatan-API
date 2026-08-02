@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma';
 import { AppError } from '../utils/AppError';
 import { auditLogService } from './audit-log.service';
 import { clearDashboardCache } from './dashboard.service';
+import { calculateZScoreWHO } from '../utils/zscore';
 
 const wargaRepo = new WargaRepository();
 
@@ -130,6 +131,41 @@ export class WargaService {
     }
 
     const updated = await wargaRepo.update(id, data, posyanduId);
+    
+    // Recalculate ZScores if birth date or gender changed
+    if (
+      (data.tanggal_lahir !== undefined && data.tanggal_lahir !== warga.tanggal_lahir) ||
+      (data.jenis_kelamin !== undefined && data.jenis_kelamin !== warga.jenis_kelamin)
+    ) {
+      const pemeriksaans = await prisma.pemeriksaanBalitaBaduta.findMany({
+        where: { warga_id: id }
+      });
+      
+      if (pemeriksaans.length > 0 && updated) {
+        for (const record of pemeriksaans) {
+          if (record.bb === null && record.tb === null && record.lingkar_kepala === null) continue;
+          
+          const zscore = await calculateZScoreWHO({
+            jenis_kelamin: updated.jenis_kelamin as 'L' | 'P',
+            tanggal_lahir: updated.tanggal_lahir,
+            tanggal_kunjungan: record.tanggal_kunjungan,
+            bb: record.bb !== null ? Number(record.bb) : undefined,
+            tb: record.tb !== null ? Number(record.tb) : undefined,
+            lingkar_kepala: record.lingkar_kepala !== null ? Number(record.lingkar_kepala) : undefined,
+          });
+          
+          await prisma.pemeriksaanBalitaBaduta.update({
+            where: { id: record.id },
+            data: {
+              zscore_bb_u: zscore.bb_u,
+              zscore_tb_u: zscore.tb_u,
+              zscore_bb_tb: zscore.bb_tb,
+            }
+          });
+        }
+      }
+    }
+
     auditLogService.logAction(userId, posyanduId, 'UPDATE', 'Warga', id, warga, updated);
     return updated;
   }

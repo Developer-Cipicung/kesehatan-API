@@ -4,7 +4,7 @@ import { classifyZScore } from './classifier';
 
 export interface ZScoreParams {
   jenis_kelamin: 'L' | 'P';
-  tanggal_lahir: Date;
+  tanggal_lahir: Date | null;
   tanggal_kunjungan: Date;
   bb?: number; // in kg
   tb?: number; // in cm
@@ -24,6 +24,9 @@ export { classifyZScore };
 
 export async function calculateZScoreWHO(params: ZScoreParams): Promise<ZScoreResult> {
   try {
+    if (!params.tanggal_lahir) {
+      return { bb_u: null, tb_u: null, bb_tb: null, kategori_bb_u: null, kategori_tb_u: null, kategori_bb_tb: null };
+    }
     const umurDays = Math.max(0, Math.floor((params.tanggal_kunjungan.getTime() - params.tanggal_lahir.getTime()) / (1000 * 60 * 60 * 24)));
     
     const isMale = params.jenis_kelamin === 'L';

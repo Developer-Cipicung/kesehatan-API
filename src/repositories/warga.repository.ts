@@ -39,23 +39,34 @@ export class WargaRepository {
       if (params.kategori === 'baduta') {
         // Under 2 years old
         const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
-        where.tanggal_lahir = { gt: twoYearsAgo };
+        where.OR = [
+          { tanggal_lahir: { gt: twoYearsAgo } },
+          { tanggal_lahir: null, kategori_terdaftar: 'baduta' }
+        ];
       } else if (params.kategori === 'balita') {
         // 2–5 years old (not baduta)
         const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
         const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
-        where.tanggal_lahir = { lte: twoYearsAgo, gt: fiveYearsAgo };
+        where.OR = [
+          { tanggal_lahir: { lte: twoYearsAgo, gt: fiveYearsAgo } },
+          { tanggal_lahir: null, kategori_terdaftar: 'balita' }
+        ];
       } else if (params.kategori === 'anak_sekolah') {
         const fiveYearsAgo = new Date();
         fiveYearsAgo.setFullYear(now.getFullYear() - 5);
         const eighteenYearsAgo = new Date();
         eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
-        where.tanggal_lahir = { lte: fiveYearsAgo, gt: eighteenYearsAgo };
+        where.OR = [
+          { tanggal_lahir: { lte: fiveYearsAgo, gt: eighteenYearsAgo } },
+          { tanggal_lahir: null, kategori_terdaftar: 'anak_sekolah' }
+        ];
       } else if (params.kategori === 'lansia') {
         // Lansia: >= 60 years old
         const sixtyYearsAgo = getBirthDateCutoffInMonths(720, now);
-        where.tanggal_lahir = { lte: sixtyYearsAgo };
-        where.status_kehamilan = 'TIDAK_HAMIL';
+        where.OR = [
+          { tanggal_lahir: { lte: sixtyYearsAgo }, status_kehamilan: 'TIDAK_HAMIL' },
+          { tanggal_lahir: null, kategori_terdaftar: 'lansia', status_kehamilan: 'TIDAK_HAMIL' }
+        ];
       } else if (params.kategori === 'bumil') {
         where.jenis_kelamin = 'P';
         where.status_kehamilan = 'HAMIL';
