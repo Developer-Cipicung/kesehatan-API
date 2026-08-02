@@ -167,6 +167,7 @@ export class WargaService {
     }
 
     auditLogService.logAction(userId, posyanduId, 'UPDATE', 'Warga', id, warga, updated);
+    clearDashboardCache(posyanduId);
     return updated;
   }
 
