@@ -80,8 +80,8 @@ export class DashboardService {
       totalBalita, 
       totalAnakSekolah, 
       totalLansia, 
-      bumilGroups,
-      pascaGroups,
+      totalBumil,
+      totalPasca,
       recentPemeriksaanBalita,
       recentPemeriksaanBumil,
       recentPemeriksaanLansia,
@@ -93,24 +93,42 @@ export class DashboardService {
       // Aggregate across all posyandus if posyanduId is undefined
       prisma.warga.count(posyanduId ? { where: { posyandu_id: posyanduId } } : undefined),
       // Baduta: > 2 years ago
-      prisma.warga.count({ where: { tanggal_lahir: { gt: twoYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
+      prisma.warga.count({ where: { 
+        OR: [
+          { tanggal_lahir: { gt: twoYearsAgo } },
+          { tanggal_lahir: null, kategori_terdaftar: 'baduta' }
+        ],
+        ...(posyanduId && { posyandu_id: posyanduId })
+      } }),
       // Balita: > 5 years ago, <= 2 years ago
-      prisma.warga.count({ where: { tanggal_lahir: { gt: fiveYearsAgo, lte: twoYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
+      prisma.warga.count({ where: { 
+        OR: [
+          { tanggal_lahir: { lte: twoYearsAgo, gt: fiveYearsAgo } },
+          { tanggal_lahir: null, kategori_terdaftar: 'balita' }
+        ],
+        ...(posyanduId && { posyandu_id: posyanduId })
+      } }),
       // Anak Sekolah: > 18 years ago, <= 7 years ago
-      prisma.warga.count({ where: { tanggal_lahir: { gt: eighteenYearsAgo, lte: sevenYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
+      prisma.warga.count({ where: { 
+        OR: [
+          { tanggal_lahir: { lte: sevenYearsAgo, gt: eighteenYearsAgo } },
+          { tanggal_lahir: null, kategori_terdaftar: 'anak_sekolah' }
+        ],
+        ...(posyanduId && { posyandu_id: posyanduId })
+      } }),
       // Lansia
-      prisma.warga.count({ where: { tanggal_lahir: { lte: sixtyYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
+      prisma.warga.count({ where: { 
+        OR: [
+          { tanggal_lahir: { lte: sixtyYearsAgo }, status_kehamilan: 'TIDAK_HAMIL' },
+          { tanggal_lahir: null, kategori_terdaftar: 'lansia', status_kehamilan: 'TIDAK_HAMIL' }
+        ],
+        ...(posyanduId && { posyandu_id: posyanduId })
+      } }),
       
-      // Bumil (active in last 9 months)
-      prisma.pemeriksaanBumil.groupBy({
-        by: ['warga_id'],
-        where: { tanggal_kunjungan: { gte: nineMonthsAgo }, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
-      }),
-      // Pasca Persalinan (active in last 3 months)
-      prisma.pemeriksaanPascaPersalinan.groupBy({
-        by: ['warga_id'],
-        where: { tanggal_kunjungan: { gte: new Date(now.getFullYear(), now.getMonth() - 3, 1) }, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
-      }),
+      // Bumil
+      prisma.warga.count({ where: { status_kehamilan: 'HAMIL', jenis_kelamin: 'P', ...(posyanduId && { posyandu_id: posyanduId }) } }),
+      // Pasca Persalinan
+      prisma.warga.count({ where: { status_kehamilan: 'PASCA_PERSALINAN', jenis_kelamin: 'P', ...(posyanduId && { posyandu_id: posyanduId }) } }),
       // Recent activities
       prisma.pemeriksaanBalitaBaduta.findMany({
         where: posyanduId ? { warga: { posyandu_id: posyanduId } } : {},
@@ -163,9 +181,6 @@ export class DashboardService {
         select: { tanggal_kunjungan: true }
       })
     ]);
-
-    const totalBumil = bumilGroups.length;
-    const totalPasca = pascaGroups.length;
 
     const pendataanStatus = await pendataanStatusPromise;
     

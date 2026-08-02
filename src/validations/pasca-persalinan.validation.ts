@@ -6,7 +6,7 @@ export const createPascaPersalinanSchema = z.object({
   warga_id: z.string().uuid(),
   tanggal_kunjungan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
   tanggal_persalinan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
-  bb: emptyAsNull(z.number().min(0).optional().nullable()),
+  bb: z.preprocess((val) => val === '' ? undefined : Number(val), z.number({ required_error: 'Berat badan wajib diisi', invalid_type_error: 'Berat badan harus berupa angka' }).min(0.1, 'Berat badan harus lebih dari 0')),
   tb: emptyAsNull(z.number().min(0).optional().nullable()),
   kondisi_ibu: emptyAsNull(z.string().optional().nullable()),
   tinggi_badan_bayi: emptyAsNull(z.number().min(0).optional().nullable()),
