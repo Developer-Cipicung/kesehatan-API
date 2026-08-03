@@ -51,28 +51,28 @@ export const getKasusRisti = async (req: Request, res: Response) => {
       orderBy: { tanggal_kunjungan: 'desc' }
     });
 
-    // 3. Lansia Risti (Tensi >= 140/90, GDS/Kolesterol > 200, Asam urat > 7)
+    // 3. Lansia Risti (Tensi >= 140/90, GDS/Kolesterol > 200, Asam urat > 6)
     const lansiaRisti = await prisma.pemeriksaanLansia.findMany({
       where: {
         tanggal_kunjungan: { gte: start, lte: end },
         OR: [
           { tekanan_darah_sistolik: { gte: 140 } },
           { tekanan_darah_diastolik: { gte: 90 } },
-          { gula_darah_sewaktu: { gt: 200 } },
-          { kolesterol: { gt: 200 } },
-          { asam_urat: { gt: 7 } }
+          { gula_darah_sewaktu: { gte: 200 } },
+          { kolesterol: { gte: 200 } },
+          { asam_urat: { gt: 6 } }
         ],
         warga: posyanduFilter
       },
       include: {
         warga: {
-          select: { nama: true, posyandu: { select: { nama: true } } }
+          select: { nama: true, jenis_kelamin: true, posyandu: { select: { nama: true } } }
         }
       },
       orderBy: { tanggal_kunjungan: 'desc' }
     });
 
-    // Format & gabungkan data
+    // Format & gabungkan data (Patokan standar cek-kartu / KartuPosyandu)
     const ristiCases: any[] = [];
 
     balitaRisti.forEach(b => {
@@ -81,27 +81,35 @@ export const getKasusRisti = async (req: Request, res: Response) => {
       const zTbU = b.zscore_tb_u !== null ? Number(b.zscore_tb_u) : null;
       const zBbTb = b.zscore_bb_tb !== null ? Number(b.zscore_bb_tb) : null;
 
-      const categories = classifyZScore(zBbU, zTbU, zBbTb);
-
-      if (categories.kategori_tb_u && (categories.kategori_tb_u.includes('Pendek') || categories.kategori_tb_u.includes('Stunted'))) {
-        riskFactors.push(categories.kategori_tb_u);
+      if (zTbU !== null) {
+        if (zTbU < -3) riskFactors.push(`Sangat Pendek (${zTbU})`);
+        else if (zTbU < -2) riskFactors.push(`Pendek (${zTbU})`);
+        else if (zTbU > 3) riskFactors.push(`Tinggi (${zTbU})`);
       }
-      if (categories.kategori_bb_tb && (categories.kategori_bb_tb.includes('Kurang') || categories.kategori_bb_tb.includes('Buruk') || categories.kategori_bb_tb.includes('Obesitas') || categories.kategori_bb_tb.includes('Lebih'))) {
-        riskFactors.push(categories.kategori_bb_tb);
+      if (zBbTb !== null) {
+        if (zBbTb < -3) riskFactors.push(`Gizi Buruk (${zBbTb})`);
+        else if (zBbTb < -2) riskFactors.push(`Gizi Kurang (${zBbTb})`);
+        else if (zBbTb > 3) riskFactors.push(`Obesitas (${zBbTb})`);
+        else if (zBbTb > 2) riskFactors.push(`Gizi Lebih (${zBbTb})`);
+        else if (zBbTb > 1) riskFactors.push(`Berisiko Lebih (${zBbTb})`);
       }
-      if (categories.kategori_bb_u && categories.kategori_bb_u.includes('Kurang')) {
-        riskFactors.push(`BB ${categories.kategori_bb_u}`);
+      if (zBbU !== null) {
+        if (zBbU < -3) riskFactors.push(`BB Sangat Kurang (${zBbU})`);
+        else if (zBbU < -2) riskFactors.push(`BB Kurang (${zBbU})`);
+        else if (zBbU > 1) riskFactors.push(`Risiko BB Lebih (${zBbU})`);
       }
       
-      ristiCases.push({
-        id: b.id,
-        warga_id: b.warga_id,
-        kategori: 'Balita',
-        nama: b.warga.nama,
-        posyandu: b.warga.posyandu?.nama || '-',
-        tanggal_periksa: b.tanggal_kunjungan,
-        risiko: riskFactors.join(', ')
-      });
+      if (riskFactors.length > 0) {
+        ristiCases.push({
+          id: b.id,
+          warga_id: b.warga_id,
+          kategori: 'Balita',
+          nama: b.warga.nama,
+          posyandu: b.warga.posyandu?.nama || '-',
+          tanggal_periksa: b.tanggal_kunjungan,
+          risiko: riskFactors.join(', ')
+        });
+      }
     });
 
     bumilRisti.forEach(b => {
@@ -109,55 +117,70 @@ export const getKasusRisti = async (req: Request, res: Response) => {
       const lila = b.lingkar_lengan_atas !== null ? Number(b.lingkar_lengan_atas) : null;
       const hb = b.kadar_hemoglobin !== null ? Number(b.kadar_hemoglobin) : null;
 
-      if (lila !== null && lila < 23.5) {
-        riskFactors.push(`Risiko KEK (LILA: ${lila} cm)`);
+      if (lila !== null && lila > 0 && lila < 23.5) {
+        riskFactors.push(`Risiko KEK (${lila})`);
       }
-      if (hb !== null && hb < 11) {
-        if (hb < 8) {
-          riskFactors.push(`Anemia Berat (Hb: ${hb} g/dL)`);
-        } else {
-          riskFactors.push(`Anemia Ringan (Hb: ${hb} g/dL)`);
-        }
+      if (hb !== null && hb > 0 && hb < 11) {
+        riskFactors.push(`Risiko Anemia (${hb})`);
       }
 
-      ristiCases.push({
-        id: b.id,
-        warga_id: b.warga_id,
-        kategori: 'Ibu Hamil',
-        nama: b.warga.nama,
-        posyandu: b.warga.posyandu?.nama || '-',
-        tanggal_periksa: b.tanggal_kunjungan,
-        risiko: riskFactors.join(', ')
-      });
+      if (riskFactors.length > 0) {
+        ristiCases.push({
+          id: b.id,
+          warga_id: b.warga_id,
+          kategori: 'Ibu Hamil',
+          nama: b.warga.nama,
+          posyandu: b.warga.posyandu?.nama || '-',
+          tanggal_periksa: b.tanggal_kunjungan,
+          risiko: riskFactors.join(', ')
+        });
+      }
     });
 
     lansiaRisti.forEach(l => {
       let riskFactors: string[] = [];
-      const sistolik = l.tekanan_darah_sistolik;
-      const diastolik = l.tekanan_darah_diastolik;
+      const sistolik = l.tekanan_darah_sistolik ? Number(l.tekanan_darah_sistolik) : null;
+      const diastolik = l.tekanan_darah_diastolik ? Number(l.tekanan_darah_diastolik) : null;
 
       if ((sistolik && sistolik >= 140) || (diastolik && diastolik >= 90)) {
-        riskFactors.push(`Hipertensi (${sistolik}/${diastolik} mmHg)`);
-      }
-      if (l.gula_darah_sewaktu && l.gula_darah_sewaktu > 200) {
-        riskFactors.push(`Gula Darah Tinggi (${l.gula_darah_sewaktu} mg/dL)`);
-      }
-      if (l.kolesterol && l.kolesterol > 200) {
-        riskFactors.push(`Kolesterol Tinggi (${l.kolesterol} mg/dL)`);
-      }
-      if (l.asam_urat && Number(l.asam_urat) > 7) {
-        riskFactors.push(`Asam Urat Tinggi (${l.asam_urat} mg/dL)`);
+        riskFactors.push(`Hipertensi (${sistolik}/${diastolik})`);
+      } else if ((sistolik && sistolik <= 90) || (diastolik && diastolik <= 60)) {
+        riskFactors.push(`Hipotensi (${sistolik}/${diastolik})`);
       }
 
-      ristiCases.push({
-        id: l.id,
-        warga_id: l.warga_id,
-        kategori: 'Lansia',
-        nama: l.warga.nama,
-        posyandu: l.warga.posyandu?.nama || '-',
-        tanggal_periksa: l.tanggal_kunjungan,
-        risiko: riskFactors.join(', ')
-      });
+      if (l.kolesterol) {
+        const kol = Number(l.kolesterol);
+        if (kol >= 240) {
+          riskFactors.push(`Kolesterol Tinggi (${kol})`);
+        } else if (kol >= 200) {
+          riskFactors.push(`Kolesterol Batas Tinggi (${kol})`);
+        }
+      }
+      if (l.asam_urat) {
+        const au = Number(l.asam_urat);
+        const maxNormal = l.warga.jenis_kelamin === 'L' ? 7.0 : 6.0;
+        if (au > maxNormal) {
+          riskFactors.push(`Asam Urat Tinggi (${au})`);
+        }
+      }
+      if (l.gula_darah_sewaktu) {
+        const gds = Number(l.gula_darah_sewaktu);
+        if (gds >= 200) {
+          riskFactors.push(`GDS Tinggi (${gds})`);
+        }
+      }
+
+      if (riskFactors.length > 0) {
+        ristiCases.push({
+          id: l.id,
+          warga_id: l.warga_id,
+          kategori: 'Lansia',
+          nama: l.warga.nama,
+          posyandu: l.warga.posyandu?.nama || '-',
+          tanggal_periksa: l.tanggal_kunjungan,
+          risiko: riskFactors.join(', ')
+        });
+      }
     });
 
     // Urutkan dari yang terbaru
