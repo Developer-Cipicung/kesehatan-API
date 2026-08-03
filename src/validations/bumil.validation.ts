@@ -10,6 +10,8 @@ export const createBumilSchema = z.object({
   lingkar_perut: emptyAsNull(z.number().min(0).optional().nullable()),
   lingkar_lengan_atas: emptyAsNull(z.number().min(0).optional().nullable()),
   tinggi_fundus: emptyAsNull(z.number().min(0).optional().nullable()),
+  tekanan_darah_sistolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  tekanan_darah_diastolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
   usia_kehamilan_minggu: emptyAsNull(z.number().int().min(0).optional().nullable()),
   riwayat_penyakit: emptyAsNull(z.string().optional().nullable()),
   kadar_hemoglobin: emptyAsNull(z.number().min(0).optional().nullable()),

@@ -165,6 +165,8 @@ model PemeriksaanBumil {
   lingkar_perut           Decimal?  @db.Decimal(5, 2)
   tinggi_fundus           Decimal? @db.Decimal(5, 2)
   lingkar_lengan_atas     Decimal?  @db.Decimal(5, 2)
+  tekanan_darah_sistolik  Int?
+  tekanan_darah_diastolik Int?
   usia_kehamilan_minggu   Int?
   catatan                   String?   @db.Text
   riwayat_penyakit          String?   @db.Text
