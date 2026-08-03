@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
+import { classifyZScore } from '../utils/zscore';
 
 export const getKasusRisti = async (req: Request, res: Response) => {
   try {
@@ -75,10 +76,22 @@ export const getKasusRisti = async (req: Request, res: Response) => {
     const ristiCases: any[] = [];
 
     balitaRisti.forEach(b => {
-      let riskFactors = [];
-      if (b.zscore_bb_u !== null && Number(b.zscore_bb_u) <= -2) riskFactors.push('BB/U Rendah');
-      if (b.zscore_tb_u !== null && Number(b.zscore_tb_u) <= -2) riskFactors.push('TB/U Rendah (Stunting)');
-      if (b.zscore_bb_tb !== null && Number(b.zscore_bb_tb) <= -2) riskFactors.push('BB/TB Rendah (Gizi Kurang)');
+      let riskFactors: string[] = [];
+      const zBbU = b.zscore_bb_u !== null ? Number(b.zscore_bb_u) : null;
+      const zTbU = b.zscore_tb_u !== null ? Number(b.zscore_tb_u) : null;
+      const zBbTb = b.zscore_bb_tb !== null ? Number(b.zscore_bb_tb) : null;
+
+      const categories = classifyZScore(zBbU, zTbU, zBbTb);
+
+      if (categories.kategori_tb_u && (categories.kategori_tb_u.includes('Pendek') || categories.kategori_tb_u.includes('Stunted'))) {
+        riskFactors.push(categories.kategori_tb_u);
+      }
+      if (categories.kategori_bb_tb && (categories.kategori_bb_tb.includes('Kurang') || categories.kategori_bb_tb.includes('Buruk') || categories.kategori_bb_tb.includes('Obesitas') || categories.kategori_bb_tb.includes('Lebih'))) {
+        riskFactors.push(categories.kategori_bb_tb);
+      }
+      if (categories.kategori_bb_u && categories.kategori_bb_u.includes('Kurang')) {
+        riskFactors.push(`BB ${categories.kategori_bb_u}`);
+      }
       
       ristiCases.push({
         id: b.id,
@@ -92,9 +105,20 @@ export const getKasusRisti = async (req: Request, res: Response) => {
     });
 
     bumilRisti.forEach(b => {
-      let riskFactors = [];
-      if (b.lingkar_lengan_atas !== null && Number(b.lingkar_lengan_atas) < 23.5) riskFactors.push('KEK (LILA < 23.5)');
-      if (b.kadar_hemoglobin !== null && Number(b.kadar_hemoglobin) < 11) riskFactors.push('Anemia (Hb < 11)');
+      let riskFactors: string[] = [];
+      const lila = b.lingkar_lengan_atas !== null ? Number(b.lingkar_lengan_atas) : null;
+      const hb = b.kadar_hemoglobin !== null ? Number(b.kadar_hemoglobin) : null;
+
+      if (lila !== null && lila < 23.5) {
+        riskFactors.push(`Risiko KEK (LILA: ${lila} cm)`);
+      }
+      if (hb !== null && hb < 11) {
+        if (hb < 8) {
+          riskFactors.push(`Anemia Berat (Hb: ${hb} g/dL)`);
+        } else {
+          riskFactors.push(`Anemia Ringan (Hb: ${hb} g/dL)`);
+        }
+      }
 
       ristiCases.push({
         id: b.id,
@@ -108,14 +132,22 @@ export const getKasusRisti = async (req: Request, res: Response) => {
     });
 
     lansiaRisti.forEach(l => {
-      let riskFactors = [];
-      if ((l.tekanan_darah_sistolik && l.tekanan_darah_sistolik >= 140) || 
-          (l.tekanan_darah_diastolik && l.tekanan_darah_diastolik >= 90)) {
-        riskFactors.push(`Hipertensi (${l.tekanan_darah_sistolik}/${l.tekanan_darah_diastolik})`);
+      let riskFactors: string[] = [];
+      const sistolik = l.tekanan_darah_sistolik;
+      const diastolik = l.tekanan_darah_diastolik;
+
+      if ((sistolik && sistolik >= 140) || (diastolik && diastolik >= 90)) {
+        riskFactors.push(`Hipertensi (${sistolik}/${diastolik} mmHg)`);
       }
-      if (l.gula_darah_sewaktu && l.gula_darah_sewaktu > 200) riskFactors.push('Gula Darah Tinggi');
-      if (l.kolesterol && l.kolesterol > 200) riskFactors.push('Kolesterol Tinggi');
-      if (l.asam_urat && Number(l.asam_urat) > 7) riskFactors.push('Asam Urat Tinggi');
+      if (l.gula_darah_sewaktu && l.gula_darah_sewaktu > 200) {
+        riskFactors.push(`Gula Darah Tinggi (${l.gula_darah_sewaktu} mg/dL)`);
+      }
+      if (l.kolesterol && l.kolesterol > 200) {
+        riskFactors.push(`Kolesterol Tinggi (${l.kolesterol} mg/dL)`);
+      }
+      if (l.asam_urat && Number(l.asam_urat) > 7) {
+        riskFactors.push(`Asam Urat Tinggi (${l.asam_urat} mg/dL)`);
+      }
 
       ristiCases.push({
         id: l.id,
