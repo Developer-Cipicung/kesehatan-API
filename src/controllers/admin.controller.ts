@@ -11,7 +11,7 @@ export const getKasusRisti = async (req: Request, res: Response) => {
       ? new Date(startDate as string) 
       : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const posyanduFilter = posyanduId ? { posyandu_id: posyanduId as string } : {};
+    const posyanduFilter = (posyanduId && posyanduId !== 'ALL') ? { posyandu_id: posyanduId as string } : {};
 
     // 1. Balita Risti (Z-score <= -2)
     const balitaRisti = await prisma.pemeriksaanBalitaBaduta.findMany({
