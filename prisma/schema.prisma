@@ -90,6 +90,7 @@ model Warga {
   tempat_persalinan      String?
   penggunaan_kontrasepsi String?
   jumlah_anak            Int?
+  memiliki_bpjs          Boolean         @default(false)
   nama_ayah              String?
   nama_ibu               String?
   hpht                   DateTime?       @db.Date
