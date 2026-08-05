@@ -17,7 +17,7 @@ export const createWargaSchema = z.object({
   penggunaan_kontrasepsi: emptyAsNull(z.string().optional().nullable()),
   nama_ayah: emptyAsNull(z.string().toUpperCase().optional().nullable()),
   nama_ibu: emptyAsNull(z.string().toUpperCase().optional().nullable()),
-  jumlah_anak: emptyAsNull(z.union([z.string(), z.number()]).transform(v => typeof v === 'string' && v.trim() !== '' ? parseInt(v, 10) : v).optional().nullable()),
+  jumlah_anak: emptyAsNull(z.union([z.string(), z.number()]).transform(v => typeof v === 'string' && v.trim() !== '' ? parseInt(v, 10) : v).pipe(z.number().min(0, 'Jumlah anak tidak boleh negatif')).optional().nullable()),
   ibu_id: emptyAsNull(z.string().uuid().optional().nullable()),
   hpht: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
   htp: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
