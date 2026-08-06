@@ -50,7 +50,7 @@ export class PascaPersalinanService {
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanPascaPersalinanUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanPascaPersalinanUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -72,12 +72,12 @@ export class PascaPersalinanService {
     const created = await prisma.$transaction(async (tx) => {
       const pemeriksaan = await tx.pemeriksaanPascaPersalinan.create({ data });
       await tx.warga.updateMany({
-        where: { id: data.warga_id, posyandu_id: posyanduId },
+        where: { id: data.warga_id },
         data: { status_kehamilan: 'PASCA_PERSALINAN' },
       });
       return pemeriksaan;
     });
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanPascaPersalinan', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanPascaPersalinan', created.id, null, created);
     return mapWithStatus(created);
   }
 

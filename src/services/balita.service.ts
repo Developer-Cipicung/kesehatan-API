@@ -58,7 +58,7 @@ export class BalitaService {
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanBalitaBadutaUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanBalitaBadutaUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -88,7 +88,7 @@ export class BalitaService {
     data.zscore_bb_tb = zscore.bb_tb;
 
     const created = await balitaRepo.create(data);
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBalita', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanBalita', created.id, null, created);
     return mapWithStatus(created);
   }
 

@@ -36,7 +36,7 @@ export const getLansiaHistory = asyncHandler(async (req: Request, res: Response)
 });
 
 export const createLansia = asyncHandler(async (req: Request, res: Response) => {
-  const data = await lansiaService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await lansiaService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan lansia berhasil ditambahkan.', data);
 });
 

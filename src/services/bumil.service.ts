@@ -63,7 +63,7 @@ export class BumilService {
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanBumilUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanBumilUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -82,12 +82,12 @@ export class BumilService {
     const created = await prisma.$transaction(async (tx) => {
       const pemeriksaan = await tx.pemeriksaanBumil.create({ data });
       await tx.warga.updateMany({
-        where: { id: data.warga_id, posyandu_id: posyanduId },
+        where: { id: data.warga_id },
         data: { status_kehamilan: 'HAMIL' },
       });
       return pemeriksaan;
     });
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanBumil', created.id, null, created);
     return mapWithStatus(created);
   }
 

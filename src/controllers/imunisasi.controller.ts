@@ -30,7 +30,7 @@ export const getImunisasiHistory = asyncHandler(async (req: Request, res: Respon
 });
 
 export const createImunisasi = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await imunisasiService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Riwayat imunisasi berhasil ditambahkan.', data);
 });
 

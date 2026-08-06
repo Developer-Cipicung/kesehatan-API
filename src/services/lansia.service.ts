@@ -50,7 +50,7 @@ export class LansiaService {
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanLansiaUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanLansiaUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -65,7 +65,7 @@ export class LansiaService {
     );
 
     const created = await lansiaRepo.create(data);
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanLansia', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanLansia', created.id, null, created);
     return mapWithStatus(created);
   }
 

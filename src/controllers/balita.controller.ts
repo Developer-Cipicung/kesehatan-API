@@ -37,7 +37,7 @@ export const getBalitaHistory = asyncHandler(async (req: Request, res: Response)
 });
 
 export const createBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await balitaService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan balita berhasil ditambahkan.', data);
 });
 

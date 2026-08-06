@@ -36,7 +36,7 @@ export const getBumilHistory = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const createBumil = asyncHandler(async (req: Request, res: Response) => {
-  const data = await bumilService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await bumilService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan bumil berhasil ditambahkan.', data);
 });
 

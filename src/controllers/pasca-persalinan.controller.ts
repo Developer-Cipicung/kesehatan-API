@@ -39,7 +39,7 @@ export const getPascaPersalinanHistory = asyncHandler(async (req: Request, res: 
 });
 
 export const createPascaPersalinan = asyncHandler(async (req: Request, res: Response) => {
-  const data = await pascaPersalinanService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await pascaPersalinanService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan pasca persalinan berhasil ditambahkan.', data);
 });
 

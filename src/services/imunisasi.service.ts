@@ -25,7 +25,7 @@ export class ImunisasiService {
     return history;
   }
 
-  async create(data: Prisma.RiwayatImunisasiUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.RiwayatImunisasiUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -38,7 +38,7 @@ export class ImunisasiService {
     );
 
     const created = await imunisasiRepo.create(data);
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'RiwayatImunisasi', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'RiwayatImunisasi', created.id, null, created);
     return created;
   }
 
