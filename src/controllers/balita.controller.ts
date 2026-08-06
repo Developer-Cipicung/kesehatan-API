@@ -22,13 +22,13 @@ export const getBalita = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getBalitaById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await balitaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data pemeriksaan balita berhasil diambil.', data);
 });
 
 export const getBalitaHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await balitaService.findHistory(
     req.params.wargaId as string,
     posyanduId,

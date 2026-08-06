@@ -25,7 +25,7 @@ export const getWarga = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getWargaById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await wargaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data warga berhasil diambil.', data);
 });

@@ -13,7 +13,7 @@ export class WargaService {
     return wargaRepo.findAll(params);
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const warga = await wargaRepo.findById(id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga not found');
     return warga;

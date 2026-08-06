@@ -59,16 +59,16 @@ export class LansiaRepository {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     return prisma.pemeriksaanLansia.findFirst({ 
-      where: { id, warga: { posyandu_id: posyanduId } }, 
+      where: { id, ...(posyanduId ? { warga: { posyandu_id: posyanduId } } : {}) }, 
       include: { warga: { include: { posyandu: true } } } 
     });
   }
 
-  async findByWargaId(wargaId: string, posyanduId: string) {
+  async findByWargaId(wargaId: string, posyanduId?: string) {
     return prisma.pemeriksaanLansia.findMany({
-      where: { warga_id: wargaId, warga: { posyandu_id: posyanduId } },
+      where: { warga_id: wargaId, ...(posyanduId ? { warga: { posyandu_id: posyanduId } } : {}) },
       orderBy: { tanggal_kunjungan: 'desc' },
     });
   }

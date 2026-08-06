@@ -21,7 +21,7 @@ export const getPascaPersalinan = asyncHandler(async (req: Request, res: Respons
 });
 
 export const getPascaPersalinanById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await pascaPersalinanService.findById(
     req.params.id as string,
     posyanduId,
@@ -30,7 +30,7 @@ export const getPascaPersalinanById = asyncHandler(async (req: Request, res: Res
 });
 
 export const getPascaPersalinanHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await pascaPersalinanService.findHistory(
     req.params.wargaId as string,
     posyanduId,

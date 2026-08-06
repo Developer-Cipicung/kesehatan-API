@@ -21,13 +21,13 @@ export const getLansia = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getLansiaById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await lansiaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data pemeriksaan lansia berhasil diambil.', data);
 });
 
 export const getLansiaHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await lansiaService.findHistory(
     req.params.wargaId as string,
     posyanduId,

@@ -14,13 +14,13 @@ export class ImunisasiService {
     return imunisasiRepo.findAll(params);
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const data = await imunisasiRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data imunisasi tidak ditemukan');
     return data;
   }
 
-  async findHistory(wargaId: string, posyanduId: string) {
+  async findHistory(wargaId: string, posyanduId?: string) {
     const history = await imunisasiRepo.findByWargaId(wargaId, posyanduId);
     return history;
   }

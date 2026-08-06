@@ -39,13 +39,13 @@ export class PascaPersalinanService {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const data = await pascaPersalinanRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
     return mapWithStatus(data);
   }
 
-  async findHistory(wargaId: string, posyanduId: string) {
+  async findHistory(wargaId: string, posyanduId?: string) {
     const history = await pascaPersalinanRepo.findByWargaId(wargaId, posyanduId);
     return history.map(mapWithStatus);
   }

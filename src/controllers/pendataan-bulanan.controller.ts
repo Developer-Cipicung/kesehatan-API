@@ -4,12 +4,15 @@ import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
 import { KategoriPendataan } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
-import { getRequiredPosyanduId } from '../utils/posyandu';
+import { getOptionalPosyanduId, getRequiredPosyanduId } from '../utils/posyandu';
 
 const pendataanService = new PendataanBulananService();
 
 export const getPendataan = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
+  if (!posyanduId) {
+    return successResponse(res, 200, 'Status pendataan berhasil diambil.', { status: 'draft' });
+  }
   const { bulan, tahun } = req.query;
 
   const result = await pendataanService.getStatus(

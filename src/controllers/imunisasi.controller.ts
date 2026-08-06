@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ImunisasiService } from '../services/imunisasi.service';
 import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
-import { getRequiredPosyanduId } from '../utils/posyandu';
+import { getOptionalPosyanduId, getRequiredPosyanduId } from '../utils/posyandu';
 
 const imunisasiService = new ImunisasiService();
 
@@ -10,21 +10,21 @@ export const getImunisasi = asyncHandler(async (req: Request, res: Response) => 
   const result = await imunisasiService.findAll({
     page: req.query.page ? parseInt(req.query.page as string) : undefined,
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-    posyanduId: getRequiredPosyanduId(req),
+    posyanduId: getOptionalPosyanduId(req),
     wargaId: req.query.wargaId as string | undefined,
   });
   return successResponse(res, 200, 'Data riwayat imunisasi berhasil diambil.', result);
 });
 
 export const getImunisasiById = asyncHandler(async (req: Request, res: Response) => {
-  const data = await imunisasiService.findById(req.params.id as string, getRequiredPosyanduId(req));
+  const data = await imunisasiService.findById(req.params.id as string, getOptionalPosyanduId(req));
   return successResponse(res, 200, 'Data imunisasi berhasil diambil.', data);
 });
 
 export const getImunisasiHistory = asyncHandler(async (req: Request, res: Response) => {
   const data = await imunisasiService.findHistory(
     req.params.wargaId as string,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
   );
   return successResponse(res, 200, 'Riwayat imunisasi berhasil diambil.', data);
 });

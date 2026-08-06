@@ -21,13 +21,13 @@ export const getBumil = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getBumilById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await bumilService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data pemeriksaan bumil berhasil diambil.', data);
 });
 
 export const getBumilHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await bumilService.findHistory(
     req.params.wargaId as string,
     posyanduId,
