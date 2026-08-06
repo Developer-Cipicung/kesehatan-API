@@ -57,14 +57,14 @@ export class ImunisasiRepository {
     return prisma.riwayatImunisasi.create({ data });
   }
 
-  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId: string) {
+  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId?: string) {
     return prisma.riwayatImunisasi.update({ 
       where: { id }, 
       data 
     }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string, posyanduId: string) {
+  async delete(id: string, posyanduId?: string) {
     const record = await this.findById(id, posyanduId);
     if (record) {
       await prisma.riwayatImunisasi.delete({ 

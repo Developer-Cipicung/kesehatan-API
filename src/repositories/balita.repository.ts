@@ -86,18 +86,18 @@ export class BalitaRepository {
     return prisma.pemeriksaanBalitaBaduta.create({ data });
   }
 
-  async update(id: string, data: Prisma.PemeriksaanBalitaBadutaUncheckedUpdateInput, posyanduId: string) {
+  async update(id: string, data: Prisma.PemeriksaanBalitaBadutaUncheckedUpdateInput, posyanduId?: string) {
     return prisma.pemeriksaanBalitaBaduta.updateMany({ 
-      where: { id, warga: { posyandu_id: posyanduId } }, 
+      where: { id, ...(posyanduId ? { warga: { posyandu_id: posyanduId } } : {}) }, 
       data 
     }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string, posyanduId: string) {
+  async delete(id: string, posyanduId?: string) {
     const record = await this.findById(id, posyanduId);
     if (record) {
       await prisma.pemeriksaanBalitaBaduta.deleteMany({ 
-        where: { id, warga: { posyandu_id: posyanduId } } 
+        where: { id, ...(posyanduId ? { warga: { posyandu_id: posyanduId } } : {}) } 
       });
     }
     return record;

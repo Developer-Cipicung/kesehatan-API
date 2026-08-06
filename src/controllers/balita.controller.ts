@@ -50,14 +50,14 @@ export const updateBalita = asyncHandler(async (req: Request, res: Response) => 
   const data = await balitaService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan balita berhasil diubah.', data);
 });
 
 export const deleteBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await balitaService.delete(req.params.id as string, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan balita berhasil dihapus.', data);
 });
 

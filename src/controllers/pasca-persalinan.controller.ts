@@ -52,7 +52,7 @@ export const updatePascaPersalinan = asyncHandler(async (req: Request, res: Resp
   const data = await pascaPersalinanService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan pasca persalinan berhasil diubah.', data);
@@ -61,7 +61,7 @@ export const updatePascaPersalinan = asyncHandler(async (req: Request, res: Resp
 export const deletePascaPersalinan = asyncHandler(async (req: Request, res: Response) => {
   const data = await pascaPersalinanService.delete(
     req.params.id as string,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan pasca persalinan berhasil dihapus.', data);

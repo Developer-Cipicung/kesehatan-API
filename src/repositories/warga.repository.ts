@@ -185,18 +185,18 @@ export class WargaRepository {
     });
   }
 
-  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId: string) {
+  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId?: string) {
     return prisma.warga.updateMany({
-      where: { id, posyandu_id: posyanduId },
+      where: { id, ...(posyanduId ? { posyandu_id: posyanduId } : {}) },
       data,
     }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string, posyanduId: string) {
+  async delete(id: string, posyanduId?: string) {
     const record = await this.findById(id, posyanduId);
     if (record) {
       await prisma.warga.deleteMany({
-        where: { id, posyandu_id: posyanduId },
+        where: { id, ...(posyanduId ? { posyandu_id: posyanduId } : {}) },
       });
     }
     return record;

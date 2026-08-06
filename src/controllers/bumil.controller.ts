@@ -49,13 +49,13 @@ export const updateBumil = asyncHandler(async (req: Request, res: Response) => {
   const data = await bumilService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan bumil berhasil diubah.', data);
 });
 
 export const deleteBumil = asyncHandler(async (req: Request, res: Response) => {
-  const data = await bumilService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await bumilService.delete(req.params.id as string, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan bumil berhasil dihapus.', data);
 });

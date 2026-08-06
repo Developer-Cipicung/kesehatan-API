@@ -198,7 +198,7 @@ export class BumilService {
     return { successCount, errors };
   }
 
-  async update(id: string, data: Prisma.PemeriksaanBumilUncheckedUpdateInput, posyanduId: string, userId: string) {
+  async update(id: string, data: Prisma.PemeriksaanBumilUncheckedUpdateInput, posyanduId?: string, userId?: string) {
     const record = await bumilRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -219,11 +219,11 @@ export class BumilService {
     }
 
     const updated = await bumilRepo.update(id, data, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PemeriksaanBumil', id, record, updated);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'UPDATE', 'PemeriksaanBumil', id, record, updated);
     return mapWithStatus(updated);
   }
 
-  async delete(id: string, posyanduId: string, userId: string) {
+  async delete(id: string, posyanduId?: string, userId?: string) {
     const record = await bumilRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -234,7 +234,7 @@ export class BumilService {
     }
 
     const deleted = await bumilRepo.delete(id, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'DELETE', 'PemeriksaanBumil', id, record, null);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'DELETE', 'PemeriksaanBumil', id, record, null);
     return mapWithStatus(deleted);
   }
 }

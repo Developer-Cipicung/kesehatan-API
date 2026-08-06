@@ -51,14 +51,14 @@ export const updateWarga = asyncHandler(async (req: Request, res: Response) => {
   const data = await wargaService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Warga berhasil diubah.', data);
 });
 
 export const deleteWarga = asyncHandler(async (req: Request, res: Response) => {
-  const data = await wargaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await wargaService.delete(req.params.id as string, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Warga berhasil dihapus.', data);
 });
 
