@@ -8,6 +8,7 @@ import {
   deleteWarga,
   tandaiBersalin,
   tandaiAbortus,
+  hamilKembali,
 } from '../controllers/warga.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validation.middleware';
@@ -26,5 +27,6 @@ router.put('/:id', validateRequest(updateWargaSchema), updateWarga);
 router.delete('/:id', deleteWarga);
 router.post('/:id/bersalin', validateRequest(tandaiBersalinSchema), tandaiBersalin);
 router.post('/:id/abortus', tandaiAbortus);
+router.post('/:id/hamil-kembali', hamilKembali);
 
 export default router;

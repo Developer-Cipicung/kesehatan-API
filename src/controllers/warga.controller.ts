@@ -82,3 +82,13 @@ export const tandaiAbortus = asyncHandler(async (req: Request, res: Response) =>
   return successResponse(res, 200, 'Status abortus berhasil diperbarui.', data);
 });
 
+export const hamilKembali = asyncHandler(async (req: Request, res: Response) => {
+  const data = await wargaService.hamilKembali(
+    req.params.id as string,
+    getRequiredPosyanduId(req),
+    req.appUser!.id,
+    req.body
+  );
+  return successResponse(res, 200, 'Status pasien berhasil diubah menjadi Ibu Hamil kembali.', data);
+});
+

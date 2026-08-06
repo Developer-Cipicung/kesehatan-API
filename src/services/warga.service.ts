@@ -280,4 +280,37 @@ export class WargaService {
 
     return result;
   }
+
+  async hamilKembali(
+    ibuId: string,
+    posyanduId: string,
+    userId: string,
+    data: {
+      hpht?: string;
+      htp?: string;
+      jumlah_anak?: number;
+    }
+  ) {
+    const ibu = await this.findById(ibuId, posyanduId);
+    if (!ibu) throw new AppError(404, 'Data ibu tidak ditemukan');
+
+    const result = await prisma.$transaction(async (tx) => {
+      const updatedIbu = await tx.warga.update({
+        where: { id: ibuId },
+        data: {
+          status_kehamilan: 'HAMIL',
+          hpht: data.hpht ? new Date(data.hpht) : null,
+          htp: data.htp ? new Date(data.htp) : null,
+          ...(data.jumlah_anak !== undefined ? { jumlah_anak: data.jumlah_anak } : {}),
+        },
+      });
+
+      return updatedIbu;
+    });
+
+    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'Warga', ibuId, null, { action: 'Hamil Kembali', data: result });
+    clearDashboardCache(posyanduId);
+
+    return result;
+  }
 }
