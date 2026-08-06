@@ -171,7 +171,7 @@ model PemeriksaanBumil {
   tekanan_darah_diastolik Int?
   usia_kehamilan_minggu   Int?
   catatan                   String?   @db.Text
-  status_risiko_pe          String?   @default("Risiko Rendah")
+  status_risiko_pe          String?   @default("Belum Diperiksa")
   riwayat_penyakit          String?   @db.Text
   kadar_hemoglobin          Decimal?  @db.Decimal(5, 2)
   berat_janin               Decimal?  @db.Decimal(5, 2)
