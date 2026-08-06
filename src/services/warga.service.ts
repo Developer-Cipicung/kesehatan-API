@@ -248,4 +248,36 @@ export class WargaService {
 
     return result;
   }
+
+  async tandaiAbortus(
+    ibuId: string,
+    posyanduId: string,
+    userId: string,
+    data: {
+      tanggal_abortus: string;
+      tempat_penanganan?: string;
+      catatan?: string;
+    }
+  ) {
+    const ibu = await this.findById(ibuId, posyanduId);
+    if (!ibu) throw new AppError(404, 'Data ibu tidak ditemukan');
+
+    const result = await prisma.$transaction(async (tx) => {
+      const updatedIbu = await tx.warga.update({
+        where: { id: ibuId },
+        data: {
+          status_kehamilan: 'ABORTUS' as any,
+          hpht: null,
+          htp: null,
+        },
+      });
+
+      return updatedIbu;
+    });
+
+    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'Warga', ibuId, null, { action: 'Tandai Abortus', data: result });
+    clearDashboardCache(posyanduId);
+
+    return result;
+  }
 }

@@ -18,6 +18,7 @@ enum StatusKehamilan {
   TIDAK_HAMIL
   HAMIL
   PASCA_PERSALINAN
+  ABORTUS
 }
 
 enum UserRole {

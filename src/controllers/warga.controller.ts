@@ -71,3 +71,14 @@ export const tandaiBersalin = asyncHandler(async (req: Request, res: Response) =
   );
   return successResponse(res, 200, 'Warga berhasil ditandai telah bersalin, dan data bayi telah dibuat.', data);
 });
+
+export const tandaiAbortus = asyncHandler(async (req: Request, res: Response) => {
+  const data = await wargaService.tandaiAbortus(
+    req.params.id as string,
+    getRequiredPosyanduId(req),
+    req.appUser!.id,
+    req.body
+  );
+  return successResponse(res, 200, 'Status abortus berhasil diperbarui.', data);
+});
+
