@@ -39,22 +39,22 @@ export class WargaRepository {
     if (params.kategori) {
       const now = new Date();
       if (params.kategori === 'baduta') {
-        // Under 2 years old
+        // Under 2 years old or explicitly registered as baduta
         const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
         andConditions.push({
           OR: [
             { tanggal_lahir: { gt: twoYearsAgo } },
-            { tanggal_lahir: null, kategori_terdaftar: 'baduta' }
+            { kategori_terdaftar: 'baduta' }
           ]
         });
       } else if (params.kategori === 'balita') {
-        // 2–5 years old (not baduta)
+        // 2–5 years old (not baduta) or explicitly registered as balita
         const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
         const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
         andConditions.push({
           OR: [
             { tanggal_lahir: { lte: twoYearsAgo, gt: fiveYearsAgo } },
-            { tanggal_lahir: null, kategori_terdaftar: 'balita' }
+            { kategori_terdaftar: 'balita' }
           ]
         });
       } else if (params.kategori === 'anak_sekolah') {
@@ -65,22 +65,32 @@ export class WargaRepository {
         andConditions.push({
           OR: [
             { tanggal_lahir: { lte: fiveYearsAgo, gt: eighteenYearsAgo } },
-            { tanggal_lahir: null, kategori_terdaftar: 'anak_sekolah' }
+            { kategori_terdaftar: 'anak_sekolah' }
           ]
         });
       } else if (params.kategori === 'lansia') {
-        // Lansia: >= 60 years old
+        // Lansia: >= 60 years old or explicitly registered as lansia
         const sixtyYearsAgo = getBirthDateCutoffInMonths(720, now);
         andConditions.push({
           OR: [
             { tanggal_lahir: { lte: sixtyYearsAgo }, status_kehamilan: 'TIDAK_HAMIL' },
-            { tanggal_lahir: null, kategori_terdaftar: 'lansia', status_kehamilan: 'TIDAK_HAMIL' }
+            { kategori_terdaftar: 'lansia', status_kehamilan: 'TIDAK_HAMIL' }
           ]
         });
       } else if (params.kategori === 'bumil') {
-        andConditions.push({ jenis_kelamin: 'P', status_kehamilan: 'HAMIL' });
+        andConditions.push({
+          OR: [
+            { jenis_kelamin: 'P', status_kehamilan: 'HAMIL' },
+            { kategori_terdaftar: 'bumil' }
+          ]
+        });
       } else if (params.kategori === 'pasca_persalinan') {
-        andConditions.push({ jenis_kelamin: 'P', status_kehamilan: 'PASCA_PERSALINAN' });
+        andConditions.push({
+          OR: [
+            { jenis_kelamin: 'P', status_kehamilan: 'PASCA_PERSALINAN' },
+            { kategori_terdaftar: 'pasca_persalinan' }
+          ]
+        });
       }
     }
 
