@@ -21,7 +21,7 @@ export const getPascaPersalinan = asyncHandler(async (req: Request, res: Respons
 });
 
 export const getPascaPersalinanById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await pascaPersalinanService.findById(
     req.params.id as string,
     posyanduId,
@@ -30,7 +30,7 @@ export const getPascaPersalinanById = asyncHandler(async (req: Request, res: Res
 });
 
 export const getPascaPersalinanHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await pascaPersalinanService.findHistory(
     req.params.wargaId as string,
     posyanduId,
@@ -39,7 +39,7 @@ export const getPascaPersalinanHistory = asyncHandler(async (req: Request, res: 
 });
 
 export const createPascaPersalinan = asyncHandler(async (req: Request, res: Response) => {
-  const data = await pascaPersalinanService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await pascaPersalinanService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan pasca persalinan berhasil ditambahkan.', data);
 });
 
@@ -52,7 +52,7 @@ export const updatePascaPersalinan = asyncHandler(async (req: Request, res: Resp
   const data = await pascaPersalinanService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan pasca persalinan berhasil diubah.', data);
@@ -61,7 +61,7 @@ export const updatePascaPersalinan = asyncHandler(async (req: Request, res: Resp
 export const deletePascaPersalinan = asyncHandler(async (req: Request, res: Response) => {
   const data = await pascaPersalinanService.delete(
     req.params.id as string,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan pasca persalinan berhasil dihapus.', data);

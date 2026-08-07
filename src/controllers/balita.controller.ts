@@ -22,13 +22,13 @@ export const getBalita = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getBalitaById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await balitaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data pemeriksaan balita berhasil diambil.', data);
 });
 
 export const getBalitaHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await balitaService.findHistory(
     req.params.wargaId as string,
     posyanduId,
@@ -37,7 +37,7 @@ export const getBalitaHistory = asyncHandler(async (req: Request, res: Response)
 });
 
 export const createBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await balitaService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan balita berhasil ditambahkan.', data);
 });
 
@@ -50,14 +50,14 @@ export const updateBalita = asyncHandler(async (req: Request, res: Response) => 
   const data = await balitaService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan balita berhasil diubah.', data);
 });
 
 export const deleteBalita = asyncHandler(async (req: Request, res: Response) => {
-  const data = await balitaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await balitaService.delete(req.params.id as string, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan balita berhasil dihapus.', data);
 });
 

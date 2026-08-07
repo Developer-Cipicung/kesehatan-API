@@ -47,18 +47,18 @@ export class BalitaService {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const data = await balitaRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
     return mapWithStatus(data);
   }
 
-  async findHistory(wargaId: string, posyanduId: string) {
+  async findHistory(wargaId: string, posyanduId?: string) {
     const history = await balitaRepo.findByWargaId(wargaId, posyanduId);
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanBalitaBadutaUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanBalitaBadutaUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -88,7 +88,7 @@ export class BalitaService {
     data.zscore_bb_tb = zscore.bb_tb;
 
     const created = await balitaRepo.create(data);
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBalita', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanBalita', created.id, null, created);
     return mapWithStatus(created);
   }
 
@@ -164,8 +164,8 @@ export class BalitaService {
   async update(
     id: string,
     data: Prisma.PemeriksaanBalitaBadutaUncheckedUpdateInput,
-    posyanduId: string,
-    userId: string,
+    posyanduId?: string,
+    userId?: string,
   ) {
     const record = await balitaRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
@@ -200,11 +200,11 @@ export class BalitaService {
     data.zscore_bb_tb = zscore.bb_tb;
 
     const updated = await balitaRepo.update(id, data, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PemeriksaanBalitaBaduta', id, record, updated);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'UPDATE', 'PemeriksaanBalitaBaduta', id, record, updated);
     return mapWithStatus(updated);
   }
 
-  async delete(id: string, posyanduId: string, userId: string) {
+  async delete(id: string, posyanduId?: string, userId?: string) {
     const record = await balitaRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -215,7 +215,7 @@ export class BalitaService {
     }
 
     const deleted = await balitaRepo.delete(id, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'DELETE', 'PemeriksaanBalitaBaduta', id, record, null);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'DELETE', 'PemeriksaanBalitaBaduta', id, record, null);
     return mapWithStatus(deleted);
   }
 }

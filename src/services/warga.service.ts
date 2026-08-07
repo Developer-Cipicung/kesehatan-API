@@ -13,7 +13,7 @@ export class WargaService {
     return wargaRepo.findAll(params);
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const warga = await wargaRepo.findById(id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga not found');
     return warga;
@@ -119,14 +119,14 @@ export class WargaService {
     };
   }
 
-  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId: string, userId: string) {
+  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(id, posyanduId);
-    if (!warga) throw new AppError(404, 'Warga not found');
+    if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
     if (data.nik === '-') data.nik = null;
 
     if (data.nik && data.nik !== warga.nik) {
-      const existing = await wargaRepo.findByNik(data.nik as string, posyanduId);
+      const existing = await wargaRepo.findByNik(data.nik as string, warga.posyandu_id);
       if (existing) throw new AppError(409, 'NIK sudah terdaftar');
     }
 
@@ -166,18 +166,19 @@ export class WargaService {
       }
     }
 
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'Warga', id, warga, updated);
-    clearDashboardCache(posyanduId);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'UPDATE', 'Warga', id, warga, updated);
+    clearDashboardCache(warga.posyandu_id);
     return updated;
   }
 
-  async delete(id: string, posyanduId: string, userId: string) {
+  async delete(id: string, posyanduId?: string, userId?: string) {
     const record = await this.findById(id, posyanduId);
-    if (record) {
-      await wargaRepo.delete(id, posyanduId);
-      auditLogService.logAction(userId, posyanduId, 'DELETE', 'Warga', id, record, null);
-      clearDashboardCache(posyanduId);
+    if (!record) {
+      throw new AppError(404, 'Warga tidak ditemukan');
     }
+    await wargaRepo.delete(id, posyanduId);
+    if (userId) auditLogService.logAction(userId || '', record.posyandu_id, 'DELETE', 'Warga', id, record, null);
+    clearDashboardCache(record.posyandu_id);
     return record;
   }
 

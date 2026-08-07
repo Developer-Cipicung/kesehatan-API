@@ -39,18 +39,18 @@ export class PascaPersalinanService {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const data = await pascaPersalinanRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
     return mapWithStatus(data);
   }
 
-  async findHistory(wargaId: string, posyanduId: string) {
+  async findHistory(wargaId: string, posyanduId?: string) {
     const history = await pascaPersalinanRepo.findByWargaId(wargaId, posyanduId);
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanPascaPersalinanUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanPascaPersalinanUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -72,12 +72,12 @@ export class PascaPersalinanService {
     const created = await prisma.$transaction(async (tx) => {
       const pemeriksaan = await tx.pemeriksaanPascaPersalinan.create({ data });
       await tx.warga.updateMany({
-        where: { id: data.warga_id, posyandu_id: posyanduId },
+        where: { id: data.warga_id },
         data: { status_kehamilan: 'PASCA_PERSALINAN' },
       });
       return pemeriksaan;
     });
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanPascaPersalinan', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanPascaPersalinan', created.id, null, created);
     return mapWithStatus(created);
   }
 
@@ -150,8 +150,8 @@ export class PascaPersalinanService {
   async update(
     id: string,
     data: Prisma.PemeriksaanPascaPersalinanUncheckedUpdateInput,
-    posyanduId: string,
-    userId: string,
+    posyanduId?: string,
+    userId?: string,
   ) {
     const record = await pascaPersalinanRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
@@ -173,11 +173,11 @@ export class PascaPersalinanService {
     }
 
     const updated = await pascaPersalinanRepo.update(id, data, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PemeriksaanPascaPersalinan', id, record, updated);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'UPDATE', 'PemeriksaanPascaPersalinan', id, record, updated);
     return mapWithStatus(updated);
   }
 
-  async delete(id: string, posyanduId: string, userId: string) {
+  async delete(id: string, posyanduId?: string, userId?: string) {
     const record = await pascaPersalinanRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -188,7 +188,7 @@ export class PascaPersalinanService {
     }
 
     const deleted = await pascaPersalinanRepo.delete(id, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'DELETE', 'PemeriksaanPascaPersalinan', id, record, null);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'DELETE', 'PemeriksaanPascaPersalinan', id, record, null);
     return mapWithStatus(deleted);
   }
 }

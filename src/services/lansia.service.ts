@@ -39,18 +39,18 @@ export class LansiaService {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const data = await lansiaRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
     return mapWithStatus(data);
   }
 
-  async findHistory(wargaId: string, posyanduId: string) {
+  async findHistory(wargaId: string, posyanduId?: string) {
     const history = await lansiaRepo.findByWargaId(wargaId, posyanduId);
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanLansiaUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanLansiaUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -65,7 +65,7 @@ export class LansiaService {
     );
 
     const created = await lansiaRepo.create(data);
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanLansia', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanLansia', created.id, null, created);
     return mapWithStatus(created);
   }
 
@@ -134,7 +134,7 @@ export class LansiaService {
     return { successCount, errors };
   }
 
-  async update(id: string, data: Prisma.PemeriksaanLansiaUncheckedUpdateInput, posyanduId: string, userId: string) {
+  async update(id: string, data: Prisma.PemeriksaanLansiaUncheckedUpdateInput, posyanduId?: string, userId?: string) {
     const record = await lansiaRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -155,11 +155,11 @@ export class LansiaService {
     }
 
     const updated = await lansiaRepo.update(id, data, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PemeriksaanLansia', id, record, updated);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'UPDATE', 'PemeriksaanLansia', id, record, updated);
     return mapWithStatus(updated);
   }
 
-  async delete(id: string, posyanduId: string, userId: string) {
+  async delete(id: string, posyanduId?: string, userId?: string) {
     const record = await lansiaRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -170,7 +170,7 @@ export class LansiaService {
     }
 
     const deleted = await lansiaRepo.delete(id, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'DELETE', 'PemeriksaanLansia', id, record, null);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'DELETE', 'PemeriksaanLansia', id, record, null);
     return mapWithStatus(deleted);
   }
 }
