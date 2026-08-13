@@ -9,13 +9,13 @@ export const createBalitaSchema = z.object({
   tb: z.coerce.number({ message: 'TB wajib diisi' }).min(0.1, 'TB wajib diisi'),
   lingkar_kepala: emptyAsNull(z.number().min(0).optional().nullable()),
   lingkar_lengan_atas: emptyAsNull(z.number().min(0).optional().nullable()),
-  kondisi: emptyAsNull(z.string().optional().nullable()),
+  kondisi: emptyAsNull(z.string().toUpperCase().optional().nullable()),
   asi_eksklusif: emptyAsNull(z.boolean().optional().nullable()),
   fasilitasi_bantuan_sosial: emptyAsNull(z.boolean().optional().nullable()),
   tanggal_kunjungan_berikut: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
   nama_ayah: emptyAsNull(z.string().toUpperCase().optional().nullable()),
   nama_ibu: emptyAsNull(z.string().toUpperCase().optional().nullable()),
-  catatan: emptyAsNull(z.string().optional().nullable()),
+  catatan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
 });
 
 export const updateBalitaSchema = createBalitaSchema.partial();

@@ -13,7 +13,7 @@ export const createBumilSchema = z.object({
   tekanan_darah_sistolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
   tekanan_darah_diastolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
   usia_kehamilan_minggu: emptyAsNull(z.number().int().min(0).optional().nullable()),
-  riwayat_penyakit: emptyAsNull(z.string().optional().nullable()),
+  riwayat_penyakit: emptyAsNull(z.string().toUpperCase().optional().nullable()),
   kadar_hemoglobin: emptyAsNull(z.number().min(0).optional().nullable()),
   berat_janin: emptyAsNull(z.number().min(0).optional().nullable()),
   terpapar_rokok: emptyAsNull(z.boolean().optional().nullable()),
@@ -23,7 +23,7 @@ export const createBumilSchema = z.object({
   fasilitasi_rujukan: emptyAsNull(z.boolean().optional().nullable()),
   fasilitasi_bantuan_sosial: emptyAsNull(z.boolean().optional().nullable()),
   tanggal_kunjungan_berikut: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
-  catatan: emptyAsNull(z.string().optional().nullable()),
+  catatan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
 });
 
 export const updateBumilSchema = createBumilSchema.partial();
