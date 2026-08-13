@@ -94,6 +94,7 @@ model Warga {
   memiliki_bpjs          Boolean         @default(false)
   nama_ayah              String?
   nama_ibu               String?
+  nama_suami             String?
   hpht                   DateTime?       @db.Date
   htp                    DateTime?       @db.Date
   kategori_terdaftar     String?

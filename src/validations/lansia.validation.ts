@@ -12,7 +12,7 @@ export const createLansiaSchema = z.object({
   gula_darah_sewaktu: emptyAsNull(z.number().min(0).optional().nullable()),
   kolesterol: emptyAsNull(z.number().int().min(0).optional().nullable()),
   asam_urat: emptyAsNull(z.number().min(0).optional().nullable()),
-  catatan: emptyAsNull(z.string().optional().nullable()),
+  catatan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
 });
 
 export const updateLansiaSchema = createLansiaSchema.partial();

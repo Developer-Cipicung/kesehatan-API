@@ -8,7 +8,7 @@ export const createPascaPersalinanSchema = z.object({
   tanggal_persalinan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
   bb: z.preprocess((val) => val === '' ? undefined : Number(val), z.number({ message: 'Berat badan wajib diisi dan harus berupa angka' }).min(0.1, 'Berat badan harus lebih dari 0')),
   tb: emptyAsNull(z.number().min(0).optional().nullable()),
-  kondisi_ibu: emptyAsNull(z.string().optional().nullable()),
+  kondisi_ibu: emptyAsNull(z.string().toUpperCase().optional().nullable()),
   tinggi_badan_bayi: emptyAsNull(z.number().min(0).optional().nullable()),
   berat_badan_bayi: emptyAsNull(z.number().min(0).optional().nullable()),
   tekanan_darah_sistolik: emptyAsNull(z.number().min(0).optional().nullable()),
@@ -17,7 +17,7 @@ export const createPascaPersalinanSchema = z.object({
   fasilitasi_rujukan: emptyAsNull(z.boolean().optional().nullable()),
   fasilitasi_bantuan_sosial: emptyAsNull(z.boolean().optional().nullable()),
   tanggal_kunjungan_berikut: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
-  catatan: emptyAsNull(z.string().optional().nullable()),
+  catatan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
 });
 
 export const updatePascaPersalinanSchema = createPascaPersalinanSchema.partial();
