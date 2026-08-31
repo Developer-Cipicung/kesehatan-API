@@ -1,21 +1,23 @@
 import { z } from 'zod';
 
+const emptyAsNull = (schema: z.ZodTypeAny) => z.preprocess((val) => val === 0 || val === '0' || val === '-' || val === '' ? null : val, schema);
+
 export const createPascaPersalinanSchema = z.object({
   warga_id: z.string().uuid(),
-  tanggal_kunjungan: z.string().date().transform(val => new Date(val).toISOString()),
-  tanggal_persalinan: z.string().date().transform(val => new Date(val).toISOString()),
-  bb: z.number().min(0),
-  tb: z.number().min(0).optional(),
-  kondisi_ibu: z.string().optional(),
-  tinggi_badan_bayi: z.number().min(0).optional(),
-  berat_badan_bayi: z.number().min(0).optional(),
-  tekanan_darah_sistolik: z.number().min(0).optional(),
-  tekanan_darah_diastolik: z.number().min(0).optional(),
-  kie: z.boolean().optional(),
-  fasilitasi_rujukan: z.boolean().optional(),
-  fasilitasi_bantuan_sosial: z.boolean().optional(),
-  tanggal_kunjungan_berikut: z.string().date().transform(val => new Date(val).toISOString()).optional(),
-  catatan: z.string().optional(),
+  tanggal_kunjungan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  tanggal_persalinan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  bb: z.preprocess((val) => val === '' ? undefined : Number(val), z.number({ message: 'Berat badan wajib diisi dan harus berupa angka' }).min(0.1, 'Berat badan harus lebih dari 0')),
+  tb: emptyAsNull(z.number().min(0).optional().nullable()),
+  kondisi_ibu: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  tinggi_badan_bayi: emptyAsNull(z.number().min(0).optional().nullable()),
+  berat_badan_bayi: emptyAsNull(z.number().min(0).optional().nullable()),
+  tekanan_darah_sistolik: emptyAsNull(z.number().min(0).optional().nullable()),
+  tekanan_darah_diastolik: emptyAsNull(z.number().min(0).optional().nullable()),
+  kie: emptyAsNull(z.boolean().optional().nullable()),
+  fasilitasi_rujukan: emptyAsNull(z.boolean().optional().nullable()),
+  fasilitasi_bantuan_sosial: emptyAsNull(z.boolean().optional().nullable()),
+  tanggal_kunjungan_berikut: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  catatan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
 });
 
 export const updatePascaPersalinanSchema = createPascaPersalinanSchema.partial();

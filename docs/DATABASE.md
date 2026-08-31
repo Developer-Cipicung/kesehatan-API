@@ -88,16 +88,30 @@ Master data seluruh warga.
 |-------|------|-------|
 | id | UUID | Primary Key |
 | posyandu_id | UUID | FK → posyandu |
-| nomor | String | Nomor administrasi |
-| nik | String | Unique |
+| nomor | String? | Nomor administrasi |
+| nik | String? | Unique |
 | nama | String | |
-| jenis_kelamin | Enum(L,P) | |
-| status_kehamilan | Enum | TIDAK_HAMIL / HAMIL / PASCA_PERSALINAN |
-| tanggal_lahir | Date | |
+| jenis_kelamin | Enum? | L / P |
+| status_kehamilan | Enum? | TIDAK_HAMIL / HAMIL / PASCA_PERSALINAN |
+| tanggal_lahir | Date? | |
+| tempat_lahir | String? | |
+| alamat | String? | |
+| rt | String? | |
+| rw | String? | |
+| tempat_persalinan | String? | |
+| penggunaan_kontrasepsi| String? | |
+| jumlah_anak | Int? | |
+| memiliki_bpjs | Boolean | Default false |
+| nama_ayah | String? | |
+| nama_ibu | String? | |
+| hpht | Date? | Hari Pertama Haid Terakhir |
+| htp | Date? | Hari Taksiran Persalinan |
+| kategori_terdaftar | String? | Kategori warga saat ditambahkan (opsional) |
+| ibu_id | UUID? | FK → warga (relasi ibu-anak) |
 | created_at | Timestamp | |
 | updated_at | Timestamp | |
 
-**Catatan:** Kategori warga (balita, baduta, bumil, lansia, dll.) dihitung secara dinamis dari `tanggal_lahir` dan `status_kehamilan`, tidak disimpan sebagai kolom permanen.
+**Catatan:** Kategori warga secara umum dapat dihitung dinamis dari `tanggal_lahir` dan `status_kehamilan`, namun kolom `kategori_terdaftar` disediakan untuk menyimpan preferensi spesifik. Relasi `ibu_id` digunakan untuk memetakan data anak ke ibunya.
 
 ---
 

@@ -1,16 +1,18 @@
 import { z } from 'zod';
 
+const emptyAsNull = (schema: z.ZodTypeAny) => z.preprocess((val) => val === 0 || val === '0' || val === '-' || val === '' ? null : val, schema);
+
 export const createLansiaSchema = z.object({
   warga_id: z.string().uuid(),
-  tanggal_kunjungan: z.string().date().transform(val => new Date(val).toISOString()),
-  bb: z.number().min(0),
-  tb: z.number().min(0),
-  tekanan_darah_sistolik: z.number().int().min(0),
-  tekanan_darah_diastolik: z.number().int().min(0),
-  gula_darah_sewaktu: z.number().min(0).optional(),
-  kolesterol: z.number().int().min(0).optional(),
-  asam_urat: z.number().min(0).optional(),
-  catatan: z.string().optional(),
+  tanggal_kunjungan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  bb: z.coerce.number({ message: 'BB wajib diisi' }).min(0.1, 'BB wajib diisi'),
+  tb: emptyAsNull(z.number().min(0).optional().nullable()),
+  tekanan_darah_sistolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  tekanan_darah_diastolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  gula_darah_sewaktu: emptyAsNull(z.number().min(0).optional().nullable()),
+  kolesterol: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  asam_urat: emptyAsNull(z.number().min(0).optional().nullable()),
+  catatan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
 });
 
 export const updateLansiaSchema = createLansiaSchema.partial();

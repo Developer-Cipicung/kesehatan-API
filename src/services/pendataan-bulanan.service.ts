@@ -113,27 +113,32 @@ export class PendataanBulananService {
     return updated;
   }
 
-  async batalkanPendataan(
-    id: string,
-    posyanduId: string,
-    userId: string
-  ) {
+  async batalkanVerifikasi(id: string, posyanduId: string, userId: string) {
     const record = await pendataanRepo.findById(id, posyanduId);
     if (!record) {
       throw new AppError(404, 'Data pendataan bulanan tidak ditemukan.');
     }
 
-    // If already draft, return as is
-    if (record.status === 'draft') {
+    if (record.status !== 'selesai') {
       return record;
     }
 
-    const updated = await pendataanRepo.update(id, {
-      status: 'draft',
+    const { prisma } = await import('../lib/prisma');
+    const updated = await prisma.pendataanBulanan.update({
+      where: { id },
+      data: {
+        status: 'draft',
+        submitted_at: null,
+        submitted_by: null,
+      },
     });
 
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PendataanBulanan', id, record, updated);
+    auditLogService.logAction(userId, posyanduId, 'UNVERIFY', 'PendataanBulanan', id, record, updated);
     return updated;
+  }
+
+  async batalkanPendataan(id: string, posyanduId: string, userId: string) {
+    return this.batalkanVerifikasi(id, posyanduId, userId);
   }
 
   async getSummaryList(posyanduId: string, bulan: number, tahun: number) {

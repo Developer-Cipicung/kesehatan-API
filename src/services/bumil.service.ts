@@ -9,7 +9,14 @@ import { PendataanBulananRepository } from '../repositories/pendataan-bulanan.re
 
 function mapWithStatus(record: any) {
   if (!record) return record;
-  
+
+  if (record.lingkar_lengan_atas === null && record.kadar_hemoglobin === null) {
+    return {
+      ...record,
+      status_medis: null,
+    };
+  }
+
   let status = 'Normal';
   const lila = Number(record.lingkar_lengan_atas) || 0;
   const hb = Number(record.kadar_hemoglobin) || 0;
@@ -45,18 +52,18 @@ export class BumilService {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const data = await bumilRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
     return mapWithStatus(data);
   }
 
-  async findHistory(wargaId: string, posyanduId: string) {
+  async findHistory(wargaId: string, posyanduId?: string) {
     const history = await bumilRepo.findByWargaId(wargaId, posyanduId);
     return history.map(mapWithStatus);
   }
 
-  async create(data: Prisma.PemeriksaanBumilUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.PemeriksaanBumilUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -75,12 +82,12 @@ export class BumilService {
     const created = await prisma.$transaction(async (tx) => {
       const pemeriksaan = await tx.pemeriksaanBumil.create({ data });
       await tx.warga.updateMany({
-        where: { id: data.warga_id, posyandu_id: posyanduId },
+        where: { id: data.warga_id },
         data: { status_kehamilan: 'HAMIL' },
       });
       return pemeriksaan;
     });
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'PemeriksaanBumil', created.id, null, created);
     return mapWithStatus(created);
   }
 
@@ -100,6 +107,10 @@ export class BumilService {
     
     const wargaMap = new Map(wargasList.map(w => [w.nik, w]));
 
+    const validPemeriksaan: any[] = [];
+    const wargaUpdatePromises: any[] = [];
+    const affectedWargaIds = new Set<string>();
+
     for (const data of dataList) {
        try {
          const warga = wargaMap.get(data.nik);
@@ -109,8 +120,6 @@ export class BumilService {
          }
 
          const date = new Date(data.tanggal_kunjungan);
-         const month = date.getMonth() + 1;
-         const year = date.getFullYear();
 
          let calculatedUsia = data.usia_kehamilan_minggu || 0;
          let newHpht = data.hpht ? new Date(data.hpht) : warga.hpht;
@@ -120,34 +129,51 @@ export class BumilService {
             calculatedUsia = Math.max(0, Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)));
          }
 
-         const updateWargaData: any = { status_kehamilan: 'HAMIL' };
+         validPemeriksaan.push({
+           warga_id: warga.id,
+           tanggal_kunjungan: date.toISOString(),
+           bb: data.bb || 0,
+           tb: data.tb || 0,
+           lingkar_perut: data.lingkar_perut || 0,
+           lingkar_lengan_atas: data.lingkar_lengan_atas || 0,
+           usia_kehamilan_minggu: calculatedUsia,
+           kadar_hemoglobin: data.kadar_hemoglobin || 0,
+         });
+
          if (data.hpht) {
-            updateWargaData.hpht = new Date(data.hpht);
+           wargaUpdatePromises.push((tx: any) => tx.warga.update({
+             where: { id: warga.id },
+             data: { status_kehamilan: 'HAMIL', hpht: new Date(data.hpht) }
+           }));
+         } else {
+           affectedWargaIds.add(warga.id);
          }
 
-         await prisma.$transaction(async (tx) => {
-           const pemeriksaan = await tx.pemeriksaanBumil.create({ 
-             data: {
-               warga_id: warga.id,
-               tanggal_kunjungan: date.toISOString(),
-               bb: data.bb || 0,
-               tb: data.tb || 0,
-               lingkar_perut: data.lingkar_perut || 0,
-               lingkar_lengan_atas: data.lingkar_lengan_atas || 0,
-               usia_kehamilan_minggu: calculatedUsia,
-               kadar_hemoglobin: data.kadar_hemoglobin || null,
-             } 
-           });
-           await tx.warga.update({
-             where: { id: warga.id },
-             data: updateWargaData,
-           });
-           auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', pemeriksaan.id, null, pemeriksaan);
-         });
          successCount++;
        } catch (err: any) {
          errors.push(`Gagal memproses NIK ${data.nik}: ${err.message}`);
        }
+    }
+
+    if (validPemeriksaan.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        // Bulk insert
+        await tx.pemeriksaanBumil.createMany({ data: validPemeriksaan });
+
+        // Bulk update status HAMIL for those without specific hpht
+        if (affectedWargaIds.size > 0) {
+          await tx.warga.updateMany({
+            where: { id: { in: Array.from(affectedWargaIds) } },
+            data: { status_kehamilan: 'HAMIL' }
+          });
+        }
+
+        // Individual updates for specific hpht
+        for (const updateFn of wargaUpdatePromises) {
+          await updateFn(tx);
+        }
+      });
+      auditLogService.logAction(userId, posyanduId, 'CREATE', 'PemeriksaanBumil', 'bulk', null, { count: validPemeriksaan.length });
     }
 
     if (successCount === 0 && dataList.length > 0) {
@@ -172,7 +198,7 @@ export class BumilService {
     return { successCount, errors };
   }
 
-  async update(id: string, data: Prisma.PemeriksaanBumilUncheckedUpdateInput, posyanduId: string, userId: string) {
+  async update(id: string, data: Prisma.PemeriksaanBumilUncheckedUpdateInput, posyanduId?: string, userId?: string) {
     const record = await bumilRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -193,11 +219,11 @@ export class BumilService {
     }
 
     const updated = await bumilRepo.update(id, data, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PemeriksaanBumil', id, record, updated);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'UPDATE', 'PemeriksaanBumil', id, record, updated);
     return mapWithStatus(updated);
   }
 
-  async delete(id: string, posyanduId: string, userId: string) {
+  async delete(id: string, posyanduId?: string, userId?: string) {
     const record = await bumilRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data pemeriksaan tidak ditemukan');
 
@@ -208,7 +234,7 @@ export class BumilService {
     }
 
     const deleted = await bumilRepo.delete(id, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'DELETE', 'PemeriksaanBumil', id, record, null);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'DELETE', 'PemeriksaanBumil', id, record, null);
     return mapWithStatus(deleted);
   }
 }

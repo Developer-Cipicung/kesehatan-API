@@ -1,26 +1,29 @@
 import { z } from 'zod';
 
+const emptyAsNull = (schema: z.ZodTypeAny) => z.preprocess((val) => val === 0 || val === '0' || val === '-' || val === '' ? null : val, schema);
+
 export const createBumilSchema = z.object({
   warga_id: z.string().uuid(),
-  tanggal_kunjungan: z.string().date().transform(val => new Date(val).toISOString()),
-  bb: z.number().min(0),
-  tb: z.number().min(0),
-  lingkar_perut: z.number().min(0),
-  lingkar_lengan_atas: z.number().min(0),
-  tinggi_fundus: z.number().min(0).optional(),
-  usia_kehamilan_minggu: z.number().int().min(0),
-  jumlah_anak: z.number().int().min(0).optional(),
-  riwayat_penyakit: z.string().optional(),
-  kadar_hemoglobin: z.number().min(0).optional().nullable(),
-  berat_janin: z.number().min(0).optional(),
-  terpapar_rokok: z.boolean().optional(),
-  kie: z.boolean().optional(),
-  suplemen_tambah_darah: z.number().int().min(0).optional(),
-  mms: z.number().int().min(0).optional(),
-  fasilitasi_rujukan: z.boolean().optional(),
-  fasilitasi_bantuan_sosial: z.boolean().optional(),
-  tanggal_kunjungan_berikut: z.string().date().transform(val => new Date(val).toISOString()).optional(),
-  catatan: z.string().optional(),
+  tanggal_kunjungan: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  bb: z.coerce.number({ message: 'BB wajib diisi' }).min(0.1, 'BB wajib diisi'),
+  tb: emptyAsNull(z.number().min(0).optional().nullable()),
+  lingkar_perut: emptyAsNull(z.number().min(0).optional().nullable()),
+  lingkar_lengan_atas: emptyAsNull(z.number().min(0).optional().nullable()),
+  tinggi_fundus: emptyAsNull(z.number().min(0).optional().nullable()),
+  tekanan_darah_sistolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  tekanan_darah_diastolik: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  usia_kehamilan_minggu: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  riwayat_penyakit: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  kadar_hemoglobin: emptyAsNull(z.number().min(0).optional().nullable()),
+  berat_janin: emptyAsNull(z.number().min(0).optional().nullable()),
+  terpapar_rokok: emptyAsNull(z.boolean().optional().nullable()),
+  kie: emptyAsNull(z.boolean().optional().nullable()),
+  suplemen_tambah_darah: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  mms: emptyAsNull(z.number().int().min(0).optional().nullable()),
+  fasilitasi_rujukan: emptyAsNull(z.boolean().optional().nullable()),
+  fasilitasi_bantuan_sosial: emptyAsNull(z.boolean().optional().nullable()),
+  tanggal_kunjungan_berikut: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  catatan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
 });
 
 export const updateBumilSchema = createBumilSchema.partial();

@@ -5,7 +5,7 @@ export class AuditLogService {
   async logAction(
     userId: string,
     posyanduId: string,
-    action: 'CREATE' | 'UPDATE' | 'DELETE' | 'SUBMIT',
+    action: 'CREATE' | 'UPDATE' | 'DELETE' | 'SUBMIT' | 'UNVERIFY',
     entity: string,
     entityId: string,
     oldValue?: any,

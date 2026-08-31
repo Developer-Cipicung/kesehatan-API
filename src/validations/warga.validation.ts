@@ -1,22 +1,29 @@
 import { z } from 'zod';
 
+const emptyAsNull = (schema: z.ZodTypeAny) => z.preprocess((val) => val === 0 || val === '0' || val === '-' || val === '' ? null : val, schema);
+
 export const createWargaSchema = z.object({
-  nomor: z.string().min(1),
-  nik: z.string().min(1).optional().default('-'),
-  nama: z.string().min(1),
-  jenis_kelamin: z.enum(['L', 'P']),
-  status_kehamilan: z.enum(['TIDAK_HAMIL', 'HAMIL', 'PASCA_PERSALINAN']).optional(),
-  tanggal_lahir: z.string().date().transform(val => new Date(val).toISOString()),
-  tempat_lahir: z.string().optional(),
-  alamat: z.string().optional(),
-  tempat_persalinan: z.string().optional(),
-  penggunaan_kontrasepsi: z.string().optional(),
-  nama_ayah: z.string().optional(),
-  nama_ibu: z.string().optional(),
-  jumlah_anak: z.union([z.number(), z.string()]).transform(v => parseInt(v as string)).optional(),
-  ibu_id: z.string().uuid().optional(),
-  hpht: z.string().date().transform(val => new Date(val).toISOString()).optional(),
-  htp: z.string().date().transform(val => new Date(val).toISOString()).optional(),
+  nomor: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  nik: emptyAsNull(z.string().max(16).toUpperCase().optional().nullable()),
+  nama: z.string().min(1).toUpperCase(),
+  jenis_kelamin: emptyAsNull(z.enum(['L', 'P']).optional().nullable()),
+  status_kehamilan: emptyAsNull(z.enum(['TIDAK_HAMIL', 'HAMIL', 'PASCA_PERSALINAN']).optional().nullable()),
+  tanggal_lahir: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  tempat_lahir: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  alamat: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  rt: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  rw: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  tempat_persalinan: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  penggunaan_kontrasepsi: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  nama_ayah: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  nama_ibu: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  nama_suami: emptyAsNull(z.string().toUpperCase().optional().nullable()),
+  memiliki_bpjs: z.boolean().optional().default(false),
+  jumlah_anak: emptyAsNull(z.union([z.string(), z.number()]).transform(v => typeof v === 'string' && v.trim() !== '' ? parseInt(v, 10) : v).pipe(z.number().min(0, 'Jumlah anak tidak boleh negatif')).optional().nullable()),
+  ibu_id: emptyAsNull(z.string().uuid().optional().nullable()),
+  hpht: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  htp: emptyAsNull(z.string().date().transform(val => new Date(val).toISOString()).optional().nullable()),
+  kategori_terdaftar: emptyAsNull(z.string().optional().nullable()),
 });
 
 export const updateWargaSchema = createWargaSchema.partial();

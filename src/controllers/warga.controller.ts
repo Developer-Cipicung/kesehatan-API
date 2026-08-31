@@ -25,7 +25,7 @@ export const getWarga = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getWargaById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await wargaService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data warga berhasil diambil.', data);
 });
@@ -51,13 +51,44 @@ export const updateWarga = asyncHandler(async (req: Request, res: Response) => {
   const data = await wargaService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Warga berhasil diubah.', data);
 });
 
 export const deleteWarga = asyncHandler(async (req: Request, res: Response) => {
-  const data = await wargaService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await wargaService.delete(req.params.id as string, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Warga berhasil dihapus.', data);
 });
+
+export const tandaiBersalin = asyncHandler(async (req: Request, res: Response) => {
+  const data = await wargaService.tandaiBersalin(
+    req.params.id as string,
+    getRequiredPosyanduId(req),
+    req.appUser!.id,
+    req.body
+  );
+  return successResponse(res, 200, 'Warga berhasil ditandai telah bersalin, dan data bayi telah dibuat.', data);
+});
+
+export const tandaiAbortus = asyncHandler(async (req: Request, res: Response) => {
+  const data = await wargaService.tandaiAbortus(
+    req.params.id as string,
+    getRequiredPosyanduId(req),
+    req.appUser!.id,
+    req.body
+  );
+  return successResponse(res, 200, 'Status abortus berhasil diperbarui.', data);
+});
+
+export const hamilKembali = asyncHandler(async (req: Request, res: Response) => {
+  const data = await wargaService.hamilKembali(
+    req.params.id as string,
+    getRequiredPosyanduId(req),
+    req.appUser!.id,
+    req.body
+  );
+  return successResponse(res, 200, 'Status pasien berhasil diubah menjadi Ibu Hamil kembali.', data);
+});
+

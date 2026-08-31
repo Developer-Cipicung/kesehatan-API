@@ -168,3 +168,9 @@
 - [x] Implemented placeholder centralized medical status logic
 - [x] Refactor Pendataan Bulanan routes to idempotent `/:id/submit`
 - [x] Update documentation (API.md, DATABASE.md, OPENAPI.md, swagger.yaml)
+
+## Phase 15 — Maintenance & Schema Sync
+
+- [x] Sinkronisasi pembaruan skema database terbaru dengan `prisma db push`.
+- [x] Melakukan generate ulang Prisma Client untuk kompatibilitas frontend terbaru.
+- [x] Memperbarui validasi input warga (`warga.validation.ts`) sesuai struktur terbaru.

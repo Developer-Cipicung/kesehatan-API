@@ -21,31 +21,41 @@ export const buildKategoriWargaWhere = (
   };
 
   if (kategori === 'baduta') {
-    // Under 2 years old
     const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
-    where.tanggal_lahir = { gt: twoYearsAgo };
+    where.OR = [
+      { tanggal_lahir: { gt: twoYearsAgo } },
+      { kategori_terdaftar: 'baduta' },
+    ];
   } else if (kategori === 'balita') {
-    // 2-5 years old (not baduta)
     const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
     const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
-    where.tanggal_lahir = { lte: twoYearsAgo, gt: fiveYearsAgo };
+    where.OR = [
+      { tanggal_lahir: { lte: twoYearsAgo, gt: fiveYearsAgo } },
+      { kategori_terdaftar: 'balita' },
+    ];
   } else if (kategori === 'anak_sekolah') {
-    const fiveYearsAgo = new Date();
-    fiveYearsAgo.setFullYear(now.getFullYear() - 5);
-    const eighteenYearsAgo = new Date();
-    eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
-    where.tanggal_lahir = { lte: fiveYearsAgo, gt: eighteenYearsAgo };
+    const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
+    const eighteenYearsAgo = getBirthDateCutoffInMonths(216, now);
+    where.OR = [
+      { tanggal_lahir: { lte: fiveYearsAgo, gt: eighteenYearsAgo } },
+      { kategori_terdaftar: 'anak_sekolah' },
+    ];
   } else if (kategori === 'lansia') {
-    // Lansia: >= 60 years old
     const sixtyYearsAgo = getBirthDateCutoffInMonths(720, now);
-    where.tanggal_lahir = { lte: sixtyYearsAgo };
-    where.status_kehamilan = 'TIDAK_HAMIL';
+    where.OR = [
+      { tanggal_lahir: { lte: sixtyYearsAgo } },
+      { kategori_terdaftar: 'lansia' },
+    ];
   } else if (kategori === 'bumil') {
-    where.jenis_kelamin = 'P';
-    where.status_kehamilan = 'HAMIL';
+    where.OR = [
+      { jenis_kelamin: 'P', status_kehamilan: 'HAMIL' },
+      { kategori_terdaftar: 'bumil' },
+    ];
   } else if (kategori === 'pasca_persalinan') {
-    where.jenis_kelamin = 'P';
-    where.status_kehamilan = 'PASCA_PERSALINAN';
+    where.OR = [
+      { jenis_kelamin: 'P', status_kehamilan: 'PASCA_PERSALINAN' },
+      { kategori_terdaftar: 'pasca_persalinan' },
+    ];
   }
 
   return where;
@@ -57,26 +67,30 @@ export class WargaRepository {
     const limit = params.limit || 10;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.WargaWhereInput = {};
+    const andConditions: Prisma.WargaWhereInput[] = [];
 
     if (params.search) {
-      where.OR = [
-        { nama: { contains: params.search, mode: 'insensitive' } },
-        { nik: { contains: params.search, mode: 'insensitive' } },
-      ];
+      andConditions.push({
+        OR: [
+          { nama: { contains: params.search, mode: 'insensitive' } },
+          { nik: { contains: params.search, mode: 'insensitive' } },
+        ]
+      });
     }
 
     if (params.jenisKelamin) {
-      where.jenis_kelamin = params.jenisKelamin;
+      andConditions.push({ jenis_kelamin: params.jenisKelamin });
     }
 
     if (params.posyanduId) {
-      where.posyandu_id = params.posyanduId;
+      andConditions.push({ posyandu_id: params.posyanduId });
     }
 
     if (params.kategori) {
-      Object.assign(where, buildKategoriWargaWhere(params.kategori));
+      andConditions.push(buildKategoriWargaWhere(params.kategori));
     }
+
+    const where: Prisma.WargaWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
 
     // Build dynamic include object based on kategori
     const include: Prisma.WargaInclude = {};
@@ -101,6 +115,13 @@ export class WargaRepository {
       include.ibu = true;
     }
 
+    include.posyandu = {
+      select: {
+        id: true,
+        nama: true,
+      },
+    };
+
     const [data, total] = await Promise.all([
       prisma.warga.findMany({
         where,
@@ -123,9 +144,9 @@ export class WargaRepository {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     return prisma.warga.findFirst({
-      where: { id, posyandu_id: posyanduId },
+      where: { id, ...(posyanduId ? { posyandu_id: posyanduId } : {}) },
       include: {
         pemeriksaan_balita_baduta: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
         pemeriksaan_bumil: { orderBy: [{ tanggal_kunjungan: 'desc' }, { created_at: 'desc' }], take: 3 },
@@ -170,18 +191,18 @@ export class WargaRepository {
     });
   }
 
-  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId: string) {
+  async update(id: string, data: Prisma.WargaUncheckedUpdateInput, posyanduId?: string) {
     return prisma.warga.updateMany({
-      where: { id, posyandu_id: posyanduId },
+      where: { id, ...(posyanduId ? { posyandu_id: posyanduId } : {}) },
       data,
     }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string, posyanduId: string) {
+  async delete(id: string, posyanduId?: string) {
     const record = await this.findById(id, posyanduId);
     if (record) {
       await prisma.warga.deleteMany({
-        where: { id, posyandu_id: posyanduId },
+        where: { id, ...(posyanduId ? { posyandu_id: posyanduId } : {}) },
       });
     }
     return record;

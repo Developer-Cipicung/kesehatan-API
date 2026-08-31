@@ -21,13 +21,13 @@ export const getBumil = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getBumilById = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await bumilService.findById(req.params.id as string, posyanduId);
   return successResponse(res, 200, 'Data pemeriksaan bumil berhasil diambil.', data);
 });
 
 export const getBumilHistory = asyncHandler(async (req: Request, res: Response) => {
-  const posyanduId = getRequiredPosyanduId(req);
+  const posyanduId = getOptionalPosyanduId(req);
   const data = await bumilService.findHistory(
     req.params.wargaId as string,
     posyanduId,
@@ -36,7 +36,7 @@ export const getBumilHistory = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const createBumil = asyncHandler(async (req: Request, res: Response) => {
-  const data = await bumilService.create(req.body, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await bumilService.create(req.body, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 201, 'Pemeriksaan bumil berhasil ditambahkan.', data);
 });
 
@@ -49,13 +49,13 @@ export const updateBumil = asyncHandler(async (req: Request, res: Response) => {
   const data = await bumilService.update(
     req.params.id as string,
     req.body,
-    getRequiredPosyanduId(req),
+    getOptionalPosyanduId(req),
     req.appUser!.id,
   );
   return successResponse(res, 200, 'Pemeriksaan bumil berhasil diubah.', data);
 });
 
 export const deleteBumil = asyncHandler(async (req: Request, res: Response) => {
-  const data = await bumilService.delete(req.params.id as string, getRequiredPosyanduId(req), req.appUser!.id);
+  const data = await bumilService.delete(req.params.id as string, getOptionalPosyanduId(req), req.appUser!.id);
   return successResponse(res, 200, 'Pemeriksaan bumil berhasil dihapus.', data);
 });

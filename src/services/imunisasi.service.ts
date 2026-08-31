@@ -14,18 +14,18 @@ export class ImunisasiService {
     return imunisasiRepo.findAll(params);
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     const data = await imunisasiRepo.findById(id, posyanduId);
     if (!data) throw new AppError(404, 'Data imunisasi tidak ditemukan');
     return data;
   }
 
-  async findHistory(wargaId: string, posyanduId: string) {
+  async findHistory(wargaId: string, posyanduId?: string) {
     const history = await imunisasiRepo.findByWargaId(wargaId, posyanduId);
     return history;
   }
 
-  async create(data: Prisma.RiwayatImunisasiUncheckedCreateInput, posyanduId: string, userId: string) {
+  async create(data: Prisma.RiwayatImunisasiUncheckedCreateInput, posyanduId?: string, userId?: string) {
     const warga = await wargaRepo.findById(data.warga_id, posyanduId);
     if (!warga) throw new AppError(404, 'Warga tidak ditemukan');
 
@@ -38,11 +38,11 @@ export class ImunisasiService {
     );
 
     const created = await imunisasiRepo.create(data);
-    auditLogService.logAction(userId, posyanduId, 'CREATE', 'RiwayatImunisasi', created.id, null, created);
+    if (userId) auditLogService.logAction(userId, warga.posyandu_id, 'CREATE', 'RiwayatImunisasi', created.id, null, created);
     return created;
   }
 
-  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId: string, userId: string) {
+  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId?: string, userId?: string) {
     const record = await imunisasiRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data imunisasi tidak ditemukan');
 
@@ -63,11 +63,11 @@ export class ImunisasiService {
     }
 
     const updated = await imunisasiRepo.update(id, data, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'RiwayatImunisasi', id, record, updated);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'UPDATE', 'RiwayatImunisasi', id, record, updated);
     return updated;
   }
 
-  async delete(id: string, posyanduId: string, userId: string) {
+  async delete(id: string, posyanduId?: string, userId?: string) {
     const record = await imunisasiRepo.findById(id, posyanduId);
     if (!record) throw new AppError(404, 'Data imunisasi tidak ditemukan');
 
@@ -78,7 +78,7 @@ export class ImunisasiService {
     }
 
     const deleted = await imunisasiRepo.delete(id, posyanduId);
-    auditLogService.logAction(userId, posyanduId, 'DELETE', 'RiwayatImunisasi', id, record, null);
+    if (userId) auditLogService.logAction(userId, record.warga.posyandu_id, 'DELETE', 'RiwayatImunisasi', id, record, null);
     return deleted;
   }
 }

@@ -18,6 +18,7 @@ enum StatusKehamilan {
   TIDAK_HAMIL
   HAMIL
   PASCA_PERSALINAN
+  ABORTUS
 }
 
 enum UserRole {
@@ -80,18 +81,23 @@ model Warga {
   nomor            String?
   nik              String?         @unique
   nama             String
-  jenis_kelamin    JenisKelamin
-  status_kehamilan StatusKehamilan @default(TIDAK_HAMIL)
-  tanggal_lahir          DateTime?       @db.Date
+  jenis_kelamin    JenisKelamin?
+  status_kehamilan StatusKehamilan? @default(TIDAK_HAMIL)
+  tanggal_lahir          DateTime?        @db.Date
   tempat_lahir           String?
   alamat                 String?         @db.Text
+  rt                     String?
+  rw                     String?
   tempat_persalinan      String?
   penggunaan_kontrasepsi String?
+  jumlah_anak            Int?
+  memiliki_bpjs          Boolean         @default(false)
   nama_ayah              String?
   nama_ibu               String?
-  jumlah_anak            Int?
+  nama_suami             String?
   hpht                   DateTime?       @db.Date
   htp                    DateTime?       @db.Date
+  kategori_terdaftar     String?
   created_at             DateTime        @default(now())
   updated_at             DateTime        @updatedAt
 
@@ -116,13 +122,12 @@ model PemeriksaanBalitaBaduta {
   id                  String   @id @default(uuid()) @db.Uuid
   warga_id            String   @db.Uuid
   tanggal_kunjungan   DateTime @db.Date
-  bb                  Decimal  @db.Decimal(5, 2)
-  tb                  Decimal  @db.Decimal(5, 2)
-  lingkar_kepala      Decimal  @db.Decimal(5, 2)
-  lingkar_lengan_atas Decimal  @db.Decimal(5, 2)
+  bb                  Decimal?  @db.Decimal(5, 2)
+  tb                  Decimal?  @db.Decimal(5, 2)
+  lingkar_kepala      Decimal?  @db.Decimal(5, 2)
+  lingkar_lengan_atas Decimal?  @db.Decimal(5, 2)
   nama_ayah           String?
   nama_ibu            String?
-  penggunaan_kontrasepsi    String?
   catatan                   String?   @db.Text
   kondisi                   String?
   asi_eksklusif             Boolean?
@@ -134,7 +139,7 @@ model PemeriksaanBalitaBaduta {
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_balita_baduta")
@@ -148,7 +153,7 @@ model RiwayatImunisasi {
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("riwayat_imunisasi")
@@ -158,14 +163,16 @@ model PemeriksaanBumil {
   id                      String   @id @default(uuid()) @db.Uuid
   warga_id                String   @db.Uuid
   tanggal_kunjungan       DateTime @db.Date
-  bb                      Decimal  @db.Decimal(5, 2)
-  tb                      Decimal  @db.Decimal(5, 2)
-  lingkar_perut           Decimal  @db.Decimal(5, 2)
+  bb                      Decimal?  @db.Decimal(5, 2)
+  tb                      Decimal?  @db.Decimal(5, 2)
+  lingkar_perut           Decimal?  @db.Decimal(5, 2)
   tinggi_fundus           Decimal? @db.Decimal(5, 2)
-  lingkar_lengan_atas     Decimal  @db.Decimal(5, 2)
-  usia_kehamilan_minggu   Int
+  lingkar_lengan_atas     Decimal?  @db.Decimal(5, 2)
+  tekanan_darah_sistolik  Int?
+  tekanan_darah_diastolik Int?
+  usia_kehamilan_minggu   Int?
   catatan                   String?   @db.Text
-  jumlah_anak               Int?
+  status_risiko_pe          String?   @default("Belum Diperiksa")
   riwayat_penyakit          String?   @db.Text
   kadar_hemoglobin          Decimal?  @db.Decimal(5, 2)
   berat_janin               Decimal?  @db.Decimal(5, 2)
@@ -179,7 +186,7 @@ model PemeriksaanBumil {
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_bumil")
@@ -189,8 +196,8 @@ model PemeriksaanPascaPersalinan {
   id                      String   @id @default(uuid()) @db.Uuid
   warga_id                String   @db.Uuid
   tanggal_kunjungan       DateTime @db.Date
-  tanggal_persalinan      DateTime @db.Date
-  bb                      Decimal  @db.Decimal(5, 2)
+  tanggal_persalinan      DateTime? @db.Date
+  bb                      Decimal?  @db.Decimal(5, 2)
   tb                      Decimal? @db.Decimal(5, 2)
   tekanan_darah_sistolik  Int?
   tekanan_darah_diastolik Int?
@@ -205,7 +212,7 @@ model PemeriksaanPascaPersalinan {
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_pasca_persalinan")
@@ -215,8 +222,8 @@ model PemeriksaanLansia {
   id                      String   @id @default(uuid()) @db.Uuid
   warga_id                String   @db.Uuid
   tanggal_kunjungan       DateTime @db.Date
-  bb                      Decimal  @db.Decimal(5, 2)
-  tb                      Decimal  @db.Decimal(5, 2)
+  bb                      Decimal?  @db.Decimal(5, 2)
+  tb                      Decimal?  @db.Decimal(5, 2)
   tekanan_darah_sistolik  Int?
   tekanan_darah_diastolik Int?
   gula_darah_sewaktu      Int?
@@ -226,7 +233,7 @@ model PemeriksaanLansia {
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 
-  warga Warga @relation(fields: [warga_id], references: [id])
+  warga Warga @relation(fields: [warga_id], references: [id], onDelete: Cascade)
 
   @@index([warga_id])
   @@map("pemeriksaan_lansia")

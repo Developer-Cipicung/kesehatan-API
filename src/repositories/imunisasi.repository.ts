@@ -39,16 +39,16 @@ export class ImunisasiRepository {
     };
   }
 
-  async findById(id: string, posyanduId: string) {
+  async findById(id: string, posyanduId?: string) {
     return prisma.riwayatImunisasi.findFirst({ 
-      where: { id, warga: { posyandu_id: posyanduId } }, 
+      where: { id, ...(posyanduId ? { warga: { posyandu_id: posyanduId } } : {}) }, 
       include: { warga: true } 
     });
   }
 
-  async findByWargaId(wargaId: string, posyanduId: string) {
+  async findByWargaId(wargaId: string, posyanduId?: string) {
     return prisma.riwayatImunisasi.findMany({
-      where: { warga_id: wargaId, warga: { posyandu_id: posyanduId } },
+      where: { warga_id: wargaId, ...(posyanduId ? { warga: { posyandu_id: posyanduId } } : {}) },
       orderBy: { tanggal_pemberian: 'desc' },
     });
   }
@@ -57,14 +57,14 @@ export class ImunisasiRepository {
     return prisma.riwayatImunisasi.create({ data });
   }
 
-  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId: string) {
+  async update(id: string, data: Prisma.RiwayatImunisasiUncheckedUpdateInput, posyanduId?: string) {
     return prisma.riwayatImunisasi.update({ 
       where: { id }, 
       data 
     }).then(() => this.findById(id, posyanduId));
   }
 
-  async delete(id: string, posyanduId: string) {
+  async delete(id: string, posyanduId?: string) {
     const record = await this.findById(id, posyanduId);
     if (record) {
       await prisma.riwayatImunisasi.delete({ 

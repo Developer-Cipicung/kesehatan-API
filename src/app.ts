@@ -57,6 +57,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import posyanduRoutes from './routes/posyandu.routes';
 import userRoutes from './routes/user.routes';
 import publicRoutes from './routes/public.routes';
+import adminRoutes from './routes/admin.routes';
 import YAML from 'yamljs';
 import path from 'path';
 
@@ -139,6 +140,7 @@ app.use('/api/v1/pendataan-bulanan', pendataanRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/posyandu', posyanduRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // 404 Handler
 app.use(notFoundMiddleware);
