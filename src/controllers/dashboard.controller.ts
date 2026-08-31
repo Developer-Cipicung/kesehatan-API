@@ -7,7 +7,10 @@ import { getOptionalPosyanduId } from '../utils/posyandu';
 const dashboardService = new DashboardService();
 
 export const getDashboardSummary = asyncHandler(async (req: Request, res: Response) => {
-  const result = await dashboardService.getSummary(getOptionalPosyanduId(req));
+  const result = await dashboardService.getSummary(getOptionalPosyanduId(req), {
+    startDate: req.query.startDate as string | undefined,
+    endDate: req.query.endDate as string | undefined,
+  });
 
   // Set Vercel Edge Caching (Cache for 5 mins, stale-while-revalidate for 10 mins)
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');

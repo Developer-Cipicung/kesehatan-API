@@ -1,14 +1,27 @@
 import { Request, Response } from 'express';
 import { successResponse } from '../utils/response';
 import { asyncHandler } from '../utils/asyncHandler';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAdmin } from '../lib/supabase';
 import { AppError } from '../utils/AppError';
 import { prisma } from '../lib/prisma';
 import { getOptionalPosyanduId } from '../utils/posyandu';
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { username, password } = req.body;
-  const email = `${username}@cipicung.com`;
+  const appUser = await prisma.user.findUnique({
+    where: { username },
+    select: { auth_id: true },
+  });
+  let email = username;
+
+  if (appUser) {
+    const { data: authData, error: authLookupError } = await supabaseAdmin.auth.admin.getUserById(appUser.auth_id);
+    if (authLookupError || !authData.user?.email) {
+      throw new AppError(401, 'Invalid login credentials');
+    }
+    email = authData.user.email;
+  }
+
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {

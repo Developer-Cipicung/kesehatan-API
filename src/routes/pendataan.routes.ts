@@ -4,6 +4,7 @@ import {
   getPendataanStatusAll,
   getAdminStatusAll,
   selesaikanPendataan,
+  batalkanPendataan,
   getSummary
 } from '../controllers/pendataan-bulanan.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
@@ -23,5 +24,6 @@ router.get('/summary', validateQuery(getPendataanStatusSchema), getSummary);
 router.get('/status', validateQuery(getPendataanStatusSchema), getPendataanStatusAll);
 router.get('/admin/status', validateQuery(getAdminStatusSchema), getAdminStatusAll);
 router.post('/:id/submit', selesaikanPendataan);
+router.post('/:id/unsubmit', batalkanPendataan);
 
 export default router;

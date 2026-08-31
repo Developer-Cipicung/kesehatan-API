@@ -77,18 +77,19 @@ model User {
 model Warga {
   id               String          @id @default(uuid()) @db.Uuid
   posyandu_id      String          @db.Uuid
-  nomor            String
-  nik              String          @unique
+  nomor            String?
+  nik              String?         @unique
   nama             String
   jenis_kelamin    JenisKelamin
   status_kehamilan StatusKehamilan @default(TIDAK_HAMIL)
-  tanggal_lahir          DateTime        @db.Date
+  tanggal_lahir          DateTime?       @db.Date
   tempat_lahir           String?
   alamat                 String?         @db.Text
   tempat_persalinan      String?
   penggunaan_kontrasepsi String?
   nama_ayah              String?
   nama_ibu               String?
+  jumlah_anak            Int?
   hpht                   DateTime?       @db.Date
   htp                    DateTime?       @db.Date
   created_at             DateTime        @default(now())
@@ -216,9 +217,9 @@ model PemeriksaanLansia {
   tanggal_kunjungan       DateTime @db.Date
   bb                      Decimal  @db.Decimal(5, 2)
   tb                      Decimal  @db.Decimal(5, 2)
-  tekanan_darah_sistolik  Int
-  tekanan_darah_diastolik Int
-  gula_darah_sewaktu      Int
+  tekanan_darah_sistolik  Int?
+  tekanan_darah_diastolik Int?
+  gula_darah_sewaktu      Int?
   kolesterol              Int?
   asam_urat               Decimal? @db.Decimal(4, 2)
   catatan                 String?  @db.Text

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createWargaSchema = z.object({
   nomor: z.string().min(1),
-  nik: z.string().length(16),
+  nik: z.string().min(1).optional().default('-'),
   nama: z.string().min(1),
   jenis_kelamin: z.enum(['L', 'P']),
   status_kehamilan: z.enum(['TIDAK_HAMIL', 'HAMIL', 'PASCA_PERSALINAN']).optional(),
@@ -13,6 +13,7 @@ export const createWargaSchema = z.object({
   penggunaan_kontrasepsi: z.string().optional(),
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
+  jumlah_anak: z.union([z.number(), z.string()]).transform(v => parseInt(v as string)).optional(),
   ibu_id: z.string().uuid().optional(),
   hpht: z.string().date().transform(val => new Date(val).toISOString()).optional(),
   htp: z.string().date().transform(val => new Date(val).toISOString()).optional(),

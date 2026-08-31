@@ -25,9 +25,7 @@ export class PendataanBulananService {
 
     // We can fetch all records for the given year and map them
     const allRecords = await prisma.pendataanBulanan.findMany({
-      where: {
-        tahun
-      }
+      where: { tahun }
     });
 
     return posyandus.map((posyandu: any) => {
@@ -71,7 +69,6 @@ export class PendataanBulananService {
     const endDate = new Date(record.tahun, record.bulan, 0, 23, 59, 59, 999);
     const newDate = new Date(tanggalPelaksanaan);
     
-    // We import prisma here dynamically to avoid circular dependencies if any, or just at the top
     const { prisma } = await import('../lib/prisma');
 
     const baseWhere = {
@@ -113,6 +110,29 @@ export class PendataanBulananService {
     });
 
     auditLogService.logAction(submittedBy, posyanduId, 'SUBMIT', 'PendataanBulanan', id, record, updated);
+    return updated;
+  }
+
+  async batalkanPendataan(
+    id: string,
+    posyanduId: string,
+    userId: string
+  ) {
+    const record = await pendataanRepo.findById(id, posyanduId);
+    if (!record) {
+      throw new AppError(404, 'Data pendataan bulanan tidak ditemukan.');
+    }
+
+    // If already draft, return as is
+    if (record.status === 'draft') {
+      return record;
+    }
+
+    const updated = await pendataanRepo.update(id, {
+      status: 'draft',
+    });
+
+    auditLogService.logAction(userId, posyanduId, 'UPDATE', 'PendataanBulanan', id, record, updated);
     return updated;
   }
 

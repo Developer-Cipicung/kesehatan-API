@@ -11,7 +11,7 @@ export const createBumilSchema = z.object({
   usia_kehamilan_minggu: z.number().int().min(0),
   jumlah_anak: z.number().int().min(0).optional(),
   riwayat_penyakit: z.string().optional(),
-  kadar_hemoglobin: z.number().min(0),
+  kadar_hemoglobin: z.number().min(0).optional().nullable(),
   berat_janin: z.number().min(0).optional(),
   terpapar_rokok: z.boolean().optional(),
   kie: z.boolean().optional(),

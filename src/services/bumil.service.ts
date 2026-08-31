@@ -135,7 +135,7 @@ export class BumilService {
                lingkar_perut: data.lingkar_perut || 0,
                lingkar_lengan_atas: data.lingkar_lengan_atas || 0,
                usia_kehamilan_minggu: calculatedUsia,
-               kadar_hemoglobin: data.kadar_hemoglobin || 0,
+               kadar_hemoglobin: data.kadar_hemoglobin || null,
              } 
            });
            await tx.warga.update({

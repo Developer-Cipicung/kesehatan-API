@@ -85,3 +85,13 @@ export const selesaikanPendataan = asyncHandler(async (req: Request, res: Respon
 
   return successResponse(res, 200, 'Pendataan berhasil diselesaikan.', {});
 });
+
+export const batalkanPendataan = asyncHandler(async (req: Request, res: Response) => {
+  const posyanduId = getPosyanduId(req);
+  const id = req.params.id as string;
+  const userId = req.appUser!.id;
+
+  await pendataanService.batalkanPendataan(id, posyanduId, userId);
+
+  return successResponse(res, 200, 'Verifikasi pendataan berhasil dibatalkan.', {});
+});

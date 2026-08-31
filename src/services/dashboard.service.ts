@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { PendataanBulananService } from './pendataan-bulanan.service';
-import { getBirthDateCutoffInMonths } from '../utils/age';
+import { buildKategoriWargaWhere } from '../repositories/warga.repository';
 
 const pendataanService = new PendataanBulananService();
 
@@ -9,18 +9,31 @@ const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 const cache = new Map<string, { data: any; expiry: number }>();
 const pendingCache = new Map<string, Promise<any>>();
 
+interface DashboardSummaryFilters {
+  startDate?: string;
+  endDate?: string;
+}
+
 export const clearDashboardCache = (posyanduId?: string) => {
   if (posyanduId) {
-    cache.delete(posyanduId);
+    for (const key of cache.keys()) {
+      if (key.startsWith(`${posyanduId}:`) || key.startsWith('GLOBAL:')) {
+        cache.delete(key);
+      }
+    }
   } else {
     cache.clear();
   }
 };
 
 export class DashboardService {
-  async getSummary(posyanduId?: string) {
+  async getSummary(posyanduId?: string, filters: DashboardSummaryFilters = {}) {
     const nowCache = Date.now();
-    const cacheKey = posyanduId || 'GLOBAL';
+    const cacheKey = [
+      posyanduId || 'GLOBAL',
+      filters.startDate || 'CURRENT_MONTH',
+      filters.endDate || 'CURRENT_MONTH',
+    ].join(':');
 
     try {
       const cachedItem = cache.get(cacheKey);
@@ -37,7 +50,7 @@ export class DashboardService {
       // Cache hanya optimisasi; jika ada masalah, lanjut hitung normal.
     }
 
-    const summaryPromise = this.computeSummary(posyanduId, cacheKey);
+    const summaryPromise = this.computeSummary(posyanduId, cacheKey, filters);
     pendingCache.set(cacheKey, summaryPromise);
 
     try {
@@ -47,23 +60,20 @@ export class DashboardService {
     }
   }
 
-  private async computeSummary(posyanduId: string | undefined, cacheKey: string) {
+  private getDateRange(now: Date, filters: DashboardSummaryFilters) {
+    const fallbackStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const fallbackEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const start = filters.startDate ? new Date(`${filters.startDate}T00:00:00`) : fallbackStart;
+    const end = filters.endDate ? new Date(`${filters.endDate}T00:00:00`) : fallbackEnd;
+
+    return Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end
+      ? { gte: fallbackStart, lte: fallbackEnd }
+      : { gte: start, lte: end };
+  }
+
+  private async computeSummary(posyanduId: string | undefined, cacheKey: string, filters: DashboardSummaryFilters) {
     const now = new Date();
-
-    const twoYearsAgo = getBirthDateCutoffInMonths(24, now);
-    const fiveYearsAgo = getBirthDateCutoffInMonths(60, now);
-    
-    const sevenYearsAgo = new Date();
-    sevenYearsAgo.setFullYear(now.getFullYear() - 7);
-    
-    const eighteenYearsAgo = new Date();
-    eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
-
-    const sixtyYearsAgo = new Date();
-    sixtyYearsAgo.setFullYear(now.getFullYear() - 60);
-
-    const nineMonthsAgo = new Date();
-    nineMonthsAgo.setMonth(now.getMonth() - 9);
+    const dateRange = this.getDateRange(now, filters);
     
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(now.getMonth() - 5);
@@ -73,15 +83,19 @@ export class DashboardService {
       ? pendataanService.getStatus(posyanduId, now.getMonth() + 1, now.getFullYear())
       : Promise.resolve({ status: 'draft' });
 
-    // BATCH SEMUA (14 concurrent queries) -> Biarkan Prisma menangani antrean koneksi
+    // BATCH SEMUA -> Biarkan Prisma menangani antrean koneksi
     const [
       totalWarga, 
       totalBaduta, 
       totalBalita, 
       totalAnakSekolah, 
       totalLansia, 
-      bumilGroups,
-      pascaGroups,
+      totalBumil,
+      totalPasca,
+      totalPemeriksaanBalitaBaduta,
+      totalPemeriksaanBumil,
+      totalPemeriksaanPasca,
+      totalPemeriksaanLansia,
       recentPemeriksaanBalita,
       recentPemeriksaanBumil,
       recentPemeriksaanLansia,
@@ -92,24 +106,23 @@ export class DashboardService {
     ] = await Promise.all([
       // Aggregate across all posyandus if posyanduId is undefined
       prisma.warga.count(posyanduId ? { where: { posyandu_id: posyanduId } } : undefined),
-      // Baduta: > 2 years ago
-      prisma.warga.count({ where: { tanggal_lahir: { gt: twoYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
-      // Balita: > 5 years ago, <= 2 years ago
-      prisma.warga.count({ where: { tanggal_lahir: { gt: fiveYearsAgo, lte: twoYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
-      // Anak Sekolah: > 18 years ago, <= 7 years ago
-      prisma.warga.count({ where: { tanggal_lahir: { gt: eighteenYearsAgo, lte: sevenYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
-      // Lansia
-      prisma.warga.count({ where: { tanggal_lahir: { lte: sixtyYearsAgo }, ...(posyanduId && { posyandu_id: posyanduId }) } }),
-      
-      // Bumil (active in last 9 months)
-      prisma.pemeriksaanBumil.groupBy({
-        by: ['warga_id'],
-        where: { tanggal_kunjungan: { gte: nineMonthsAgo }, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
+      prisma.warga.count({ where: buildKategoriWargaWhere('baduta', posyanduId, now) }),
+      prisma.warga.count({ where: buildKategoriWargaWhere('balita', posyanduId, now) }),
+      prisma.warga.count({ where: buildKategoriWargaWhere('anak_sekolah', posyanduId, now) }),
+      prisma.warga.count({ where: buildKategoriWargaWhere('lansia', posyanduId, now) }),
+      prisma.warga.count({ where: buildKategoriWargaWhere('bumil', posyanduId, now) }),
+      prisma.warga.count({ where: buildKategoriWargaWhere('pasca_persalinan', posyanduId, now) }),
+      prisma.pemeriksaanBalitaBaduta.count({
+        where: { tanggal_kunjungan: dateRange, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
       }),
-      // Pasca Persalinan (active in last 3 months)
-      prisma.pemeriksaanPascaPersalinan.groupBy({
-        by: ['warga_id'],
-        where: { tanggal_kunjungan: { gte: new Date(now.getFullYear(), now.getMonth() - 3, 1) }, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
+      prisma.pemeriksaanBumil.count({
+        where: { tanggal_kunjungan: dateRange, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
+      }),
+      prisma.pemeriksaanPascaPersalinan.count({
+        where: { tanggal_kunjungan: dateRange, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
+      }),
+      prisma.pemeriksaanLansia.count({
+        where: { tanggal_kunjungan: dateRange, ...(posyanduId && { warga: { posyandu_id: posyanduId } }) },
       }),
       // Recent activities
       prisma.pemeriksaanBalitaBaduta.findMany({
@@ -163,9 +176,6 @@ export class DashboardService {
         select: { tanggal_kunjungan: true }
       })
     ]);
-
-    const totalBumil = bumilGroups.length;
-    const totalPasca = pascaGroups.length;
 
     const pendataanStatus = await pendataanStatusPromise;
     
@@ -242,6 +252,7 @@ export class DashboardService {
       total_balita: totalBaduta + totalBalita, // aggregated for backwards compatibility if needed
       total_bumil: totalBumil,
       total_lansia: totalLansia,
+      jumlah_pemeriksaan: totalPemeriksaanBalitaBaduta + totalPemeriksaanBumil + totalPemeriksaanPasca + totalPemeriksaanLansia,
       pendataan_status: pendataanStatus.status,
       kategori_breakdown: {
         ibu_hamil: totalBumil,

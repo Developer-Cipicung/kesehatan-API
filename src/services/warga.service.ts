@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { WargaRepository, FindAllWargaParams } from '../repositories/warga.repository';
 import { Prisma } from '../../prisma/generated-schema';
 import { AppError } from '../utils/AppError';
@@ -5,6 +6,12 @@ import { auditLogService } from './audit-log.service';
 import { clearDashboardCache } from './dashboard.service';
 
 const wargaRepo = new WargaRepository();
+
+/** Returns true when a NIK is a system-generated placeholder (not a real NIK) */
+export const isTempNik = (nik: string) => nik.startsWith('TEMP-');
+
+/** Generate a unique placeholder NIK when the warga's NIK is not known */
+const generateTempNik = () => `TEMP-${randomUUID().replace(/-/g, '').slice(0, 12).toUpperCase()}`;
 
 export class WargaService {
   async findAll(params: FindAllWargaParams) {
@@ -45,8 +52,13 @@ export class WargaService {
   }
 
   async create(data: Prisma.WargaUncheckedCreateInput, userId: string) {
-    const existing = await wargaRepo.findByNik(data.nik, data.posyandu_id);
-    if (existing) throw new AppError(409, 'NIK sudah terdaftar');
+    // If NIK is "-" or empty, auto-generate a unique placeholder so DB unique constraint is satisfied
+    if (!data.nik || data.nik === '-') {
+      data = { ...data, nik: generateTempNik() };
+    } else {
+      const existing = await wargaRepo.findByNik(data.nik, data.posyandu_id);
+      if (existing) throw new AppError(409, 'NIK sudah terdaftar');
+    }
 
     const created = await wargaRepo.create(data);
     auditLogService.logAction(userId, data.posyandu_id, 'CREATE', 'Warga', created.id, null, created);
